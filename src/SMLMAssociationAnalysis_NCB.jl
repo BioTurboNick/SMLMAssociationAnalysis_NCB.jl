@@ -1,8 +1,12 @@
 module SMLMAssociationAnalysis_NCB
 
+using JLD2
 using LocalizationMicroscopy
 using NearestNeighbors
 using Plots
+using Printf
+using Statistics
+using StatsPlots
 
 include(raw"data\Molecule.jl")
 include(raw"data\ChannelData.jl")

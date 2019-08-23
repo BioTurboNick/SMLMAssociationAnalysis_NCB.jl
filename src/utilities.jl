@@ -1,8 +1,7 @@
 """
     argmaxall()
 
-Return the index of the maximum element in a collection. If there are multiple, all tied indexes
-are returned.
+Return the index of the maximum element in a collection. If there are multiple, all tied indexes are returned.
 """
 function argmaxall(vals)
     maxvalue = maximum(vals)
@@ -14,8 +13,8 @@ end
 """
     invertdictionary()
 
-Create a new dictionary using the values of an existing dictionary as keys and the values of
-the existing dictionary as values.
+Create a new dictionary using the values of an existing dictionary as keys and the values of the existing dictionary as
+values.
 """
 function invertdictionary(dictionary::IdDict{S, T}) where {S, T}
     newkeys = unique(values(dictionary))
@@ -28,7 +27,7 @@ end
 """
     inrange()
 
-Evaluates if a value lies within the range provided, inclusive.
+Evaluate if a value lies within the range provided, inclusive.
 """
 inrange(value, lowerlimit, upperlimit) =
     value ≥ lowerlimit && value ≤ upperlimit

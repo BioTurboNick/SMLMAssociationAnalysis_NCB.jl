@@ -72,17 +72,18 @@ function distanceprobabilityplot(result::StormData.Result)
 end
 
 using LocalizationMicroscopy
-function moleculesplot(result::StormData.Result)
+function moleculesplot(result::Result)
     mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
     mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :red))
     plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :green))
-    plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:box) # check limit
+    plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0),
+          framestyle=:box) # check limit
 end
 
-function localizationsplot(result::StormData.Result; insetbox = [[0,0], [0,0]])
+function localizationsplot(result::Result; insetbox = [[0,0], [0,0]])
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     scatter(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), 0.75, :red), framestyle=:none)
@@ -102,7 +103,7 @@ function localizationsplot(result::StormData.Result; insetbox = [[0,0], [0,0]])
     plot!()
 end
 
-function localizationsplot_forprint(result::StormData.Result; color1 = :red, color2 = :green, insetbox = [[0,0], [0,0]])
+function localizationsplot_forprint(result::Result; color1 = :red, color2 = :green, insetbox = [[0,0], [0,0]])
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     scatter(loc1coords[1,:], loc1coords[2,:], marker=(8, stroke(0), 0.75, color1), size=(2048,2048), framestyle=:none)
@@ -124,51 +125,56 @@ end
 
 ENV["GKS_ENCODING"] = "utf-8"
 
-function moleculesinsetplot(result::StormData.Result, xlims, ylims)
+function moleculesinsetplot(result::Result, xlims, ylims)
     mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
     mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(4, stroke(0), :red))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black), annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(4, stroke(0), :green))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:box)
 end
 
-function moleculesinsetplot_forprint(result::StormData.Result, xlims, ylims; color1 = :red, color2 = :green)
+function moleculesinsetplot_forprint(result::Result, xlims, ylims; color1 = :red, color2 = :green)
     mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
     mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(16, stroke(0), color1), size=(2048,2048), framestyle=:none)
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black), annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(16, stroke(0), color2))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
 end
 
-function localizationsinsetplot(result::StormData.Result, xlims, ylims)
+function localizationsinsetplot(result::Result, xlims, ylims)
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     scatter(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), :red))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black), annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(loc2coords[1,:], loc2coords[2,:], marker=(1, stroke(0), :green))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:box)
 end
 
-function localizationsinsetplot_forprint(result::StormData.Result, xlims, ylims; color1 = :red, color2 = :green)
+function localizationsinsetplot_forprint(result::Result, xlims, ylims; color1 = :red, color2 = :green)
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     scatter(loc1coords[1,:], loc1coords[2,:], marker=(8, stroke(0), 0.75, color1), framestyle=:none, size=(2048,2048))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black), annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(loc2coords[1,:], loc2coords[2,:], marker=(8, stroke(0), 0.75, color2))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
 end
 
-function insetplot(result::StormData.Result, xlims, ylims)
+function insetplot(result::Result, xlims, ylims)
     mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
     mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(2, :red), :white))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black), annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(2, :green), :white))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
@@ -176,17 +182,20 @@ function insetplot(result::StormData.Result, xlims, ylims)
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     scatter!(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), :red))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black), annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(loc2coords[1,:], loc2coords[2,:], marker=(1, stroke(0), :green))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:box)
 end
 
-function insetplot_forprint(result::StormData.Result, xlims, ylims; color1 = :red, color2 = :green)
+function insetplot_forprint(result::Result, xlims, ylims; color1 = :red, color2 = :green)
     mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
     mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
-    scatter(mol1coords[1,:], mol1coords[2,:], marker=(24, stroke(2, color1), 0.75, :white), framestyle=:none, size=(2048,2048))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black), annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(24, stroke(2, color1), 0.75, :white),
+            framestyle=:none, size=(2048,2048))
+    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(24, stroke(2, color2), 0.75, :white))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
@@ -194,19 +203,21 @@ function insetplot_forprint(result::StormData.Result, xlims, ylims; color1 = :re
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     scatter!(loc1coords[1,:], loc1coords[2,:], marker=(8, stroke(0), 0.75, color1))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black), annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(loc2coords[1,:], loc2coords[2,:], marker=(8, stroke(0), 0.75, color2))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
 end
 
-function yzframelocalizationplot(result::StormData.Result)
+function yzframelocalizationplot(result::Result)
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc1frames = [y.frame for y ∈ mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules)]
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     loc2frames = [y.frame for y ∈ mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules)]
 
-    scatter(loc1frames, loc1coords[2,:], marker=(2, :red, stroke(0)), xaxis=("frames", (0,22000)), yaxis=("y", (0,40960), :flip, 90), legend=:none)
+    scatter(loc1frames, loc1coords[2,:], marker=(2, :red, stroke(0)), xaxis=("frames", (0,22000)),
+            yaxis=("y", (0,40960), :flip, 90), legend=:none)
     scatter!(loc2frames, loc2coords[2,:], marker=(2, :green, stroke(0)))
     plot!(tick_direction=:out, size=(1024,512))
 end

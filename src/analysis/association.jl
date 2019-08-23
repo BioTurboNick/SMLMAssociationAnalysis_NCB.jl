@@ -3,8 +3,7 @@
 
 Exclusively pair points between two provided lists.
 
-Finds the closest of all pairs, removes both, and iterates on the remainder until all pairs
-have been created.
+Finds the closest of all pairs, removes both, and iterates on the remainder until all pairs have been created.
 
 NOTE: Assumes that your data is far away from the type's maximum value.
 """
@@ -49,7 +48,8 @@ end
 
 Evaluate the probability of chance association across all molecules by randomizing their neighbors.
 """
-function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_neighbors::Vector{T}, ch2_neighbors::Vector{T}, distances, rangefactor) where T <: DataEntity
+function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_neighbors::Vector{T},
+                            ch2_neighbors::Vector{T}, distances, rangefactor) where T <: DataEntity
     coordinates1, coordinates2 = extractcoordinates.([molecules1, molecules2])
 
     percentileranks = ones(length(ch1_neighbors))

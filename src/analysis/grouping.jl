@@ -3,11 +3,10 @@
 
 Group nearby localizations separated by time into `Molecule`s
 
-Identifies local maxima of `Localization`s
-temporally distant from other points by `t_off` frames. The effect is to consider flashes
-correlated in time as originating from the same molecule. Only localizations within
-`radius` (same units as position) of the cluster center are joined into the molecule. The
-algorithm is repeated on the remaining unjoined localizations.
+Identifies local maxima of `Localization`s temporally distant from other points by `t_off` frames. The effect is to
+consider flashes correlated in time as originating from the same molecule. Only localizations within `radius` (same
+units as position) of the cluster center are joined into the molecule. The algorithm is repeated on the remaining
+unjoined localizations.
 """
 function groupby_localmax_temporallimit(localizations::Vector{Localization},
     radius, t_off)
@@ -209,8 +208,7 @@ end
 """
     buildmolecules!
 
-Build grouped molecules from the molecule seeds and the other entities (`Localization`s or
-`Molecule`s) to join.
+Build grouped molecules from the molecule seeds and the other entities (`Localization`s or `Molecule`s) to join.
 """
 function buildmolecules!(seedmolecules::Vector{Molecule}, entities::Vector{T},
     localmaxima_map::IdDict{T, Int}, radius) where T <: DataEntity
