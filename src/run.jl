@@ -47,13 +47,13 @@ for i ∈ 1:length(cellpaths)
     println("Processing $cellpath")
     localizations = LocalizationMicroscopy.load(cellpath, LocalizationMicroscopy.nikonelementstext)
 
-    ch1_molecules, ch1_localizations = StormAnalysis.getmolecules(localizations, ch1_name, ch1_startframe, ch1_frames,
+    ch1_molecules, ch1_localizations = getmolecules(localizations, ch1_name, ch1_startframe, ch1_frames,
                                                                   ch1_starttrim, ch1_endtrim, maximum_displacement,
                                                                   t_off, merge_radius)
-    ch2_molecules, ch2_localizations = StormAnalysis.getmolecules(localizations, ch2_name, ch2_startframe, ch2_frames,
+    ch2_molecules, ch2_localizations = getmolecules(localizations, ch2_name, ch2_startframe, ch2_frames,
                                                                   ch2_starttrim, ch2_endtrim, maximum_displacement,
                                                                   t_off, merge_radius)
-    ch1_neighbors, ch2_neighbors, distances = StormAssociation.exclusivenearestneighbors(ch1_molecules, ch2_molecules)
+    ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
 
     percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 4)
 
@@ -63,10 +63,10 @@ for i ∈ 1:length(cellpaths)
         mediandistance = median(distances)
     end
 
-    ch1_data = StormData.ChannelData(ch1_name, ch1_molecules, ch1_neighbors)
-    ch2_data = StormData.ChannelData(ch2_name, ch2_molecules, ch2_neighbors)
-    result = StormData.Result("", "", 1, cellpath, i,
-                              [ch1_data, ch2_data], distances, mediandistance, percentileranks)
+    ch1_data = ChannelData(ch1_name, ch1_molecules, ch1_neighbors)
+    ch2_data = ChannelData(ch2_name, ch2_molecules, ch2_neighbors)
+    result = Result("", "", 1, cellpath, i,
+                    [ch1_data, ch2_data], distances, mediandistance, percentileranks)
     push!(results, result)
 end
 

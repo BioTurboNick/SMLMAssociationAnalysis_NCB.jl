@@ -16,18 +16,18 @@ nreplicates = 3
 nsamples = 4
 ncells = 10
 
-experimentresults = Vector{Vector{Vector{StormData.Result}}}[]
+experimentresults = Vector{Vector{Vector{Result}}}[]
 for experimentdirname ∈ experimentdirnames
     println("Starting experiment $experimentdirname.")
     experimentpath = joinpath(datapath, projectdirname, experimentdirname, datadirname)
     experimentoutputpath = joinpath(datapath, projectdirname, experimentdirname, outputdirname)
-    replicateresults = Vector{Vector{StormData.Result}}[]
+    replicateresults = Vector{Vector{Result}}[]
     for i ∈ 1:nreplicates
-        sampleresults = Vector{StormData.Result}[]
+        sampleresults = Vector{Result}[]
         println("    Starting replicate $i.")
         replicatepath = joinpath(experimentpath, "Replicate $i")
         for samplename ∈ samplenames
-            results = StormData.Result[]
+            results = Result[]
             println("        Starting sample $samplename.")
             for j ∈ 1:ncells
                 println("            Starting cell $j.")
@@ -48,11 +48,11 @@ for experimentdirname ∈ experimentdirnames
                     ch1_startframe = 1
                     ch2_startframe = 11001 # try weeding out molecules with only 1 loc? ##############
                 end
-                ch1_molecules, ch1_localizations = StormAnalysis.getmolecules(localizations, ch1_name, ch1_startframe, 11000, 100, 10, 34.2, 500, 200)
-                ch2_molecules, ch2_localizations = StormAnalysis.getmolecules(localizations, ch2_name, ch2_startframe, 11000, 100, 10, 34.2, 500, 200)
-                ch1_neighbors, ch2_neighbors, distances = StormAssociation.exclusivenearestneighbors(ch1_molecules, ch2_molecules)
+                ch1_molecules, ch1_localizations = getmolecules(localizations, ch1_name, ch1_startframe, 11000, 100, 10, 34.2, 500, 200)
+                ch2_molecules, ch2_localizations = getmolecules(localizations, ch2_name, ch2_startframe, 11000, 100, 10, 34.2, 500, 200)
+                ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
 
-                percentileranks = StormAssociation.montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 200, 4)
+                percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 200, 4)
 
                 if length(distances) == 0
                     mediandistance = NaN
@@ -60,9 +60,9 @@ for experimentdirname ∈ experimentdirnames
                     mediandistance = median(distances)
                 end
                 println("                Done: $(length(distances)) neighbors from $(length(ch1_molecules)) and $(length(ch2_molecules)) molecules, $(length(ch1_localizations)) and $(length(ch2_localizations)) localizations; median distance $mediandistance")
-                ch1_data = StormData.ChannelData(ch1_name, ch1_molecules, ch1_neighbors)
-                ch2_data = StormData.ChannelData(ch2_name, ch2_molecules, ch2_neighbors)
-                result = StormData.Result(projectdirname, experimentdirname, i, samplename, j,
+                ch1_data = ChannelData(ch1_name, ch1_molecules, ch1_neighbors)
+                ch2_data = ChannelData(ch2_name, ch2_molecules, ch2_neighbors)
+                result = Result(projectdirname, experimentdirname, i, samplename, j,
                                 [ch1_data, ch2_data], distances, mediandistance, percentileranks)
                 push!(results, result)
             end
