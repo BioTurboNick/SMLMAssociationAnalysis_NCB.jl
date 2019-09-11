@@ -23,7 +23,8 @@ julia> using SMLMAssociationAnalysis_NCB
 ()
 3. Execute `run.jl`. (If using the console only, `include("run.jl")` will execute the script.)
 
-Use (recreate analysis)
------------------------
+Recrate the paper's data
+------------------------
 The underlying data files have some quirks that need to be adjusted, so a special file is provided.
-Follow the instructions above but execute `run_original.jl` instead.
+Download the data from `<repository>`.
+Follow the instructions above but execute `run_original.jl` instead, followed by `run_plots.jl`

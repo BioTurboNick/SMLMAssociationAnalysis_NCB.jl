@@ -1,8 +1,10 @@
 using SMLMAssociationAnalysis_NCB
 
+############
 # PARAMETERS
 
 # the file paths of each file to analyze
+# you may wish to write a loop to populate this
 cellpaths = [raw"paths\to\your\data\here1.bin.txt",
              raw"paths\to\your\data\here2.bin.txt"]
 
@@ -38,6 +40,7 @@ t_off = 500
 merge_radius = 200
 
 # END PARAMETERS
+################
 
 results = Result[]
 
@@ -47,12 +50,10 @@ for i ∈ 1:length(cellpaths)
     println("Processing $cellpath")
     localizations = LocalizationMicroscopy.load(cellpath, LocalizationMicroscopy.nikonelementstext)
 
-    ch1_molecules, ch1_localizations = getmolecules(localizations, ch1_name, ch1_startframe, ch1_frames,
-                                                                  ch1_starttrim, ch1_endtrim, maximum_displacement,
-                                                                  t_off, merge_radius)
-    ch2_molecules, ch2_localizations = getmolecules(localizations, ch2_name, ch2_startframe, ch2_frames,
-                                                                  ch2_starttrim, ch2_endtrim, maximum_displacement,
-                                                                  t_off, merge_radius)
+    ch1_molecules, ch1_localizations = getmolecules(localizations, ch1_name, ch1_startframe, ch1_frames, ch1_starttrim,
+                                                    ch1_endtrim, maximum_displacement, t_off, merge_radius)
+    ch2_molecules, ch2_localizations = getmolecules(localizations, ch2_name, ch2_startframe, ch2_frames, ch2_starttrim,
+                                                    ch2_endtrim, maximum_displacement, t_off, merge_radius)
     ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
 
     percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 4)
