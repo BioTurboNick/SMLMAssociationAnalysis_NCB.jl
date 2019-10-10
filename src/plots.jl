@@ -7,10 +7,10 @@ function showPairs(molecules1, molecules2, pairedmolecules1, pairedmolecules2, d
     end
 
     p = plot()
-    pairedcoordinates1 = Main.StormData.extractcoordinates(pairedmolecules1)
-    pairedcoordinates2 = Main.StormData.extractcoordinates(pairedmolecules2)
-    coordinates1 = Main.StormData.extractcoordinates(molecules1)
-    coordinates2 = Main.StormData.extractcoordinates(molecules2)
+    pairedcoordinates1 = Main.extractcoordinates(pairedmolecules1)
+    pairedcoordinates2 = Main.extractcoordinates(pairedmolecules2)
+    coordinates1 = Main.extractcoordinates(molecules1)
+    coordinates2 = Main.extractcoordinates(molecules2)
     scatter!(coordinates1[1,:], coordinates1[2,:], markersize = 2, markercolor = :white)
     scatter!(coordinates2[1,:], coordinates2[2,:], markersize = 2, markercolor = :white)
     scatter!(pairedcoordinates1[1,:], pairedcoordinates1[2,:], markersize = 1, markerstrokecolor=nothing, markercolor = :red)
@@ -19,7 +19,7 @@ end
 
 using Printf
 
-function distanceprobabilityplot(result::StormData.Result)
+function distanceprobabilityplot(result::Result)
     lessthan10 = count((result.percentileranks .< 0.1) .& (result.distances .< 200)) / length(result.percentileranks)
     p1 = scatter(result.distances, result.percentileranks,
                  xaxis=("distance (nm)", (0,1000), 45),

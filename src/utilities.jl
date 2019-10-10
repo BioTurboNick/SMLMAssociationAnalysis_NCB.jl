@@ -29,7 +29,7 @@ end
 
 Evaluate if a value lies within the range provided, inclusive.
 """
-inrange(value, lowerlimit, upperlimit) =
+within(value, lowerlimit, upperlimit) =
     value ≥ lowerlimit && value ≤ upperlimit
 
 """

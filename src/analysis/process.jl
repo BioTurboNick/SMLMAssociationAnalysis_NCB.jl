@@ -25,7 +25,7 @@ function getmolecules(alllocalizations::Vector{Localization}, channelname, start
     upperlimit = startframe + nframes - endtrimframes - 1
 
     localizations = filter(l -> l.channel == channelname, alllocalizations)
-    localizationstrimmed = filter(l -> inrange(l.frame, lowerlimit, upperlimit), localizations)
+    localizationstrimmed = filter(l -> within(l.frame, lowerlimit, upperlimit), localizations)
     molecules = groupby_localmax_temporallimit(localizationstrimmed, radius, t_off)
     moleculesmerged = merge_close_molecules(molecules, mergeradius)
 
