@@ -27,7 +27,7 @@ function exclusivenearestneighbors(points1::Vector{T}, points2::Vector{T}) where
         coordinates = extractcoordinates(point)
 
         neighbortree = KDTree(coordinates1)
-        inearestneighbor, nearestneighbor_distance = StormGrouping.nn(neighbortree, coordinates)
+        inearestneighbor, nearestneighbor_distance = nn(neighbortree, coordinates)
 
         neighbor = points1[inearestneighbor]
 
@@ -49,7 +49,7 @@ end
 Evaluate the probability of chance association across all molecules by randomizing their neighbors.
 """
 function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_neighbors::Vector{T},
-                            ch2_neighbors::Vector{T}, distances, rangefactor) where T <: DataEntity
+                            ch2_neighbors::Vector{T}, distances, maxbindingdistance, rangefactor) where T <: DataEntity
     coordinates1, coordinates2 = extractcoordinates.([molecules1, molecules2])
 
     percentileranks = ones(length(ch1_neighbors))
@@ -85,7 +85,7 @@ function localmontecarlo(nlocalmolecules1, nlocalmolecules2, testdistance, radiu
     randomcoordinates2 = [randomcoordinates2d(nlocalmolecules2, radius) for i ∈ 1:iterations]
     randomtrees = nlocalmolecules1 > nlocalmolecules2 ? KDTree.(randomcoordinates1) : KDTree.(randomcoordinates2)
     randomcoordinates = nlocalmolecules1 > nlocalmolecules2 ? randomcoordinates2 : randomcoordinates1
-    nearestneighbor_distances = [StormGrouping.nn(randomtrees[i], randomcoordinates[i]) |> last for i ∈ 1:iterations]
+    nearestneighbor_distances = [nn(randomtrees[i], randomcoordinates[i]) |> last for i ∈ 1:iterations]
     mindistance = minimum.(nearestneighbor_distances)
     percentilerank = count(mindistance .≤ testdistance) / iterations
 
