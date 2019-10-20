@@ -1,5 +1,3 @@
-using SMLMAssociationAnalysis_NCB
-
 ############
 # PARAMETERS
 
@@ -42,6 +40,15 @@ merge_radius = 200
 # END PARAMETERS
 ################
 
+using Distributed
+currentworkers = addprocs(exeflags="--project")
+@everywhere using SMLMAssociationAnalysis_NCB
+using Statistics
+using Printf
+using LocalizationMicroscopy
+using Statistics
+using FileIO
+
 results = Result[]
 
 for i ∈ 1:length(cellpaths)
@@ -72,3 +79,5 @@ for i ∈ 1:length(cellpaths)
 end
 
 save(outputpath, "results", results)
+
+rmprocs(currentworkers)

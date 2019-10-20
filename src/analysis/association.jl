@@ -67,7 +67,7 @@ function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_ne
     ineighbors1, ineighbors2 = inrange.([neighbor1tree, neighbor2tree], Ref(centercoordinates), localradius, true)
     nlocalmolecules1, nlocalmolecules2 = [length.(x) for x ∈ [ineighbors1, ineighbors2]]
 
-    percentileranks = localmontecarlo.(nlocalmolecules1, nlocalmolecules2, distances, localradius, 10000)
+    percentileranks = pmap(localmontecarlo, nlocalmolecules1, nlocalmolecules2, distances, repeat([localradius], length(ch1_neighbors)), repeat([10000], length(ch1_neighbors)), on_error = identity)
 
     return percentileranks
 end

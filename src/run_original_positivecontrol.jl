@@ -3,6 +3,9 @@
 using SMLMAssociationAnalysis_NCB
 using Printf
 using LocalizationMicroscopy
+using Statistics
+using FileIO
+using Distributed
 
 rootpath =  raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis"
 projectdirname = "MEG3 Project"
@@ -18,6 +21,9 @@ ncells = 10
 
 outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "output")
 outputdatapath = joinpath(outputdir, "results.jld2")
+
+currentworkers = addprocs(exeflags="--project")
+@everywhere using SMLMAssociationAnalysis_NCB
 
 experimentresults = Vector{Vector{Vector{Result}}}[]
 for experimentdirname ∈ experimentdirnames
@@ -72,3 +78,5 @@ for experimentdirname ∈ experimentdirnames
 
     save(outputdatapath, "replicateresults", experimentresults)
 end
+
+rmprocs(currentworkers)

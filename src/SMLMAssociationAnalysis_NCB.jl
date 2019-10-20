@@ -1,22 +1,20 @@
 module SMLMAssociationAnalysis_NCB
 
-using JLD2
-using FileIO
+using Distributed
 using LocalizationMicroscopy
 using NearestNeighbors
 using Plots
-using Printf
-using SimpleANOVA
+using SharedArrays
 using Statistics
-using StatsPlots
+using Tau
 
-include(raw"data\Molecule.jl")
-include(raw"data\ChannelData.jl")
-include(raw"data\Result.jl")
+include("data/Molecule.jl")
+include("data/ChannelData.jl")
+include("data/Result.jl")
 include("utilities.jl")
-include(raw"analysis\process.jl")
-include(raw"analysis\grouping.jl")
-include(raw"analysis\association.jl")
+include("analysis/process.jl")
+include("analysis/grouping.jl")
+include("analysis/association.jl")
 include("plots.jl")
 
 export ChannelData, Molecule, Result
