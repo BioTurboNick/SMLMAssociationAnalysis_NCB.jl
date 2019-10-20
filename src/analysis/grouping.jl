@@ -1,3 +1,5 @@
+using Profile
+
 """
     groupby_dbscan_temporallimit()
 
@@ -13,20 +15,26 @@ function groupby_localmax_temporallimit(localizations::Vector{Localization},
 
     molecules = Molecule[]
 
+
+    println("groupby")
+
     while length(localizations) > 0
-        neighborsdict = findtemporalneighbors(localizations, radius, t_off)
+        println("iteration")
+        @time neighborsdict = findtemporalneighbors(localizations, radius, t_off) # very significant allocations but fast
 
-        localmaxima, localmaxima_map = findlocalmaxima(localizations, neighborsdict)
+        @time localmaxima, localmaxima_map = findlocalmaxima(localizations, neighborsdict) # significant allocations and only a little slow
 
-        remaining = filter(l -> l ∉ localmaxima, localizations)
-        remaining_localmaxima_map = filter(kv -> kv.first ∉ localmaxima, localmaxima_map)
+        @time setdiff!(localizations, localmaxima) # remaining = filter(l -> l ∉ localmaxima, localizations) # slooooooooow step 1240 seconds!!!! But virtually no allocations
+        #Profile.print(noisefloor = 2.0, mincount = 100)
+        #Profile.print(format = :flat, sortedby = :count, noisefloor = 2.0, mincount = 1000)
+        @time remaining_localmaxima_map = IdDict([Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima)]) # filter(kv -> kv.first ∉ localmaxima, localmaxima_map) # sloooooow 820 seconds!!! 350k allocations, but only 19 MB
 
-        newmolecules = map(l -> Molecule(l), localmaxima)
+        @time newmolecules = map(l -> Molecule(l), localmaxima)  # fast, 140k allocations and 9 MB
 
-        buildmolecules!(newmolecules, remaining, remaining_localmaxima_map, radius)
+        @time buildmolecules!(newmolecules, localizations, remaining_localmaxima_map, radius) #buildmolecules!(newmolecules, remaining, remaining_localmaxima_map, radius) # slooow 472 seconds, 100M allocations! 100 GB!
 
-        localizations = remaining
-        append!(molecules, newmolecules)
+        #@time localizations = remaining    # instant
+        @time append!(molecules, newmolecules) #instant
     end
 
     molecules
@@ -45,12 +53,14 @@ function merge_close_molecules(molecules::Vector{Molecule}, radius)
 
         localmaxima, localmaxima_map = findlocalmaxima(molecules, neighborsdict)
 
-        remaining = filter(l -> l ∉ localmaxima, molecules)
-        remaining_localmaxima_map = filter(kv -> kv.first ∉ localmaxima, localmaxima_map)
+        #remaining = filter(l -> l ∉ localmaxima, molecules)
+        setdiff!(molecules, localmaxima)
+        #remaining_localmaxima_map = filter(kv -> kv.first ∉ localmaxima, localmaxima_map)
+        remaining_localmaxima_map = IdDict([Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima)])
 
-        buildmolecules!(localmaxima, remaining, remaining_localmaxima_map, radius)
+        buildmolecules!(localmaxima, molecules, remaining_localmaxima_map, radius)
 
-        molecules = remaining
+        #molecules = remaining
         append!(mergedmolecules, localmaxima)
     end
 
