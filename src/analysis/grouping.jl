@@ -16,7 +16,6 @@ function groupby_localmax_temporallimit(localizations::Vector{Localization},
 
     while length(locs) > 0
         neighborsdict = findtemporalneighbors(locs, radius, t_off) # 9 seconds, 5 million allocations, 5.6 GB, 35.27% GC time
-        println("temporalloop")
         localmaxima, localmaxima_map = findlocalmaxima(locs, neighborsdict) # 19 seconds, 13 million allocations, 2 GB, 15.90% GC time
         setdiff!(locs, localmaxima)
         remaining_localmaxima_map = IdDict(Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima)) # 1 second 350 thousand allocations, 32 MB
