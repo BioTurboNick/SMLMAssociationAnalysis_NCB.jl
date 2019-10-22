@@ -8,7 +8,7 @@ using FileIO
 using Distributed
 using Profile
 
-rootpath =  raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis"
+rootpath = raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis"
 projectdirname = "MEG3 Project"
 experimentdirnames = ["7 - U2OS FKBP12 mTOR STORM"]
 
@@ -24,7 +24,7 @@ outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "co
 mkpath(outputdir)
 outputdatapath = joinpath(outputdir, "results.jld2")
 
-currentworkers = addprocs(exeflags="--project")
+currentworkers = addprocs(exeflags = "--project")
 @everywhere using SMLMAssociationAnalysis_NCB
 
 experimentresults = Vector{Vector{Vector{Result}}}[]
@@ -54,12 +54,40 @@ for experimentdirname ∈ experimentdirnames
                 ch1_startframe = 1
                 ch2_startframe = 11001
 
-                ch1_molecules, ch1_localizations = getmolecules(localizations, ch1_name, ch1_startframe, 11000, 100, 10, 34.2, 500, 200)
-                ch2_molecules, ch2_localizations = getmolecules(localizations, ch2_name, ch2_startframe, 11000, 100, 10, 34.2, 500, 200)
+                ch1_molecules, ch1_localizations = getmolecules(
+                    localizations,
+                    ch1_name,
+                    ch1_startframe,
+                    11000,
+                    100,
+                    10,
+                    34.2,
+                    500,
+                    200,
+                )
+                ch2_molecules, ch2_localizations = getmolecules(
+                    localizations,
+                    ch2_name,
+                    ch2_startframe,
+                    11000,
+                    100,
+                    10,
+                    34.2,
+                    500,
+                    200,
+                )
 
                 ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
 
-                percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 200, 4)
+                percentileranks = montecarloaffinity(
+                    ch1_molecules,
+                    ch2_molecules,
+                    ch1_neighbors,
+                    ch2_neighbors,
+                    distances,
+                    200,
+                    4,
+                )
 
                 if length(distances) == 0
                     mediandistance = NaN
@@ -69,8 +97,17 @@ for experimentdirname ∈ experimentdirnames
                 println("                Done: $(length(distances)) neighbors from $(length(ch1_molecules)) and $(length(ch2_molecules)) molecules, $(length(ch1_localizations)) and $(length(ch2_localizations)) localizations; median distance $mediandistance")
                 ch1_data = ChannelData(ch1_name, ch1_molecules, ch1_neighbors)
                 ch2_data = ChannelData(ch2_name, ch2_molecules, ch2_neighbors)
-                result = Result(projectdirname, experimentdirname, i, samplename, j,
-                                [ch1_data, ch2_data], distances, mediandistance, percentileranks)
+                result = Result(
+                    projectdirname,
+                    experimentdirname,
+                    i,
+                    samplename,
+                    j,
+                    [ch1_data, ch2_data],
+                    distances,
+                    mediandistance,
+                    percentileranks,
+                )
                 push!(results, result)
             end
             push!(sampleresults, results)
