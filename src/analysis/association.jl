@@ -10,18 +10,18 @@ NOTE: Assumes that your data is far away from the type's maximum value.
 function exclusivenearestneighbors(points1::Vector{T}, points2::Vector{T}) where T <: DataEntity
     points2larger = length(points2) > length(points1)
 
-    if points2larger
-        points1, points2 = points2, points1
-    end
+    (points1, points2) = points2larger ?
+        (points2, points1) :
+        (points1, points2)
 
     coordinates1 = extractcoordinates(points1)
 
-    if ndims(coordinates1) == 1
-        coordinates1 = make2d(coordinates1) # ensures array is 2d, currently needed for Tree
-    end
+    coordinates1 = ndims(coordinates1) == 1 ?
+        make2d(coordinates1) :
+        coordinates1
 
-    neighbors = Vector{T}()
-    distances = Vector{eltype(coordinates1)}()
+    neighbors = T[]
+    distances = eltype(coordinates1)[]
 
     for point ∈ points2
         coordinates = extractcoordinates(point)
@@ -67,7 +67,7 @@ function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_ne
     ineighbors1, ineighbors2 = inrange.([neighbor1tree, neighbor2tree], Ref(centercoordinates), localradius, true)
     nlocalmolecules1, nlocalmolecules2 = [length.(x) for x ∈ [ineighbors1, ineighbors2]]
 
-    percentileranks = pmap(localmontecarlo, nlocalmolecules1, nlocalmolecules2, distances, repeat([localradius], length(ch1_neighbors)), repeat([10000], length(ch1_neighbors)), on_error = identity)
+    percentileranks = pmap(localmontecarlo, nlocalmolecules1, nlocalmolecules2, distances, (localradius for i = 1:length(ch1_neighbors)), (10000 for i = 1:length(ch1_neighbors)), on_error = identity)
 
     return percentileranks
 end
@@ -85,8 +85,7 @@ function localmontecarlo(nlocalmolecules1, nlocalmolecules2, testdistance, radiu
     randomcoordinates2 = [randomcoordinates2d(nlocalmolecules2, radius) for i ∈ 1:iterations]
     randomtrees = nlocalmolecules1 > nlocalmolecules2 ? KDTree.(randomcoordinates1) : KDTree.(randomcoordinates2)
     randomcoordinates = nlocalmolecules1 > nlocalmolecules2 ? randomcoordinates2 : randomcoordinates1
-    nearestneighbor_distances = [nn(randomtrees[i], randomcoordinates[i]) |> last for i ∈ 1:iterations]
-    mindistance = minimum.(nearestneighbor_distances)
+    mindistance = (nn(randomtrees[i], randomcoordinates[i]) |> last for i ∈ 1:iterations) .|> minimum
     percentilerank = count(mindistance .≤ testdistance) / iterations
 
     return percentilerank
