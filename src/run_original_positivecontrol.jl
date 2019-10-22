@@ -6,6 +6,7 @@ using LocalizationMicroscopy
 using Statistics
 using FileIO
 using Distributed
+using Profile
 
 rootpath =  raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis"
 projectdirname = "MEG3 Project"
@@ -19,7 +20,8 @@ nreplicates = 1
 nsamples = 4
 ncells = 10
 
-outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "output")
+outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "control", "output")
+mkpath(outputdir)
 outputdatapath = joinpath(outputdir, "results.jld2")
 
 currentworkers = addprocs(exeflags="--project")
@@ -54,6 +56,7 @@ for experimentdirname ∈ experimentdirnames
 
                 ch1_molecules, ch1_localizations = getmolecules(localizations, ch1_name, ch1_startframe, 11000, 100, 10, 34.2, 500, 200)
                 ch2_molecules, ch2_localizations = getmolecules(localizations, ch2_name, ch2_startframe, 11000, 100, 10, 34.2, 500, 200)
+
                 ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
 
                 percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 200, 4)

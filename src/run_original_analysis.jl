@@ -1,6 +1,9 @@
 # Recreates the analysis from the original data files
 
 using SMLMAssociationAnalysis_NCB
+using FileIO
+using StatsBase
+using StatsPlots
 
 ### Load saved data
 
@@ -12,7 +15,7 @@ nreplicates = 3
 nsamples = 4
 ncells = 10
 
-outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "control", "output")
+outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "output")
 datapath = joinpath(outputdir, "results.jld2")
 
 experimentresults = FileIO.load(datapath)["experimentresults"]

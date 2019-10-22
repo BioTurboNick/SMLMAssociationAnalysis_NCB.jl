@@ -2,6 +2,8 @@
 
 using SMLMAssociationAnalysis_NCB
 using FileIO
+using StatsBase
+using StatsPlots
 
 ### Load saved data
 
@@ -16,7 +18,7 @@ ncells = 10
 outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "control", "output")
 datapath = joinpath(outputdir, "results.jld2")
 
-experimentresults = FileIO.load(datapath)["experimentresults"]
+experimentresults = FileIO.load(datapath)["replicateresults"]
 
 medianmeasurements = Array{Float64, 3}(undef, ncells, nreplicates, 4)
 montecarlomeasurements = Array{Float64, 3}(undef, ncells, nreplicates, 4)
