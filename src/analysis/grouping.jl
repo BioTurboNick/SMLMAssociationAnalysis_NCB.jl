@@ -1,5 +1,3 @@
-using Profile
-
 """
     groupby_dbscan_temporallimit()
 
@@ -14,27 +12,17 @@ function groupby_localmax_temporallimit(localizations::Vector{Localization},
     radius, t_off)
 
     molecules = Molecule[]
+    locs = copy(localizations)
 
-
-    println("groupby")
-
-    while length(localizations) > 0
-        println("iteration")
-        @time neighborsdict = findtemporalneighbors(localizations, radius, t_off) # very significant allocations but fast
-
-        @time localmaxima, localmaxima_map = findlocalmaxima(localizations, neighborsdict) # significant allocations and only a little slow
-
-        @time setdiff!(localizations, localmaxima) # remaining = filter(l -> l ∉ localmaxima, localizations) # slooooooooow step 1240 seconds!!!! But virtually no allocations
-        #Profile.print(noisefloor = 2.0, mincount = 100)
-        #Profile.print(format = :flat, sortedby = :count, noisefloor = 2.0, mincount = 1000)
-        @time remaining_localmaxima_map = IdDict([Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima)]) # filter(kv -> kv.first ∉ localmaxima, localmaxima_map) # sloooooow 820 seconds!!! 350k allocations, but only 19 MB
-
-        @time newmolecules = map(l -> Molecule(l), localmaxima)  # fast, 140k allocations and 9 MB
-
-        @time buildmolecules!(newmolecules, localizations, remaining_localmaxima_map, radius) #buildmolecules!(newmolecules, remaining, remaining_localmaxima_map, radius) # slooow 472 seconds, 100M allocations! 100 GB!
-
-        #@time localizations = remaining    # instant
-        @time append!(molecules, newmolecules) #instant
+    while length(locs) > 0
+        neighborsdict = findtemporalneighbors(locs, radius, t_off) # 9 seconds, 5 million allocations, 5.6 GB, 35.27% GC time
+        println("temporalloop")
+        localmaxima, localmaxima_map = findlocalmaxima(locs, neighborsdict) # 19 seconds, 13 million allocations, 2 GB, 15.90% GC time
+        setdiff!(locs, localmaxima)
+        remaining_localmaxima_map = IdDict(Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima)) # 1 second 350 thousand allocations, 32 MB
+        newmolecules = map(l -> Molecule(l), localmaxima)
+        buildmolecules!(newmolecules, locs, remaining_localmaxima_map, radius) # 120 seconds, 3.5 million allocations, 1 GB, 0.2% GC time
+        append!(molecules, newmolecules)
     end
 
     molecules
@@ -50,17 +38,10 @@ function merge_close_molecules(molecules::Vector{Molecule}, radius)
 
     while length(molecules) > 0
         neighborsdict = findneighbors(molecules, radius)
-
         localmaxima, localmaxima_map = findlocalmaxima(molecules, neighborsdict)
-
-        #remaining = filter(l -> l ∉ localmaxima, molecules)
         setdiff!(molecules, localmaxima)
-        #remaining_localmaxima_map = filter(kv -> kv.first ∉ localmaxima, localmaxima_map)
         remaining_localmaxima_map = IdDict([Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima)])
-
         buildmolecules!(localmaxima, molecules, remaining_localmaxima_map, radius)
-
-        #molecules = remaining
         append!(mergedmolecules, localmaxima)
     end
 
@@ -96,7 +77,6 @@ Find `Localiation`s or `Molecule`s within `radius` of each other.
 """
 function findneighbors(points::Vector{<:DataEntity}, radius)
     coordinates = extractcoordinates(points)
-
     neighbortree = BallTree(coordinates)
     ineighbors = inrange(neighbortree, coordinates, radius, true)
     neighbors = map(i -> points[i], ineighbors)
@@ -114,10 +94,8 @@ Find the closest `Localiation` or `Molecule` to another.
 function findnearestneighbor(neighbors::Vector{<:DataEntity}, point::DataEntity)
     coordinates = extractcoordinates(point)
     neighborcoordinates = extractcoordinates(neighbors)
-
     neighbortree = BallTree(neighborcoordinates)
     inearestneighbor, nearestneighbor_distance = nn(neighbortree, coordinates)
-
     neighbors[inearestneighbor], nearestneighbor_distance
 end
 
@@ -133,12 +111,10 @@ function findnearestunvisitedmaxneighbor(entity, neighborsdict, visited)
 
     # if there are multiple neighbors with max count, choose closest
     if length(maxneighbors) > 1
-        unvisited_maxneighbors = setdiff(maxneighbors, visited)
-
-        length(unvisited_maxneighbors) > 0 &&
-            return first(findnearestneighbor(unvisited_maxneighbors, entity))
-
-        return entity
+        setdiff!(maxneighbors, visited)
+        return length(maxneighbors) > 0 ?
+            first(findnearestneighbor(maxneighbors, entity)) :
+            entity
     end
 
     return first(maxneighbors)
@@ -151,15 +127,7 @@ Create a dictionary containing the 2nd-level neighbors of each `Localization` or
 """
 function create_neighborsofneighborsdict(entities::Vector{T}, neighborsdict::IdDict{T, Vector{T}}) where T <: DataEntity
     neighborsofneighborsdict = IdDict{T, IdDict{T, Vector{T}}}()
-
-    foreach(l -> neighborsofneighborsdict[l] = IdDict{T, Vector{T}}(), entities)
-
-    for neighborlistpair ∈ neighborsdict
-        entity = neighborlistpair.first
-        neighbors = neighborlistpair.second
-        foreach(n -> neighborsofneighborsdict[n][entity] = neighbors, neighbors)
-    end
-
+    foreach(e -> neighborsofneighborsdict[e] = IdDict(Pair(k, neighborsdict[k]) for k ∈ neighborsdict[e]), entities)
     neighborsofneighborsdict
 end
 
@@ -169,7 +137,7 @@ end
 Find the `Localization`s or `Molecule`s corresponding to local density maxima.
 """
 function findlocalmaxima(entities::Vector{T}, neighborsdict::IdDict{T, Vector{T}}) where T <: DataEntity
-    localmaxima = Vector{T}()
+    localmaxima = T[]
 
     # map of each localization to the index of its associated local maximum
     localmaxima_map = IdDict{T, Int}()
@@ -185,7 +153,7 @@ function findlocalmaxima(entities::Vector{T}, neighborsdict::IdDict{T, Vector{T}
     for entity ∈ entities
         isvisited(entity) && continue
 
-        visited_chain = Vector{T}()
+        visited_chain = T[]
 
         while true
             push!(visited_chain, entity)
@@ -213,8 +181,6 @@ function findlocalmaxima(entities::Vector{T}, neighborsdict::IdDict{T, Vector{T}
     (localmaxima, localmaxima_map)
 end
 
-# Is there anywhere that a comprehension would be good?
-
 """
     buildmolecules!
 
@@ -224,24 +190,37 @@ function buildmolecules!(seedmolecules::Vector{Molecule}, entities::Vector{T},
     localmaxima_map::IdDict{T, Int}, radius) where T <: DataEntity
 
     moleculeneighbors_map = invertdictionary(localmaxima_map)
+    entityindexes = IdDict(zip(entities, eachindex(entities)))
+
+    todelete = Int[]
 
     for molecule ∈ seedmolecules
         haskey(moleculeneighbors_map, molecule.index) || continue
 
         clusterneighbors = moleculeneighbors_map[molecule.index]
+        clusterneighborcoordinates = extractcoordinates(clusterneighbors)
+        clusterneighborsused = falses(length(clusterneighbors))
+        clusterneighbortree = BallTree(clusterneighborcoordinates)
+        coordinates = extractcoordinates(molecule)
 
-        while length(clusterneighbors) > 0
-            nearestneighbor, distance = findnearestneighbor(clusterneighbors, molecule)
+        for i ∈ eachindex(clusterneighbors)
+            inearestneighbor, nearestneighbor_distance = nn(clusterneighbortree, coordinates, j -> clusterneighborsused[j])
+            nearestneighbor = clusterneighbors[inearestneighbor]
 
-            isinrange = distance < radius + nearestneighbor.accuracy + molecule.accuracy
+            isinrange = nearestneighbor_distance < radius + nearestneighbor.accuracy + molecule.accuracy
 
             isinrange || break
 
             push!(molecule, nearestneighbor)
-            deleteat!(clusterneighbors, findfirst(x -> x === nearestneighbor, clusterneighbors))
-            deleteat!(entities, findfirst(x -> x === nearestneighbor, entities))
+            clusterneighborsused[inearestneighbor] = true
+            push!(todelete, entityindexes[nearestneighbor])
+            # try batching this one more time; filter not efficient
         end
+
     end
+
+    sort!(todelete)
+    deleteat!(entities, todelete)
 
     seedmolecules
 end
