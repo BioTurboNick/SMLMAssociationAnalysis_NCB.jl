@@ -23,7 +23,7 @@ experimentresults = FileIO.load(datapath)["replicateresults"]
 medianmeasurements = Array{Float64,3}(undef, ncells, nreplicates, 4)
 montecarlomeasurements = Array{Float64,3}(undef, ncells, nreplicates, 4)
 
-for k ∈ 1
+for k ∈ 1:1
     for i ∈ 1:nsamples
         samplemedianresults = Array{Float64,2}(undef, ncells, nreplicates)
         samplelessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
