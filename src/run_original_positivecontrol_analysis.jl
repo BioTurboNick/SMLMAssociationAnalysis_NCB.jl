@@ -7,7 +7,7 @@ using StatsPlots
 
 ### Load saved data
 
-rootpath = raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis"
+rootpath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis"
 
 samplenames = ["E", "F", "G", "H"]
 
