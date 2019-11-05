@@ -13,14 +13,14 @@ function groupby_localmax_temporallimit(localizations::Vector{Localization},
 
     molecules = Molecule[]
     locs = copy(localizations)
-
+    println("groupby")
     while length(locs) > 0
-        neighborsdict = findtemporalneighbors(locs, radius, t_off) # 9 seconds, 5 million allocations, 5.6 GB, 35.27% GC time
-        localmaxima, localmaxima_map = findlocalmaxima(locs, neighborsdict) # 19 seconds, 13 million allocations, 2 GB, 15.90% GC time
+        neighborsdict = findtemporalneighbors(locs, radius, t_off)
+        localmaxima, localmaxima_map = findlocalmaxima(locs, neighborsdict)
         setdiff!(locs, localmaxima)
-        remaining_localmaxima_map = IdDict(Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima)) # 1 second 350 thousand allocations, 32 MB
+        @time remaining_localmaxima_map = IdDict(Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima))
         newmolecules = map(l -> Molecule(l), localmaxima)
-        buildmolecules!(newmolecules, locs, remaining_localmaxima_map, radius) # 120 seconds, 3.5 million allocations, 1 GB, 0.2% GC time
+        buildmolecules!(newmolecules, locs, remaining_localmaxima_map, radius)
         append!(molecules, newmolecules)
     end
 
