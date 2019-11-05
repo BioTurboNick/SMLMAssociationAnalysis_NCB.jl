@@ -18,6 +18,7 @@ include("analysis/association.jl")
 include("plots.jl")
 
 export ChannelData, Molecule, Result
+export ChannelDataOptimizing, ResultOptimizing
 export getmolecules, exclusivenearestneighbors, montecarloaffinity
 export moleculesplot, localizationsplot
 export localizationsplot_forprint
