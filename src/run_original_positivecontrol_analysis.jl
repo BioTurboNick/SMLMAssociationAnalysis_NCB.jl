@@ -58,18 +58,16 @@ p3 = boxplot(medianmeasurements[:, :, 3], xaxis = ("Replicates", [1, 2, 3]), yax
 p4 = boxplot(medianmeasurements[:, :, 4], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
 
 plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "FKBP12-mTOR")
-savefig(joinpath(outputdir, "FKBP12-mTOR boxplots-afterwindsorizing.png"))
+
 
 # Windsorize an extreme value
 medianmeasurements[4, 1, 1] = medianmeasurements[5, 1, 1]
 
+savefig(joinpath(outputdir, "FKBP12-mTOR boxplots-afterwindsorizing.png"))
+
 
 #ZResid/ZPred plot and Levene's test
-mediansflat = [medianmeasurements[:, :, 1] medianmeasurements[:, :, 2] medianmeasurements[:, :, 3] medianmeasurements[
-    :,
-    :,
-    4,
-]]
+mediansflat = [medianmeasurements[:, :, 1] medianmeasurements[:, :, 2] medianmeasurements[:, :, 3] medianmeasurements[:, :, 4]]
 z = zscore(mediansflat)
 zpred = repeat(mean(z, dims = 1), 10)
 zresid = z .- zpred
@@ -98,30 +96,7 @@ savefig(joinpath(outputdir, "FKBP12-mTOR qqnorm.png"))
 # anova
 
 medianresult = anova(medianmeasurements[:, 1, :], factornames = ["Rapamycin"])
-
-
-# contrasts
-contrastcoeffs_0vs10_20_40 = [-3; 1; 1; 1]
-contrast0vs10_20_40 = sum(contrastcoeffs_0vs10_20_40 .* medianresult.cellmeans) /
-                      sqrt(medianresult.effects[end].ms * sum(contrastcoeffs_0vs10_20_40 .^ 2 ./ 10))
-r0vs10_20_40 = sqrt(contrast0vs10_20_40^2 / (contrast0vs10_20_40^2 + medianresult.effects[end].df))
-
-contrastcoeffs_10vs20_40 = [-2; 1; 1]
-contrast10vs20_40 = sum(contrastcoeffs_10vs20_40 .* medianresult.cellmeans[2:4]) /
-                    sqrt(medianresult.effects[end].ms * sum(contrastcoeffs_10vs20_40 .^ 2 ./ 10))
-r10vs20_40 = sqrt(contrast10vs20_40^2 / (contrast10vs20_40^2 + medianresult.effects[end].df))
-
-contrastcoeffs_20vs40 = [-1; 1]
-contrast20vs40 = sum(contrastcoeffs_20vs40 .* medianresult.cellmeans[3:4]) /
-                 sqrt(medianresult.effects[end].ms * sum(contrastcoeffs_20vs40 .^ 2 ./ 10))
-r20vs40 = sqrt(contrast20vs40^2 / (contrast20vs40^2 + medianresult.effects[end].df))
-
-using Distributions
-dist = TDist(medianresult.effects[end].df)
-pvalue(dist, x) = min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
-p0vs10_20_40 = pvalue(dist, contrast0vs10_20_40)
-p10vs20_40 = pvalue(dist, contrast10vs20_40)
-p20vs40 = pvalue(dist, contrast20vs40)
+differencecontrasts(medianresult)
 
 ### Monte Carlo Exp 3
 
@@ -135,11 +110,7 @@ plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "FKBP12-m
 savefig(joinpath(outputdir, "FKBP12-mTOR boxplots montecarlo.png"))
 
 #ZResid/ZPred plot and Levene's test
-montecarloflat = [montecarlomeasurements[:, :, 1] montecarlomeasurements[:, :, 2] montecarlomeasurements[:, :, 3] montecarlomeasurements[
-    :,
-    :,
-    4,
-]]
+montecarloflat = [montecarlomeasurements[:, :, 1] montecarlomeasurements[:, :, 2] montecarlomeasurements[:, :, 3] montecarlomeasurements[:, :, 4]]
 z = zscore(montecarloflat)
 zpred = repeat(mean(z, dims = 1), 10)
 zresid = z .- zpred
@@ -168,25 +139,4 @@ savefig(joinpath(outputdir, "FKBP12-mTOR qqnorm montecarlo.png"))
 # anova
 
 montecarloresult = anova(montecarlomeasurements[:, 1, :], factornames = ["Rapamycin"])
-
-contrastcoeffs_0vs10_20_40 = [-3; 1; 1; 1]
-contrast0vs10_20_40 = sum(contrastcoeffs_0vs10_20_40 .* montecarloresult.cellmeans) /
-                      sqrt(montecarloresult.effects[end].ms * sum(contrastcoeffs_0vs10_20_40 .^ 2 ./ 10))
-r0vs10_20_40 = sqrt(contrast0vs10_20_40^2 / (contrast0vs10_20_40^2 + montecarloresult.effects[end].df))
-
-contrastcoeffs_10vs20_40 = [-2; 1; 1]
-contrast10vs20_40 = sum(contrastcoeffs_10vs20_40 .* montecarloresult.cellmeans[2:4]) /
-                    sqrt(montecarloresult.effects[end].ms * sum(contrastcoeffs_10vs20_40 .^ 2 ./ 10))
-r10vs20_40 = sqrt(contrast10vs20_40^2 / (contrast10vs20_40^2 + montecarloresult.effects[end].df))
-
-contrastcoeffs_20vs40 = [-1; 1]
-contrast20vs40 = sum(contrastcoeffs_20vs40 .* montecarloresult.cellmeans[3:4]) /
-                 sqrt(montecarloresult.effects[end].ms * sum(contrastcoeffs_20vs40 .^ 2 ./ 10))
-r20vs40 = sqrt(contrast20vs40^2 / (contrast20vs40^2 + montecarloresult.effects[end].df))
-
-using Distributions
-dist = TDist(montecarloresult.effects[end].df)
-pvalue(dist, x) = min(2 * min(cdf(dist, x), ccdf(dist, x)), 1.0)
-p0vs10_20_40 = pvalue(dist, contrast0vs10_20_40)
-p10vs20_40 = pvalue(dist, contrast10vs20_40)
-p20vs40 = pvalue(dist, contrast20vs40)
+differencecontrasts(montecarloresult)
