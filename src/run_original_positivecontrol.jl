@@ -1,13 +1,5 @@
 # Recreates the analysis from the original data files
 
-using SMLMAssociationAnalysis_NCB
-using Printf
-using LocalizationMicroscopy
-using Statistics
-using FileIO
-using Distributed
-using Profile
-
 rootpath = raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis"
 projectdirname = "MEG3 Project"
 experimentdirnames = ["7 - U2OS FKBP12 mTOR STORM"]
@@ -26,6 +18,12 @@ outputdatapath = joinpath(outputdir, "results.jld2")
 
 currentworkers = addprocs(exeflags = "--project")
 @everywhere using SMLMAssociationAnalysis_NCB
+using Printf
+using LocalizationMicroscopy
+using Statistics
+using FileIO
+using Distributed
+using Profile
 
 experimentresults = Vector{Vector{Vector{Result}}}[]
 for experimentdirname ∈ experimentdirnames
