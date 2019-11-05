@@ -159,6 +159,8 @@ function findlocalmaxima(entities::Vector{T}, neighborsdict::IdDict{T, Vector{T}
 
             localneighborsdict = neighborsofneighborsdict[entity]
 
+            !isempty(localneighborsdict) || break
+
             maxneighbor = findnearestunvisitedmaxneighbor(entity, localneighborsdict, visited_chain)
 
             if (reached_maximum = maxneighbor === entity)
