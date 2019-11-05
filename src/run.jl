@@ -3,10 +3,12 @@
 
 # the file paths of each file to analyze
 # you may wish to write a loop to populate this
-cellpaths = [raw"paths\to\your\data\here1.bin.txt",
-             raw"paths\to\your\data\here2.bin.txt"]
+# The / path separator works on both Windows and Linux
+cellpaths = ["paths/to/your/data/here1.bin.txt",
+             "paths/to/your/data/here2.bin.txt"]
 
-outputpath = raw"path\to\your\output\results.jld2" # jld2 is a julia-native file format. You can save to other formats by changing the extension and importing an appropriate package.
+# jld2 is a julia-native file format. You can save to other formats by changing the extension and importing an appropriate package.
+outputpath = "path/to/your/output/results.jld2"
 
 # name of each channel
 ch1_name = "647"
