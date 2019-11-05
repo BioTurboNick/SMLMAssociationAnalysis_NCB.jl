@@ -1,6 +1,6 @@
 # Recreates the analysis from the original data files
 
-datapath = raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis"
+datapath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis"
 projectdirname = "MEG3 Project"
 experimentdirnames = ["2 - U2OS p53 MDM2 STORM", "3 - U2OS p53 MEG3 STORM"]
 
@@ -12,6 +12,10 @@ samplenames = ["A", "B", "C", "D"]
 nreplicates = 3
 nsamples = 4
 ncells = 10
+
+outputdir = joinpath(datapath, "SMLMAssociationAnalysis_NCB.jl", "original", "output")
+mkpath(outputdir)
+outputdatapath = joinpath(outputdir, "results.jld2")
 
 using Distributed
 currentworkers = addprocs(exeflags = "--project")
@@ -115,7 +119,6 @@ for experimentdirname ∈ experimentdirnames
     push!(experimentresults, replicateresults)
 end
 
-outputpath = joinpath(experimentoutputpath, "results.jld2")
-save(outputpath, "experimentresults", experimentresults)
+save(outputdatapath, "experimentresults", experimentresults)
 
 rmprocs(currentworkers)
