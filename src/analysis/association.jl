@@ -7,7 +7,7 @@ Finds the closest of all pairs, removes both, and iterates on the remainder unti
 
 NOTE: Assumes that your data is far away from the type's maximum value.
 """
-function exclusivenearestneighbors1(points1::Vector{T}, points2::Vector{T}) where T <: DataEntity
+function exclusivenearestneighbors(points1::Vector{T}, points2::Vector{T}) where T <: DataEntity
     points2larger = length(points2) > length(points1)
 
     (points1, points2) = points2larger ?
@@ -48,42 +48,6 @@ function exclusivenearestneighbors1(points1::Vector{T}, points2::Vector{T}) wher
         neighbors2, neighbors1, distances
     else
         neighbors1, neighbors2, distances
-    end
-end
-
-function exclusivenearestneighbors(points1::Vector{T}, points2::Vector{T}) where T <: DataEntity
-    points2larger = length(points2) > length(points1)
-
-    if points2larger
-        points1, points2 = points2, points1
-    end
-
-    coordinates1 = extractcoordinates(points1)
-
-    if ndims(coordinates1) == 1
-        coordinates1 = make2d(coordinates1) # ensures array is 2d, currently needed for Tree
-    end
-
-    neighbors = Vector{T}()
-    distances = Vector{eltype(coordinates1)}()
-
-    for point ∈ points2
-        coordinates = extractcoordinates(point)
-
-        neighbortree = KDTree(coordinates1)
-        inearestneighbor, nearestneighbor_distance = nn(neighbortree, coordinates)
-
-        neighbor = points1[inearestneighbor]
-
-        coordinates1[:,inearestneighbor] .= typemax(eltype(coordinates1))
-        push!(neighbors, neighbor)
-        push!(distances, nearestneighbor_distance)
-    end
-
-    if points2larger
-        points2, neighbors, distances
-    else
-        neighbors, points2, distances
     end
 end
 
