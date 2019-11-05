@@ -19,9 +19,10 @@ end
 
 using Printf
 
-function distanceprobabilityplot(result::Result)
-    lessthan10 = count((result.percentileranks .< 0.1) .& (result.distances .< 200)) / length(result.percentileranks)
-    p1 = scatter(result.distances, result.percentileranks,
+distanceprobabilityplot(result::Result) = distanceprobabilityplot(result.distances, result.percentileranks)
+function distanceprobabilityplot(distances::Vector{Float64}, percentileranks::Vector{Float64})
+    lessthan10 = count((percentileranks .< 0.1) .& (distances .< 200)) / length(percentileranks)
+    p1 = scatter(distances, percentileranks,
                  xaxis=("distance (nm)", (0,1000), 45),
                  yaxis=(:hide),
                  marker=(2, stroke(0)),
@@ -33,7 +34,7 @@ function distanceprobabilityplot(result::Result)
                  tick_direction=:out)
     line = plot!(p1, [0; 1000], [0.1, 0.1], line=(:gray))
     line = plot!(p1, [200; 200], [0, 1.0], line=(:gray))
-    p2 = scatter(result.distances, result.percentileranks,
+    p2 = scatter(distances, percentileranks,
                  xaxis=((1000,15000), (1000:7000:15000), 45),
                  xformatter=:plain,
                  yaxis=(:hide),
@@ -44,21 +45,21 @@ function distanceprobabilityplot(result::Result)
                  ywiden=false,
                  tick_direction=:out)
 
-    p3 = histogram(result.distances,
+    p3 = histogram(distances,
                    bins=0:25:1000,
                    left_margin=-10mm,
                    xaxis=((0,1000), :hide),
                    linealpha=0,
                    legend=:none,
                    tick_direction=:out)
-    p4 = histogram(result.distances,
+    p4 = histogram(distances,
                    bins=1000:25:15000,
                    xaxis=((1000,15000), (1000:7000:15000), :hide),
                    legend=:none,
                    linealpha=0,
                    left_margin=-30mm,
                    yaxis=(:hide))
-    p5 = histogram(result.percentileranks,
+    p5 = histogram(percentileranks,
                    bins=0:0.05:1.01,
                    orientation = :horizontal,
                    linealpha=0,
@@ -72,9 +73,10 @@ function distanceprobabilityplot(result::Result)
 end
 
 using LocalizationMicroscopy
-function moleculesplot(result::Result)
-    mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
-    mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
+moleculesplot(result::Result) = moleculesplot(result.channels[1].molecules, result.channels[2].molecules)
+function moleculesplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule})
+    mol1coords = molecules1 |> LocalizationMicroscopy.extractcoordinates
+    mol2coords = molecules2 |> LocalizationMicroscopy.extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :red))
     plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
 
@@ -83,9 +85,11 @@ function moleculesplot(result::Result)
           framestyle=:box) # check limit
 end
 
-function localizationsplot(result::Result; insetbox = [[0,0], [0,0]])
-    loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
-    loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
+localizationsplot(result::Result; kwargs...) = localizationsplot(result.channels[1].molecules, result.channels[2].molecules; kwargs...)
+localizationsplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}; kwargs...) = localizationsplot(mapreduce(x -> x.group.localizations, vcat, molecules1), mapreduce(x -> x.group.localizations, vcat, molecules2); kwargs...)
+function localizationsplot(localizations1::Vector{Localization}, localizations2::Vector{Localization}; insetbox = [[0,0], [0,0]])
+    loc1coords = localizations1 |> extractcoordinates
+    loc2coords = localizations2 |> extractcoordinates
     scatter(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), 0.75, :red), framestyle=:none)
     plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
 
@@ -126,8 +130,8 @@ end
 ENV["GKS_ENCODING"] = "utf-8"
 
 function moleculesinsetplot(result::Result, xlims, ylims)
-    mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
-    mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
+    mol1coords = result.channels[1].molecules |> extractcoordinates
+    mol2coords = result.channels[2].molecules |> extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(4, stroke(0), :red))
     plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
@@ -137,8 +141,8 @@ function moleculesinsetplot(result::Result, xlims, ylims)
 end
 
 function moleculesinsetplot_forprint(result::Result, xlims, ylims; color1 = :red, color2 = :green)
-    mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
-    mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
+    mol1coords = result.channels[1].molecules |> extractcoordinates
+    mol2coords = result.channels[2].molecules |> extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(16, stroke(0), color1), size=(2048,2048), framestyle=:none)
     plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
@@ -169,9 +173,10 @@ function localizationsinsetplot_forprint(result::Result, xlims, ylims; color1 = 
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
 end
 
-function insetplot(result::Result, xlims, ylims)
-    mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
-    mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
+insetplot(result::Result, args...) = insetplot(result.channels[1].molecules, result.channels[2].molecules, args...)
+function insetplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}, xlims, ylims)
+    mol1coords = molecules1 |> extractcoordinates
+    mol2coords = molecules2 |> extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(2, :red), :white))
     plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
@@ -179,8 +184,8 @@ function insetplot(result::Result, xlims, ylims)
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(2, :green), :white))
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
 
-    loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
-    loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
+    loc1coords = mapreduce(x -> x.group.localizations, vcat, molecules1) |> extractcoordinates
+    loc2coords = mapreduce(x -> x.group.localizations, vcat, molecules2) |> extractcoordinates
     scatter!(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), :red))
     plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
@@ -190,8 +195,8 @@ function insetplot(result::Result, xlims, ylims)
 end
 
 function insetplot_forprint(result::Result, xlims, ylims; color1 = :red, color2 = :green)
-    mol1coords = result.channels[1].molecules |> LocalizationMicroscopy.extractcoordinates
-    mol2coords = result.channels[2].molecules |> LocalizationMicroscopy.extractcoordinates
+    mol1coords = result.channels[1].molecules |> extractcoordinates
+    mol2coords = result.channels[2].molecules |> extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(24, stroke(2, color1), 0.75, :white),
             framestyle=:none, size=(2048,2048))
     plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
