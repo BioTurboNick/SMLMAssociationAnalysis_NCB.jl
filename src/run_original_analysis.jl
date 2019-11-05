@@ -160,13 +160,7 @@ savefig(joinpath(outputdir, "Mdm2-p53 boxplots montecarlo.png"))
 
 
 #ZResid/ZPred plot and Levene's test
-montecarloflat = [montecarlomeasurements[:, :, 1, 1, 1] montecarlomeasurements[:, :, 2, 1, 1] montecarlomeasurements[
-    :,
-    :,
-    1,
-    2,
-    1,
-] montecarlomeasurements[:, :, 2, 2, 1]]
+montecarloflat = [montecarlomeasurements[:, :, 1, 1, 1] montecarlomeasurements[:, :, 2, 1, 1] montecarlomeasurements[:, :, 1, 2, 1] montecarlomeasurements[:, :, 2, 2, 1]]
 z = zscore(montecarloflat)
 zpred = repeat(mean(z, dims = 1), 10)
 zresid = z .- zpred
@@ -215,13 +209,7 @@ savefig(joinpath(outputdir, "MEG3-p53 boxplots.png"))
 
 
 #ZResid/ZPred plot and Levene's test
-mediansflat = [medianmeasurements[:, :, 1, 1, 2] medianmeasurements[:, :, 2, 1, 2] medianmeasurements[:, :, 1, 2, 2] medianmeasurements[
-    :,
-    :,
-    2,
-    2,
-    2,
-]]
+mediansflat = [medianmeasurements[:, :, 1, 1, 2] medianmeasurements[:, :, 2, 1, 2] medianmeasurements[:, :, 1, 2, 2] medianmeasurements[:, :, 2, 2, 2]]
 z = zscore(mediansflat)
 zpred = repeat(mean(z, dims = 1), 10)
 zresid = z .- zpred
@@ -268,13 +256,7 @@ savefig(joinpath(outputdir, "MEG3-p53 boxplots montecarlo.png"))
 
 
 #ZResid/ZPred plot and Levene's test
-montecarloflat = [montecarlomeasurements[:, :, 1, 1, 2] montecarlomeasurements[:, :, 2, 1, 2] montecarlomeasurements[
-    :,
-    :,
-    1,
-    2,
-    2,
-] montecarlomeasurements[:, :, 2, 2, 2]]
+montecarloflat = [montecarlomeasurements[:, :, 1, 1, 2] montecarlomeasurements[:, :, 2, 1, 2] montecarlomeasurements[:, :, 1, 2, 2] montecarlomeasurements[:, :, 2, 2, 2]]
 z = zscore(montecarloflat)
 zpred = repeat(mean(z, dims = 1), 10)
 zresid = z .- zpred
