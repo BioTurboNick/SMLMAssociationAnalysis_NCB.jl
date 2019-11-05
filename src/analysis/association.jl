@@ -57,7 +57,7 @@ end
 Evaluate the probability of chance association across all molecules by randomizing their neighbors.
 """
 function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_neighbors::Vector{T},
-                            ch2_neighbors::Vector{T}, distances, maxbindingdistance, rangefactor) where T <: DataEntity
+                            ch2_neighbors::Vector{T}, distances, maxbindingdistance, rangefactor, iterations) where T <: DataEntity
     coordinates1, coordinates2 = extractcoordinates.([molecules1, molecules2])
 
     percentileranks = ones(length(ch1_neighbors))
@@ -75,10 +75,45 @@ function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_ne
     ineighbors1, ineighbors2 = inrange.([neighbor1tree, neighbor2tree], Ref(centercoordinates), localradius, true)
     nlocalmolecules1, nlocalmolecules2 = [length.(x) for x ∈ [ineighbors1, ineighbors2]]
 
-    percentileranks = pmap(localmontecarlo, nlocalmolecules1, nlocalmolecules2, distances, (localradius for i = 1:length(ch1_neighbors)), (10000 for i = 1:length(ch1_neighbors)), on_error = identity)
+    percentileranks = pmap(localmontecarlo, nlocalmolecules1, nlocalmolecules2, distances, (localradius for i = eachindex(ch1_neighbors)), (iterations for i = eachindex(ch1_neighbors)), on_error = identity)
 
     return percentileranks
 end # since number might be finite, could potentially generate say 100,000 permutations once and use for all with same counts...
+
+function montecarloaffinity1(molecules1::Vector{T}, molecules2::Vector{T}, ch1_neighbors::Vector{T},
+                            ch2_neighbors::Vector{T}, distances, maxbindingdistance, rangefactor, iterations) where T <: DataEntity
+    coordinates1, coordinates2 = extractcoordinates.([molecules1, molecules2])
+
+    percentileranks = ones(length(ch1_neighbors))
+
+    neighborcoordinates1, neighborcoordinates2 = extractcoordinates.([ch1_neighbors, ch2_neighbors])
+
+    centerxcoordinates = mean([neighborcoordinates1[1, :]'; neighborcoordinates2[1, :]'], dims = 1)
+    centerycoordinates = mean([neighborcoordinates1[2, :]'; neighborcoordinates2[2, :]'], dims = 1)
+    centerzcoordinates = mean([neighborcoordinates1[3, :]'; neighborcoordinates2[3, :]'], dims = 1)
+    centercoordinates = [centerxcoordinates; centerycoordinates; centerzcoordinates]
+
+    localradius = rangefactor * maxbindingdistance
+
+    neighbor1tree, neighbor2tree = BallTree.([coordinates1, coordinates2])
+    ineighbors1, ineighbors2 = inrange.([neighbor1tree, neighbor2tree], Ref(centercoordinates), localradius, true)
+    nlocalmolecules1, nlocalmolecules2 = [length.(x) for x ∈ [ineighbors1, ineighbors2]]
+
+    unique_nlocalmolecules1 = sort(unique(nlocalmolecules1))
+    unique_nlocalmolecules2 = sort(unique(nlocalmolecules2))
+
+    # precompute for the possible sets of distances, as there are typically many fewer combinations than their are potential pairs.
+    localcounts = [(i,j) for i in unique_nlocalmolecules1 for j in unique_nlocalmolecules2]
+    localmindistances = pmap(localmontecarlo_mindistance, localcounts, (localradius for i = eachindex(localcounts)), (iterations for i = eachindex(localcounts)), on_error = identity)
+    println(localmindistances |> length)
+    localmindistancesdict = Dict{Tuple{Int, Int}, Vector{Float64}}(zip(localcounts, localmindistances))
+    mindistances = [localmindistancesdict[x] for x ∈ zip(nlocalmolecules1, nlocalmolecules2)]
+    percentileranks = [count(mindistances[i] .≤ distances[i]) / iterations for i ∈ eachindex(ch1_neighbors)]
+
+    return percentileranks
+end
+
+
 
 """
     localmontecarlo()
@@ -97,4 +132,16 @@ function localmontecarlo(nlocalmolecules1, nlocalmolecules2, testdistance, radiu
     percentilerank = count(mindistance .≤ testdistance) / iterations
 
     return percentilerank
+end
+
+function localmontecarlo_mindistance(nlocalmolecules1_2, radius, iterations) where T <: DataEntity
+    nlocalmolecules1 = first(nlocalmolecules1_2)
+    nlocalmolecules2 = last(nlocalmolecules1_2)
+    (nlocalmolecules1 == 0 || nlocalmolecules2 == 0) && return 1.0
+
+    randomcoordinates1 = [randomcoordinates2d(nlocalmolecules1, radius) for i ∈ 1:iterations]
+    randomcoordinates2 = [randomcoordinates2d(nlocalmolecules2, radius) for i ∈ 1:iterations]
+    randomtrees = nlocalmolecules1 > nlocalmolecules2 ? KDTree.(randomcoordinates1) : KDTree.(randomcoordinates2)
+    randomcoordinates = nlocalmolecules1 > nlocalmolecules2 ? randomcoordinates2 : randomcoordinates1
+    mindistance = (nn(randomtrees[i], randomcoordinates[i]) |> last for i ∈ 1:iterations) .|> minimum
 end
