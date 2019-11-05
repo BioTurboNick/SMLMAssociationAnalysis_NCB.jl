@@ -32,7 +32,7 @@ end
 
 function calcaccuracy!(molecule::Molecule)
     count = length(molecule.group.localizations)
-    molecule.accuracy = sum(l -> l.accuracy, molecule.group.localizations) / (count ^ 2)
+    molecule.accuracy = mean(l -> l.accuracy, molecule.group.localizations) / sqrt(count)
 end
 
 export Molecule, push!, append!
