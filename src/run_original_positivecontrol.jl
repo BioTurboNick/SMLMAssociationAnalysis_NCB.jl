@@ -1,6 +1,6 @@
 # Recreates the analysis from the original data files
 
-rootpath = raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis"
+rootpath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis"
 projectdirname = "MEG3 Project"
 experimentdirnames = ["7 - U2OS FKBP12 mTOR STORM"]
 
@@ -16,6 +16,7 @@ outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "co
 mkpath(outputdir)
 outputdatapath = joinpath(outputdir, "results.jld2")
 
+using Distributed
 currentworkers = addprocs(exeflags = "--project")
 @everywhere using SMLMAssociationAnalysis_NCB
 using Printf
