@@ -113,6 +113,7 @@ for experimentdirname ∈ experimentdirnames
                     Ref(distances),
                     200,
                     1:10,
+                    10000
                 )
 
                 if length(distances) == 0
