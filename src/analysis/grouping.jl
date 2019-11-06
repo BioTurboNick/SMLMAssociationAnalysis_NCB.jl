@@ -8,12 +8,9 @@ consider flashes correlated in time as originating from the same molecule. Only 
 units as position) of the cluster center are joined into the molecule. The algorithm is repeated on the remaining
 unjoined localizations.
 """
-function groupby_localmax_temporallimit(localizations::Vector{Localization},
-    radius, t_off)
-
+function groupby_localmax_temporallimit(localizations::Vector{Localization}, radius, t_off)
     molecules = Molecule[]
     locs = copy(localizations)
-    println("groupby")
     while length(locs) > 0
         neighborsdict = findtemporalneighbors(locs, radius, t_off)
         localmaxima, localmaxima_map = findlocalmaxima(locs, neighborsdict)
