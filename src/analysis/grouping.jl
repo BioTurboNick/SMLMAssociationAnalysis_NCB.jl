@@ -18,7 +18,7 @@ function groupby_localmax_temporallimit(localizations::Vector{Localization},
         neighborsdict = findtemporalneighbors(locs, radius, t_off)
         localmaxima, localmaxima_map = findlocalmaxima(locs, neighborsdict)
         setdiff!(locs, localmaxima)
-        @time remaining_localmaxima_map = IdDict(Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima))
+        remaining_localmaxima_map = IdDict(Pair(k, localmaxima_map[k]) for k ∈ setdiff(keys(localmaxima_map), localmaxima))
         newmolecules = map(l -> Molecule(l), localmaxima)
         buildmolecules!(newmolecules, locs, remaining_localmaxima_map, radius)
         append!(molecules, newmolecules)
