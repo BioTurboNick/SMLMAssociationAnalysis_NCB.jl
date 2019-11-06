@@ -25,18 +25,18 @@ using LocalizationMicroscopy
 using Statistics
 using FileIO
 
-experimentresults = Vector{Vector{Vector{ResultOptimize}}}[]
+experimentresults = Vector{Vector{Vector{ResultOptimizing}}}[]
 for experimentdirname ∈ experimentdirnames
     println("Starting experiment $experimentdirname.")
     experimentpath = joinpath(datapath, projectdirname, experimentdirname, datadirname)
     experimentoutputpath = joinpath(datapath, projectdirname, experimentdirname, outputdirname)
-    replicateresults = Vector{Vector{ResultOptimize}}[]
+    replicateresults = Vector{Vector{ResultOptimizing}}[]
     for i ∈ 1:nreplicates
-        sampleresults = Vector{ResultOptimize}[]
+        sampleresults = Vector{ResultOptimizing}[]
         println("    Starting replicate $i.")
         replicatepath = joinpath(experimentpath, "Replicate $i")
         for samplename ∈ samplenames
-            results = ResultOptimize[]
+            results = ResultOptimizing[]
             println("        Starting sample $samplename.")
             for j ∈ 1:ncells
                 println("            Starting cell $j.")
@@ -122,9 +122,9 @@ for experimentdirname ∈ experimentdirnames
                     mediandistance = median(distances)
                 end
                 println("                Done:$(length(distances)) neighbors from $(length(ch1_molecules)) and $(length(ch2_molecules)) molecules, $(length(ch1_localizations)) and $(length(ch2_localizations)) localizations; median distance $mediandistance")
-                ch1_data = ChannelData(ch1_name, first.(ch1), ch1_neighbors)
-                ch2_data = ChannelData(ch2_name, first.(ch2), ch2_neighbors)
-                result = ResultOptimize(
+                ch1_data = ChannelDataOptimizing(ch1_name, first.(ch1), ch1_neighbors)
+                ch2_data = ChannelDataOptimizing(ch2_name, first.(ch2), ch2_neighbors)
+                result = ResultOptimizing(
                     projectdirname,
                     experimentdirname,
                     i,
@@ -133,7 +133,6 @@ for experimentdirname ∈ experimentdirnames
                     [ch1_data, ch2_data],
                     distances,
                     mediandistance,
-                    percentileranks,
                     percentileranks_by_localdensity
                 )
                 push!(results, result)
