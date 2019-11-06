@@ -103,13 +103,7 @@ savefig(joinpath(outputdir, "Mdm2-p53 boxplots.png"))
 
 
 #ZResid/ZPred plot and Levene's test
-mediansflat = [medianmeasurements[:, :, 1, 1, 1] medianmeasurements[:, :, 2, 1, 1] medianmeasurements[:, :, 1, 2, 1] medianmeasurements[
-    :,
-    :,
-    2,
-    2,
-    1,
-]]
+mediansflat = [medianmeasurements[:, :, 1, 1, 1] medianmeasurements[:, :, 2, 1, 1] medianmeasurements[:, :, 1, 2, 1] medianmeasurements[:, :, 2, 2, 1]]
 z = zscore(mediansflat)
 zpred = repeat(mean(z, dims = 1), 10)
 zresid = z .- zpred
@@ -143,8 +137,6 @@ medianresult = anova(
 
 plot(medianresult)
 savefig(joinpath(outputdir, "Mdm2-p53 interactionplot.png"))
-
-
 
 
 ### Monte Carlo Exp 2
@@ -252,9 +244,6 @@ medianresult = anova(medianmeasurements[:, :, :, :, 2], [nested], factornames = 
 plot(medianresult)
 savefig(joinpath(outputdir, "MEG3-p53 interactionplot.png"))
 
-
-
-
 ### Monte Carlo Exp 3
 
 # Check for unusual cases
@@ -325,6 +314,7 @@ average_percentileranks = [[[mean(x) for x ∈ experimentresults[1][k][j][i].per
 plot([200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000], average_percentileranks)
 
 savefig(joinpath(outputdir, "(partial) choice of local area effect on percentile rank.png"))
+
 
 # temporal cutoff (needs special data)
 
