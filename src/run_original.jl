@@ -89,6 +89,7 @@ for experimentdirname ∈ experimentdirnames
                     distances,
                     200,
                     4,
+                    10000
                 )
 
                 if length(distances) == 0
