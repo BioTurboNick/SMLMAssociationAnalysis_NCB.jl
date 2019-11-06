@@ -198,6 +198,36 @@ montecarloresultNutPlus = anova(
     factornames = ["Replicate", "Doxycycline"],
 )
 
+### Paper figure
+
+nutdoxgroups = repeat([2, 1, 4, 3], inner=30)
+p53_mdm2_median = [medianmeasurements[:,:,1,1,1] |> vec; medianmeasurements[:,:,2,1,1] |> vec; medianmeasurements[:,:,1,2,1] |> vec; medianmeasurements[:,:,2,2,1] |> vec]
+boxplot(nutdoxgroups, p53_mdm2_median, outliers=false,
+        label=["- Dox", "+ Dox"],
+        legend=:none,
+        guidefontsize=12,
+        tickfontsize=10,
+        legendfontsize=10,
+        seriescolor=[:white :lightgray],
+        line=(3, :gray, 1.0),
+        xaxis=("Condition", (1:4, ["-Dox -Nut", "+Dox -Nut", "-Dox +Nut", "+Dox +Nut"])),
+        yaxis=("Median exclusive pairwise distance (nm)", (150,450)))
+dotplot!(nutdoxgroups, p53_mdm2_median, mode = :density, label="", marker=(3, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+savefig(joinpath(outputdir, "p53_mdm2_median_boxplot.png"))
+
+p53_mdm2_montecarlo = [montecarlomeasurements[:,:,1,1,1] |> vec; montecarlomeasurements[:,:,2,1,1] |> vec; montecarlomeasurements[:,:,1,2,1] |> vec; montecarlomeasurements[:,:,2,2,1] |> vec]
+groupedboxplot(nutdoxgroups, p53_mdm2_montecarlo, outliers=false,
+        legend=:none,
+        guidefontsize=12,
+        tickfontsize=10,
+        legendfontsize=10,
+        seriescolor=[:white :lightgray],
+        line=(3, :gray, 1.0),
+        xaxis=("Condition", (1:4, ["-Dox -Nut", "+Dox -Nut", "-Dox +Nut", "+Dox +Nut"])),
+        yaxis=("Fraction bound", (0,0.15)))
+groupeddotplot!(nutdoxgroups, p53_mdm2_montecarlo, mode = :density, label="", marker=(3, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+savefig(joinpath(outputdir, "p53_mdm2_montecarlo_boxplot.png"))
+
 
 
 ### Median Exp 3
@@ -302,6 +332,41 @@ montecarloresultGAPDH = anova(
     [nested],
     factornames = ["Replicate", "Doxycycline"],
 )
+
+### Paper figure
+
+
+rnagroups = repeat([1,2], inner = 60)
+doxgroups = repeat([2, 1], inner = 30, outer = 2)
+p53_meg3_median = [medianmeasurements[:,:,1,1,2] |> vec; medianmeasurements[:,:,2,1,2] |> vec; medianmeasurements[:,:,1,2,2] |> vec; medianmeasurements[:,:,2,2,2] |> vec]
+groupedboxplot(rnagroups, p53_meg3_median, group = doxgroups, outliers=false,
+        label=["- Dox", "+ Dox"],
+        guidefontsize=12,
+        tickfontsize=10,
+        legendfontsize=10,
+        seriescolor=[:white :lightgray],
+        line=(3, :gray, 1.0),
+        xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
+        size=(2048,1024),
+        yaxis=("Median exclusive pairwise distance (nm)", (150,1200)))
+groupeddotplot!(rnagroups, p53_meg3_median, group = doxgroups, mode = :density, label="", marker=(3, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+savefig(joinpath(outputdir, "p53_meg3_median_boxplot.png"))
+
+p53_meg3_montecarlo = [montecarlomeasurements[:,:,1,1,2] |> vec; montecarlomeasurements[:,:,2,1,2] |> vec; montecarlomeasurements[:,:,1,2,2] |> vec; montecarlomeasurements[:,:,2,2,2] |> vec]
+groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
+        label=["- Dox", "+ Dox"],
+        guidefontsize=12,
+        tickfontsize=10,
+        legendfontsize=10,
+        seriescolor=[:white :lightgray],
+        line=(3, :gray, 1.0),
+        xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
+        yaxis=("Fraction bound", (0,0.2)))
+groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(3, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+savefig(joinpath(outputdir, "p53_meg3_montecarlo_boxplot.png"))
+
+
+
 
 ### Following optimization requires running run_optimize.jl instead of run_original.jl
 
