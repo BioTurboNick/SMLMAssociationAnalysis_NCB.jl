@@ -29,6 +29,5 @@ struct ResultOptimizing
     channels::Vector{ChannelDataOptimizing}
     distances::Vector{AbstractFloat}
     mediandistance::AbstractFloat
-    percentileranks::Vector{Float64}
     percentileranks_by_localdensity::Vector{Vector{Float64}}
 end
