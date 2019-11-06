@@ -1,16 +1,18 @@
 import Plots.scatter
 import Plots.mm
 
-function showPairs(molecules1, molecules2, pairedmolecules1, pairedmolecules2, distances)
+using LocalizationMicroscopy
+
+function showpairs(molecules1, molecules2, pairedmolecules1, pairedmolecules2, distances)
     if length(pairedmolecules1) != length(pairedmolecules2) != length(distances)
         throw(ErrorException("Lengths of paired inputs must be identical."))
     end
 
     p = plot()
-    pairedcoordinates1 = Main.extractcoordinates(pairedmolecules1)
-    pairedcoordinates2 = Main.extractcoordinates(pairedmolecules2)
-    coordinates1 = Main.extractcoordinates(molecules1)
-    coordinates2 = Main.extractcoordinates(molecules2)
+    pairedcoordinates1 = extractcoordinates(pairedmolecules1)
+    pairedcoordinates2 = extractcoordinates(pairedmolecules2)
+    coordinates1 = extractcoordinates(molecules1)
+    coordinates2 = extractcoordinates(molecules2)
     scatter!(coordinates1[1,:], coordinates1[2,:], markersize = 2, markercolor = :white)
     scatter!(coordinates2[1,:], coordinates2[2,:], markersize = 2, markercolor = :white)
     scatter!(pairedcoordinates1[1,:], pairedcoordinates1[2,:], markersize = 1, markerstrokecolor=nothing, markercolor = :red)
@@ -72,7 +74,6 @@ function distanceprobabilityplot(distances::Vector{Float64}, percentileranks::Ve
     plot(Plots.Plot(), p3, p4, p5, p1, p2, layout = grid(2, 3, widths=[0.15,0.65,0.15], heights=[0.1,0.9]), link=:y)
 end
 
-using LocalizationMicroscopy
 moleculesplot(result::Result) = moleculesplot(result.channels[1].molecules, result.channels[2].molecules)
 function moleculesplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule})
     mol1coords = molecules1 |> LocalizationMicroscopy.extractcoordinates
