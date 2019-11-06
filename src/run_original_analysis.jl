@@ -195,6 +195,18 @@ montecarloresult = anova(
 plot(montecarloresult)
 savefig(joinpath(outputdir, "Mdm2-p53 interactionplot montecarlo.png"))
 
+montecarloresultNutMinus = anova(
+    montecarlomeasurements[:, :, :, 1, 2],
+    [nested],
+    factornames = ["Replicate", "Doxycycline"],
+)
+montecarloresultNutPlus = anova(
+    montecarlomeasurements[:, :, :, 2, 2],
+    [nested],
+    factornames = ["Replicate", "Doxycycline"],
+)
+
+
 
 ### Median Exp 3
 
