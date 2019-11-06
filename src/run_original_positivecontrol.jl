@@ -78,18 +78,7 @@ for experimentdirname ∈ experimentdirnames
 
                 ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
 
-                percentileranks = @time montecarloaffinity(
-                    ch1_molecules,
-                    ch2_molecules,
-                    ch1_neighbors,
-                    ch2_neighbors,
-                    distances,
-                    200,
-                    4,
-                    10000
-                )
-
-                percentileranks1 = @time SMLMAssociationAnalysis_NCB.montecarloaffinity1(
+                percentileranks = montecarloaffinity(
                     ch1_molecules,
                     ch2_molecules,
                     ch1_neighbors,

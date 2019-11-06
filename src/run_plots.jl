@@ -2,7 +2,7 @@ using SMLMAssociationAnalysis_NCB
 
 # PARAMETERS
 
-outputpath = raw"path\to\your\output\results.jld2"
+outputpath = "path/to/your/output/results.jld2"
 
 percentilerankthreshold = 0.1
 distancethreshold = 200
