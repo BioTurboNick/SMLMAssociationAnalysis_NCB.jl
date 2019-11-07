@@ -12,7 +12,7 @@ struct Result
     channels::Vector{ChannelData}
     distances::Vector{AbstractFloat}
     mediandistance::AbstractFloat
-    percentileranks::Vector{Float64}
+    percentileranks::Vector{AbstractFloat}
 end
 
 """

@@ -76,14 +76,64 @@ end
 
 moleculesplot(result::Result) = moleculesplot(result.channels[1].molecules, result.channels[2].molecules)
 function moleculesplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule})
-    mol1coords = molecules1 |> LocalizationMicroscopy.extractcoordinates
-    mol2coords = molecules2 |> LocalizationMicroscopy.extractcoordinates
+    mol1coords = molecules1 |> extractcoordinates
+    mol2coords = molecules2 |> extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :red))
     plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :green))
     plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0),
           framestyle=:box) # check limit
+end
+
+neighborsplot(result::Result) = moleculesplot(result.channels[1].molecules, result.channels[2].molecules, result.channels[1].neighbormolecules, result.channels[2].neighbormolecules, result.percentileranks, result.distances)
+function neighborsplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}, neighbormolecules1::Vector{Molecule}, neighbormolecules2::Vector{Molecule}, percentileranks::Vector{AbstractFloat}, distances::Vector{AbstractFloat})
+    if length(neighbormolecules1) != length(neighbormolecules2) != length(percentileranks) != length(distances)
+        throw(ErrorException("Lengths of paired inputs must be identical."))
+    end
+    mol1coords = molecules1 |> extractcoordinates
+    mol2coords = molecules2 |> extractcoordinates
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :red, 0.2))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :green, 0.2))
+    mol1coords = neighbormolecules1 |> extractcoordinates
+    mol2coords = neighbormolecules2 |> extractcoordinates
+    reds = repeat([:red], length(percentileranks))
+    greens = repeat([:green], length(percentileranks))
+    isbound = (percentileranks .< 0.1) .& (distances .< 200)
+    reds[isbound] .= :red
+    greens[isbound] .= :green
+    opacity = ones(length(percentileranks)) * 0.4
+    opacity[isbound] .= 1
+    scatter!(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), reds, opacity))
+    plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), greens, opacity))
+    plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0),
+          framestyle=:box) # check limit
+end
+
+neighborsplot_forprint(result::Result, include_scalebar=true) = moleculesplot_forprint(result.channels[1].molecules, result.channels[2].molecules, result.channels[1].neighbormolecules, result.channels[2].neighbormolecules, result.percentileranks, result.distances, include_scalebar=true)
+function neighborsplot_forprint(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}, neighbormolecules1::Vector{Molecule}, neighbormolecules2::Vector{Molecule}, percentileranks::Vector{AbstractFloat}, distances::Vector{AbstractFloat}, include_scalebar=true)
+    if length(neighbormolecules1) != length(neighbormolecules2) != length(percentileranks) != length(distances)
+        throw(ErrorException("Lengths of paired inputs must be identical."))
+    end
+    mol1coords = molecules1 |> extractcoordinates
+    mol2coords = molecules2 |> extractcoordinates
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(0), :pink, 0.2))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(0), :lightgreen, 0.2))
+    mol1coords = neighbormolecules1 |> extractcoordinates
+    mol2coords = neighbormolecules2 |> extractcoordinates
+    reds = repeat([:red], length(percentileranks))
+    greens = repeat([:green], length(percentileranks))
+    isbound = (percentileranks .< 0.1) .& (distances .< 200)
+    reds[isbound] .= :red
+    greens[isbound] .= :green
+    opacity = ones(length(percentileranks)) * 0.4
+    opacity[isbound] .= 1
+    scatter!(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), reds, opacity))
+    plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), greens, opacity))
+    plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0),
+          framestyle=:box, size=(2048,2048)) # check limit
 end
 
 localizationsplot(result::Result; kwargs...) = localizationsplot(result.channels[1].molecules, result.channels[2].molecules; kwargs...)

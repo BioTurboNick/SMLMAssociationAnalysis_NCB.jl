@@ -20,7 +20,7 @@ include("plots.jl")
 export ChannelData, Molecule, Result
 export ChannelDataOptimizing, ResultOptimizing
 export getmolecules, exclusivenearestneighbors, montecarloaffinity
-export moleculesplot, localizationsplot, insetplot, distanceprobabilityplot
+export moleculesplot, localizationsplot, insetplot, distanceprobabilityplot, neighborsplot, neighborsplot_forprint
 export localizationsplot_forprint
 export moleculesinsetplot, localizationsinsetplot
 export moleculesinsetplot_forprint, localizationsinsetplot_forprint
