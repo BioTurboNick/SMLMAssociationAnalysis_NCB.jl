@@ -15,7 +15,7 @@ function showpairs(molecules1, molecules2, pairedmolecules1, pairedmolecules2, d
     coordinates2 = extractcoordinates(molecules2)
     scatter!(coordinates1[1,:], coordinates1[2,:], markersize = 2, markercolor = :white)
     scatter!(coordinates2[1,:], coordinates2[2,:], markersize = 2, markercolor = :white)
-    scatter!(pairedcoordinates1[1,:], pairedcoordinates1[2,:], markersize = 1, markerstrokecolor=nothing, markercolor = :red)
+    scatter!(pairedcoordinates1[1,:], pairedcoordinates1[2,:], markersize = 1, markerstrokecolor=nothing, markercolor = :magenta)
     scatter!(pairedcoordinates2[1,:], pairedcoordinates2[2,:], markersize = 1, markerstrokecolor=nothing, markercolor = :green)
 end
 
@@ -78,7 +78,7 @@ moleculesplot(result::Result) = moleculesplot(result.channels[1].molecules, resu
 function moleculesplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule})
     mol1coords = molecules1 |> extractcoordinates
     mol2coords = molecules2 |> extractcoordinates
-    scatter(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :red))
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :magenta))
     plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :green))
@@ -93,14 +93,14 @@ function neighborsplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule
     end
     mol1coords = molecules1 |> extractcoordinates
     mol2coords = molecules2 |> extractcoordinates
-    scatter(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :red, 0.25))
-    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :blue, 0.25))
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :magenta, 0.25))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :green, 0.25))
 
     mol1coords = neighbormolecules1 |> extractcoordinates
     mol2coords = neighbormolecules2 |> extractcoordinates
-    scatter!(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :red, 0.25))
+    scatter!(mol1coords[1,:], mol1coords[2,:], marker=(2, stroke(0), :magenta, 0.25))
     plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
-    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :blue, 0.25))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :green, 0.25))
 
     isbound = (percentileranks .< 0.1) .& (distances .< 200)
     boundmolecules1 = neighbormolecules1[isbound]
@@ -121,14 +121,14 @@ function neighborsplot_forprint(molecules1::Vector{Molecule}, molecules2::Vector
     end
     mol1coords = molecules1 |> extractcoordinates
     mol2coords = molecules2 |> extractcoordinates
-    scatter(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(0), :red, 0.25))
-    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(0), :blue, 0.25))
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(0), :magenta, 0.25))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(0), :green, 0.25))
     mol1coords = neighbormolecules1 |> extractcoordinates
     mol2coords = neighbormolecules2 |> extractcoordinates
-    
-    scatter!(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(0), :red, 0.25))
+
+    scatter!(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(0), :magenta, 0.25))
     plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
-    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(0), :blue, 0.25))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(0), :green, 0.25))
 
     isbound = (percentileranks .< 0.1) .& (distances .< 200)
     boundmolecules1 = neighbormolecules1[isbound]
@@ -143,16 +143,14 @@ function neighborsplot_forprint(molecules1::Vector{Molecule}, molecules2::Vector
 end
 
 localizationsplot(result::Result; kwargs...) = localizationsplot(result.channels[1].molecules, result.channels[2].molecules; kwargs...)
-localizationsplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}; kwargs...) = localizationsplot(mapreduce(x -> x.group.localizations, vcat, molecules1), mapreduce(x -> x.group.localizations, vcat, molecules2); kwargs...)
+localizationsplot(molecules1, molecules2; kwargs...) = localizationsplot(mapreduce(x -> x.group.localizations, vcat, molecules1), mapreduce(x -> x.group.localizations, vcat, molecules2); kwargs...)
 function localizationsplot(localizations1::Vector{Localization}, localizations2::Vector{Localization}; insetbox = [[0,0], [0,0]])
     loc1coords = localizations1 |> extractcoordinates
     loc2coords = localizations2 |> extractcoordinates
-    scatter(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), 0.75, :red), framestyle=:none)
+    scatter(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), 0.75, :magenta), framestyle=:none)
     plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
-
     scatter!(loc2coords[1,:], loc2coords[2,:], marker=(1, stroke(0), 0.75, :green))
     plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0))
-
     if insetbox != [[0,0], [0,0]]
         xlims, ylims = first(insetbox), last(insetbox)
         plot!(xlims, repeat([first(ylims)], 2), line=(1, :black))
@@ -164,11 +162,11 @@ function localizationsplot(localizations1::Vector{Localization}, localizations2:
     plot!()
 end
 
-function localizationsplot_forprint(result::Result; color1 = :red, color2 = :green, insetbox = [[0,0], [0,0]])
+function localizationsplot_forprint(result::Result; color1 = :magenta, color2 = :green, insetbox = [[0,0], [0,0]], include_scalebar = false)
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     scatter(loc1coords[1,:], loc1coords[2,:], marker=(8, stroke(0), 0.75, color1), size=(2048,2048), framestyle=:none)
-    plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
+    include_scalebar && plot!([1000; 6000], [1000; 1000], line=(3, :black), annotations=(1000,1250,text("5 \\mum", 10, :left, :top)))
 
     scatter!(loc2coords[1,:], loc2coords[2,:], marker=(8, stroke(0), 0.75, color2))
     plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0))
@@ -189,7 +187,7 @@ ENV["GKS_ENCODING"] = "utf-8"
 function moleculesinsetplot(result::Result, xlims, ylims)
     mol1coords = result.channels[1].molecules |> extractcoordinates
     mol2coords = result.channels[2].molecules |> extractcoordinates
-    scatter(mol1coords[1,:], mol1coords[2,:], marker=(4, stroke(0), :red))
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(4, stroke(0), :magenta))
     plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
@@ -197,7 +195,7 @@ function moleculesinsetplot(result::Result, xlims, ylims)
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:box)
 end
 
-function moleculesinsetplot_forprint(result::Result, xlims, ylims; color1 = :red, color2 = :green)
+function moleculesinsetplot_forprint(result::Result, xlims, ylims; color1 = :magenta, color2 = :green)
     mol1coords = result.channels[1].molecules |> extractcoordinates
     mol2coords = result.channels[2].molecules |> extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(16, stroke(0), color1), size=(2048,2048), framestyle=:none)
@@ -211,7 +209,7 @@ end
 function localizationsinsetplot(result::Result, xlims, ylims)
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
-    scatter(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), :red))
+    scatter(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), :magenta))
     plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
@@ -219,7 +217,7 @@ function localizationsinsetplot(result::Result, xlims, ylims)
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:box)
 end
 
-function localizationsinsetplot_forprint(result::Result, xlims, ylims; color1 = :red, color2 = :green)
+function localizationsinsetplot_forprint(result::Result, xlims, ylims; color1 = :magenta, color2 = :green)
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     scatter(loc1coords[1,:], loc1coords[2,:], marker=(8, stroke(0), 0.75, color1), framestyle=:none, size=(2048,2048))
@@ -231,11 +229,11 @@ function localizationsinsetplot_forprint(result::Result, xlims, ylims; color1 = 
 end
 
 insetplot(result::Result, args...) = insetplot(result.channels[1].molecules, result.channels[2].molecules, args...)
-function insetplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}, xlims, ylims)
+function insetplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}, xlims, ylims, include_scalebar = false)
     mol1coords = molecules1 |> extractcoordinates
     mol2coords = molecules2 |> extractcoordinates
-    scatter(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(2, :red), :white))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(2, :magenta), :white))
+    include_scalebar && plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(2, :green), :white))
@@ -243,7 +241,7 @@ function insetplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}, x
 
     loc1coords = mapreduce(x -> x.group.localizations, vcat, molecules1) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, molecules2) |> extractcoordinates
-    scatter!(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), :red))
+    scatter!(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), :magenta))
     plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
@@ -251,12 +249,12 @@ function insetplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}, x
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:box)
 end
 
-function insetplot_forprint(result::Result, xlims, ylims; color1 = :red, color2 = :green)
+function insetplot_forprint(result::Result, xlims, ylims; color1 = :magenta, color2 = :green, include_scalebar = false)
     mol1coords = result.channels[1].molecules |> extractcoordinates
     mol2coords = result.channels[2].molecules |> extractcoordinates
     scatter(mol1coords[1,:], mol1coords[2,:], marker=(24, stroke(2, color1), 0.75, :white),
             framestyle=:none, size=(2048,2048))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
+    include_scalebar && plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
           annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(24, stroke(2, color2), 0.75, :white))
@@ -278,7 +276,7 @@ function yzframelocalizationplot(result::Result)
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
     loc2frames = [y.frame for y ∈ mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules)]
 
-    scatter(loc1frames, loc1coords[2,:], marker=(2, :red, stroke(0)), xaxis=("frames", (0,22000)),
+    scatter(loc1frames, loc1coords[2,:], marker=(2, :magenta, stroke(0)), xaxis=("frames", (0,22000)),
             yaxis=("y", (0,40960), :flip, 90), legend=:none)
     scatter!(loc2frames, loc2coords[2,:], marker=(2, :green, stroke(0)))
     plot!(tick_direction=:out, size=(1024,512))
