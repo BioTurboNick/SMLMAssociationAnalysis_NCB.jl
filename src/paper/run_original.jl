@@ -55,7 +55,7 @@ for experimentdirname ∈ experimentdirnames
                     ch2_startframe = 15001
                 else
                     ch1_startframe = 1
-                    ch2_startframe = 11001 # try weeding out molecules with only 1 loc? ##############
+                    ch2_startframe = 11001
                 end
                 ch1_molecules, ch1_localizations = getmolecules(
                     localizations,
