@@ -33,3 +33,13 @@ Follow the instructions above but use the scripts in `src/paper`.
  - run_original_analysis.jl: load result and calculate statistics and plots
  - run_optimize.jl: run the calculations with various parameter choices for optimization
  - run_optimize_analysis.jl: generate graphs of the parameters for optimization.
+
+Key to dataset:
+     Mdm2-p53: A = + Dox / - Nut
+               B = - Dox / - Nut
+               C = + Dox / + Nut
+               D = - Dox / + Nut
+     MEG3-p53: A = + Dox / MEG3
+               B = - Dox / MEG3
+               C = + Dox / GAPDH
+               D = - Dox / GAPDH
