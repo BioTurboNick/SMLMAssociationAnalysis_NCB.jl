@@ -13,7 +13,7 @@ results = FileIO.load(outputpath)["results"]
 
 # generate localization plots (not print quality)
 for result ∈ results
-    p = loalizationsplot(results)
+    p = localizationsplot(results)
     savefig(p, "$(result.cell) localizations.png")
 end
 
