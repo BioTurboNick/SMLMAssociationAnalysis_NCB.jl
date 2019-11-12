@@ -22,6 +22,6 @@ export ChannelDataOptimizing, ResultOptimizing
 export getmolecules, exclusivenearestneighbors, montecarloaffinity
 export moleculesplot, localizationsplot, insetplot, distanceprobabilityplot, neighborsplot, neighborsplot_forprint
 export localizationsplot_forprint
-export moleculesinsetplot, localizationsinsetplot
+export moleculesinsetplot, localizationsinsetplot, insetplot_forprint
 export moleculesinsetplot_forprint, localizationsinsetplot_forprint
 end
