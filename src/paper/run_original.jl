@@ -41,7 +41,7 @@ for experimentdirname ∈ experimentdirnames
             for j ∈ 1:ncells
                 println("            Starting cell $j.")
                 cellpath = joinpath(replicatepath, "$samplename $(Printf.@sprintf("%03i", j)).bin.txt")
-                localizations = LocalizationMicroscopy.load(cellpath, LocalizationMicroscopy.nikonelementstext)
+                localizations = loadlocalizations(cellpath, LocalizationMicroscopy.nikonelementstext)
                 # account for variances in data collection
                 if experimentdirname == experimentdirnames[2] && samplename ∈ samplenames[3:4]
                     ch1_name = "561"
