@@ -7,18 +7,16 @@ using StatsPlots
 
 ### Load saved data
 
-rootpath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis"
-
 samplenames = ["A", "B", "C", "D"]
 
 nreplicates = 3
 nsamples = 4
 ncells = 10
 
-outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "output")
+outputdir = "output"
 datapath = joinpath(outputdir, "results.jld2")
 
-experimentresults = FileIO.load(datapath)["experimentresults"]
+experimentresults = load(datapath)["experimentresults"]
 
 medianmeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
 montecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)

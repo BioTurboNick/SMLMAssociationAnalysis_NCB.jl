@@ -1,11 +1,7 @@
 # Recreates the analysis from the original data files
 
-datapath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis"
-projectdirname = "MEG3 Project"
-experimentdirnames = ["2 - U2OS p53 MDM2 STORM", "3 - U2OS p53 MEG3 STORM"]
-
-datadirname = "Data"
-outputdirname = "Output"
+datapath = "dataset"
+experimentdirnames = ["Mdm2-p53", "MEG3-p53"]
 
 samplenames = ["A", "B", "C", "D"]
 
@@ -13,7 +9,7 @@ nreplicates = 3
 nsamples = 4
 ncells = 10
 
-outputdir = joinpath(datapath, "SMLMAssociationAnalysis_NCB.jl", "original", "output")
+outputdir = "output"
 mkpath(outputdir)
 outputdatapath = joinpath(outputdir, "results.jld2")
 
