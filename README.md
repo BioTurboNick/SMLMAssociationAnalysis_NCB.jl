@@ -22,6 +22,7 @@ julia> using SMLMAssociationAnalysis_NCB # load the module
 (`pkg>` prompt is accessed by typing ']' first; backspace to return to `julia>` prompt.)
 (Alternatively, if you are launching julia from a terminal, navigate to the project directory and execute
 `julia --project` instead)
+
 3. Execute `run.jl`. (If using the console only, `include("run.jl")` will execute the script.)
 4. Execute `run_plots.jl` to generate some basic plots.
 

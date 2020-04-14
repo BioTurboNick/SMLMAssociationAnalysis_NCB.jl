@@ -1,11 +1,7 @@
-# Recreates the analysis from the original data files
+# Recreates the analysis from the original data files with different parameters
 
-datapath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis"
-projectdirname = "MEG3 Project"
-experimentdirnames = ["2 - U2OS p53 MDM2 STORM", "3 - U2OS p53 MEG3 STORM"]
-
-datadirname = "Data"
-outputdirname = "Output"
+datapath = "dataset"
+experimentdirnames = ["Mdm2-p53", "MEG3-p53"]
 
 samplenames = ["A", "B", "C", "D"]
 
@@ -13,7 +9,7 @@ nreplicates = 3
 nsamples = 4
 ncells = 10
 
-outputdir = joinpath(datapath, "SMLMAssociationAnalysis_NCB.jl", "original", "output")
+outputdir = "output"
 mkpath(outputdir)
 outputdatapath = joinpath(outputdir, "results_optimize.jld2")
 
@@ -28,8 +24,7 @@ using FileIO
 experimentresults = Vector{Vector{Vector{ResultOptimizing}}}[]
 for experimentdirname ∈ experimentdirnames
     println("Starting experiment $experimentdirname.")
-    experimentpath = joinpath(datapath, projectdirname, experimentdirname, datadirname)
-    experimentoutputpath = joinpath(datapath, projectdirname, experimentdirname, outputdirname)
+    experimentpath = joinpath(datapath, experimentdirname)
     replicateresults = Vector{Vector{ResultOptimizing}}[]
     for i ∈ 1:nreplicates
         sampleresults = Vector{ResultOptimizing}[]
@@ -41,7 +36,7 @@ for experimentdirname ∈ experimentdirnames
             for j ∈ 1:ncells
                 println("            Starting cell $j.")
                 cellpath = joinpath(replicatepath, "$samplename $(Printf.@sprintf("%03i", j)).bin.txt")
-                localizations = LocalizationMicroscopy.load(cellpath, LocalizationMicroscopy.nikonelementstext)
+                localizations = loadlocalizations(cellpath, LocalizationMicroscopy.nikonelementstext)
                 # account for variances in data collection
                 if experimentdirname == experimentdirnames[2] && samplename ∈ samplenames[3:4]
                     ch1_name = "561"
@@ -104,7 +99,7 @@ for experimentdirname ∈ experimentdirnames
                 )
 
                 ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
-                
+
                 percentileranks_by_localdensity = montecarloaffinity.(
                     Ref(ch1_molecules),
                     Ref(ch2_molecules),

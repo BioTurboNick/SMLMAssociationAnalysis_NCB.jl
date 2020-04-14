@@ -1,11 +1,7 @@
 # Recreates the analysis from the original data files
 
-datapath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis"
-projectdirname = "MEG3 Project"
-experimentdirnames = ["2 - U2OS p53 MDM2 STORM", "3 - U2OS p53 MEG3 STORM"]
-
-datadirname = "Data"
-outputdirname = "Output"
+datapath = "dataset"
+experimentdirnames = ["Mdm2-p53", "MEG3-p53"]
 
 samplenames = ["A", "B", "C", "D"]
 
@@ -13,7 +9,7 @@ nreplicates = 3
 nsamples = 4
 ncells = 10
 
-outputdir = joinpath(datapath, "SMLMAssociationAnalysis_NCB.jl", "original", "output")
+outputdir = "output"
 mkpath(outputdir)
 outputdatapath = joinpath(outputdir, "results.jld2")
 
@@ -41,7 +37,7 @@ for experimentdirname ∈ experimentdirnames
             for j ∈ 1:ncells
                 println("            Starting cell $j.")
                 cellpath = joinpath(replicatepath, "$samplename $(Printf.@sprintf("%03i", j)).bin.txt")
-                localizations = LocalizationMicroscopy.load(cellpath, LocalizationMicroscopy.nikonelementstext)
+                localizations = loadlocalizations(cellpath, LocalizationMicroscopy.nikonelementstext)
                 # account for variances in data collection
                 if experimentdirname == experimentdirnames[2] && samplename ∈ samplenames[3:4]
                     ch1_name = "561"
@@ -55,7 +51,7 @@ for experimentdirname ∈ experimentdirnames
                     ch2_startframe = 15001
                 else
                     ch1_startframe = 1
-                    ch2_startframe = 11001 # try weeding out molecules with only 1 loc? ##############
+                    ch2_startframe = 11001
                 end
                 ch1_molecules, ch1_localizations = getmolecules(
                     localizations,

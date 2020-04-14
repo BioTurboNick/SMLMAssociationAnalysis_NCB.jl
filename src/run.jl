@@ -57,7 +57,7 @@ for i ∈ 1:length(cellpaths)
     cellpath = cellpaths[i]
 
     println("Processing $cellpath")
-    localizations = LocalizationMicroscopy.load(cellpath, LocalizationMicroscopy.nikonelementstext)
+    localizations = loadlocalizations(cellpath, LocalizationMicroscopy.nikonelementstext)
 
     ch1_molecules, ch1_localizations = getmolecules(localizations, ch1_name, ch1_startframe, ch1_frames, ch1_starttrim,
                                                     ch1_endtrim, maximum_displacement, t_off, merge_radius)
