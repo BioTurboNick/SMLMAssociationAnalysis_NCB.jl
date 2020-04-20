@@ -33,9 +33,9 @@ within(value, lowerlimit, upperlimit) =
     value ≥ lowerlimit && value ≤ upperlimit
 
 """
-    randomcoordinates()
+    randomcoordinates2d()
 
-Gernate random coordinates within a radius.
+Generate random coordinates within a radius.
 """
 function randomcoordinates2d(count, radius)
     angles = rand(count) * τ
@@ -45,3 +45,17 @@ function randomcoordinates2d(count, radius)
     z = zeros(count)
     return [x'; y'; z']
 end
+
+#="""
+    generatelocalizations()
+
+Generate a cloud of localizations around a localization.
+
+0, 1, or 2 secondary antibodies (random), with a fluorophore count determined by a random number selected from a Poisson
+distribution (λ = 1), and number of blinks determined by
+"""
+function generatelocalizations(coordinate)
+    secondaryantibodycount = rand(0:2)
+    fluorophorecount = rand(Poisson(1), 1) * secondaryantibodycount
+    frames =
+end=#

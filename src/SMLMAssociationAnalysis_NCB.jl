@@ -24,4 +24,5 @@ export moleculesplot, localizationsplot, insetplot, distanceprobabilityplot, nei
 export localizationsplot_forprint
 export moleculesinsetplot, localizationsinsetplot, insetplot_forprint
 export moleculesinsetplot_forprint, localizationsinsetplot_forprint
+export randomcoordinates2d
 end
