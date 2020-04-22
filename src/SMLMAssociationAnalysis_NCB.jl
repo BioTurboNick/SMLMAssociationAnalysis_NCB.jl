@@ -25,4 +25,6 @@ export localizationsplot_forprint
 export moleculesinsetplot, localizationsinsetplot, insetplot_forprint
 export moleculesinsetplot_forprint, localizationsinsetplot_forprint
 export randomcoordinates2d
+export merge_close_molecules
+export moleculesplot_sim
 end

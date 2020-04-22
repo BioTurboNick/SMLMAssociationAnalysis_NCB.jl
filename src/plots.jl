@@ -22,7 +22,7 @@ end
 using Printf
 
 distanceprobabilityplot(result::Result) = distanceprobabilityplot(result.distances, result.percentileranks)
-function distanceprobabilityplot(distances::Vector{Float64}, percentileranks::Vector{Float64})
+function distanceprobabilityplot(distances::Vector{AbstractFloat}, percentileranks::Vector{AbstractFloat})
     lessthan10 = count((percentileranks .< 0.1) .& (distances .< 200)) / length(percentileranks)
     p1 = scatter(distances, percentileranks,
                  xaxis=("distance (nm)", (0,1000), 45),
@@ -83,6 +83,16 @@ function moleculesplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule
 
     scatter!(mol2coords[1,:], mol2coords[2,:], marker=(2, stroke(0), :green))
     plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0),
+          framestyle=:box) # check limit
+end
+
+moleculesplot_sim(result::Result) = moleculesplot_sim(result.channels[1].molecules, result.channels[2].molecules)
+function moleculesplot_sim(molecules1::Vector{Molecule}, molecules2::Vector{Molecule})
+    mol1coords = molecules1 |> extractcoordinates
+    mol2coords = molecules2 |> extractcoordinates
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(4, stroke(0), :magenta))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(4, stroke(0), :green))
+    plot!(aspect_ratio=:equal, xlims=(-2821, 2821), yaxis=((-2821, 2821), :flip), legend=:none, grid=:hide, ticks=(0),
           framestyle=:box) # check limit
 end
 
