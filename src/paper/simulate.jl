@@ -10,13 +10,15 @@
 #    3. Run the simulated cell through the algorithm and obtain median distance and fraction bound
 #    4. Repeat for varying combinations of m, n, x, d
 #         - x = { 0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0 }
-#         - m = n = { 100, 200, 500, 1000, 2000 }
+#         - m = n = { 10, 20, 50, 100, 200 }
 #         - d = { 10, 20, 50, 100, 200 } nm
 
 # Basis for choices:
 #
 # In a particularly dense image, I have observed 2430 molecules and 500 molecules in 25 square microns, and in a less-
-# dense area, 301 and 55 molecules, respectively.
+# dense area, 301 and 55 molecules, respectively. Note: Using a merge radius of 200 nm practically limits density to
+# ~200 molecules in an area this size. Higher density from temporally-displaced localization clouds would reduce
+# detection further.
 #
 # 20 nm  = 10 nm distance + 5 nm nanobodies
 # 80 nm  = 70 nm distance + 5 nm nanobodies OR
@@ -27,7 +29,7 @@
 #
 
 fractionsbound = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
-moleculecounts = [100, 200, 500, 1000, 2000]
+moleculecounts = [10, 20, 50, 100, 200]
 boundradii = [10, 20, 50, 100, 200]
 
 cellradius = 2821 # 25 square micron circle
@@ -35,14 +37,11 @@ cellradius = 2821 # 25 square micron circle
 rootpath = "C:/Users/nicho/Dropbox (Partners HealthCare)/STORM MATLAB/STORM Single Molecule Clustering/MonteCarloAffinity/Simulated data"
 
 using Distributed
-using Tau
 using Statistics
 using LocalizationMicroscopy
 using FileIO
 currentworkers = addprocs(exeflags="--project")
 @everywhere using SMLMAssociationAnalysis_NCB
-
-results = Result[]
 
 function generateunboundmolecules(molecules::Vector{Molecule}, moleculecount, cellradius)
     while length(molecules) < moleculecount
@@ -50,11 +49,14 @@ function generateunboundmolecules(molecules::Vector{Molecule}, moleculecount, ce
         unboundmolecules = [Molecule(Localization(length(molecules) + i, "", unboundcoordinates[1,i], unboundcoordinates[2,i], unboundcoordinates[3,i], 0, 1, 1)) for i ∈ 1:size(unboundcoordinates, 2)]
         append!(molecules, unboundmolecules)
         molecules = merge_close_molecules(molecules, 200)
+        foreach(i -> molecules[i].index = i, eachindex(molecules))
     end
     molecules
 end
 
-for i ∈ 1:10
+for i ∈ 1:1
+    results = Result[]
+
     for moleculecount ∈ moleculecounts
         for fractionbound ∈ fractionsbound
             boundcount = Int(round(fractionbound * moleculecount))
@@ -96,124 +98,37 @@ rmprocs(currentworkers)
 
 using StatsPlots
 
-results = load(joinpath(rootpath, "simulationresults1.jld2"))["results"]
+results = Vector{Result}[]
+for i ∈ 1:10
+    push!(results, load(joinpath(rootpath, "simulationresults$i.jld2"))["results"])
+end
 
-## 100 molecules each
-# 0.0
-distanceprobabilityplot(results[1])
+medianmeasurements = Array{Float64,4}(undef, 10, length(boundradii), length(fractionsbound), length(moleculecounts))
+montecarlomeasurements = Array{Float64,4}(undef, 10, length(boundradii), length(fractionsbound), length(moleculecounts))
 
-# 0.01
-distanceprobabilityplot(results[2])
-distanceprobabilityplot(results[3])
-distanceprobabilityplot(results[4])
+using InvertedIndices
 
-# 0.02
-distanceprobabilityplot(results[5])
-distanceprobabilityplot(results[6])
-distanceprobabilityplot(results[7])
+for i ∈ 1:10
+    replicateresults = results[i]
+    lessthanlimit = [(x.distances .< 200) .& (x.percentileranks .< 0.1) for x ∈ replicateresults]
+    lessthan10 = count.(lessthanlimit) ./ length.(lessthanlimit)
+    mediandistances = map(x -> x.mediandistance, replicateresults)
 
-# 0.05
-distanceprobabilityplot(results[8])
-distanceprobabilityplot(results[9])
-distanceprobabilityplot(results[10])
+    medianmeasurements[i,1,1,:] .= mediandistances[1:36:end]
+    medianmeasurements[i,:,2:end,:] .= reshape(mediandistances[Not(1:36:end)], length(boundradii), length(fractionsbound)-1, length(moleculecounts))
 
-# 0.10
-distanceprobabilityplot(results[11])
-distanceprobabilityplot(results[12])
-distanceprobabilityplot(results[13])
+    montecarlomeasurements[i,1,1,:] .= lessthan10[1:36:end]
+    montecarlomeasurements[i,:,2:end,:] .= reshape(lessthan10[Not(1:36:end)], length(boundradii), length(fractionsbound)-1, length(moleculecounts))
+end
 
-# 0.20
-distanceprobabilityplot(results[14])
-distanceprobabilityplot(results[15])
-distanceprobabilityplot(results[16])
+p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
+xpos = reshape(repeat(1:8, inner=50, outer=5), 10, length(boundradii), length(fractionsbound), length(moleculecounts))
+for i ∈ eachindex(moleculecounts)
+    for j ∈ eachindex(boundradii)
+        p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, outliers=false, yaxis=(0:1))
+        dotplot!(p[i,j], xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, bar_width=0.1, markerstrokewidth=0, markersize=2, markercolor=:black)
+    end
+end
 
-# 0.50
-distanceprobabilityplot(results[17])
-distanceprobabilityplot(results[18])
-distanceprobabilityplot(results[19])
-
-# 1.0
-distanceprobabilityplot(results[20])
-distanceprobabilityplot(results[21])
-distanceprobabilityplot(results[22])
-
-moleculesplot_sim(results[6])
-
-
-## 200 molecules each
-# 0.0
-distanceprobabilityplot(results[23])
-
-# 0.01
-distanceprobabilityplot(results[24])
-distanceprobabilityplot(results[25])
-distanceprobabilityplot(results[26])
-
-# 0.02
-distanceprobabilityplot(results[27])
-distanceprobabilityplot(results[28])
-distanceprobabilityplot(results[29])
-
-# 0.05
-distanceprobabilityplot(results[30])
-distanceprobabilityplot(results[31])
-distanceprobabilityplot(results[32])
-
-# 0.10
-distanceprobabilityplot(results[33])
-distanceprobabilityplot(results[34])
-distanceprobabilityplot(results[35])
-
-# 0.20
-distanceprobabilityplot(results[36])
-distanceprobabilityplot(results[37])
-distanceprobabilityplot(results[38])
-
-# 0.50
-distanceprobabilityplot(results[39])
-distanceprobabilityplot(results[40])
-distanceprobabilityplot(results[41])
-
-# 1.0
-distanceprobabilityplot(results[42])
-distanceprobabilityplot(results[43])
-distanceprobabilityplot(results[44])
-
-## 500 molecules each
-# 0.0
-distanceprobabilityplot(results[45])
-
-# 0.01
-distanceprobabilityplot(results[46])
-distanceprobabilityplot(results[47])
-distanceprobabilityplot(results[48])
-
-# 0.02
-distanceprobabilityplot(results[49])
-distanceprobabilityplot(results[50])
-distanceprobabilityplot(results[51])
-
-# 0.05
-distanceprobabilityplot(results[52])
-distanceprobabilityplot(results[53])
-distanceprobabilityplot(results[54])
-
-# 0.10
-distanceprobabilityplot(results[55])
-distanceprobabilityplot(results[56])
-distanceprobabilityplot(results[57])
-
-# 0.20
-distanceprobabilityplot(results[58])
-distanceprobabilityplot(results[59])
-distanceprobabilityplot(results[60])
-
-# 0.50
-distanceprobabilityplot(results[61])
-distanceprobabilityplot(results[62])
-distanceprobabilityplot(results[63])
-
-# 1.0
-distanceprobabilityplot(results[64])
-distanceprobabilityplot(results[65])
-distanceprobabilityplot(results[66])
+plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
+savefig("simulation.png")
