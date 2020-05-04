@@ -1,60 +1,57 @@
 # Recreates the analysis from the original data files
 
-datapath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis" #"dataset"
-experimentdirnames = ["Mdm2-p53", "3 - U2OS p53 MEG3 STORM"]
+rootpath = "C:/Users/nicho/Dropbox (Partners HealthCare)/Data Analysis"
+projectdirname = "MEG3 Project"
+experimentdirnames = ["7 - U2OS FKBP12 mTOR STORM Nanobodies"]
 
-samplenames = ["A", "B", "C", "D"]
+datadirname = "Data"
 
-nreplicates = 3
-nsamples = 4
+samplenames = ["E", "G"]
+
+nreplicates = 1
+nsamples = 2
 ncells = 10
 
-outputdir = "output"
+outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "control nanobodies", "output")
 mkpath(outputdir)
-outputdatapath = joinpath(outputdir, "results4.jld2")
+outputdatapath = joinpath(outputdir, "results.jld2")
 
 using Distributed
 currentworkers = addprocs(exeflags = "--project")
 @everywhere using SMLMAssociationAnalysis_NCB
 using Printf
+using FileIO
 using LocalizationMicroscopy
 using Statistics
-using FileIO
 
-# TODO: need to adjust for running all 1-4 replicates of MEG3-p53 vs. 3 for p53-Mdm2
 
 experimentresults = Vector{Vector{Vector{Result}}}[]
-for experimentdirname ∈ [experimentdirnames[2]] #experimentdirnames
+for experimentdirname ∈ experimentdirnames
     println("Starting experiment $experimentdirname.")
-    experimentpath = joinpath(datapath, projectdirname, experimentdirname, datadirname)
-    #experimentoutputpath = joinpath(datapath, projectdirname, experimentdirname, outputdirname)
+    experimentpath = joinpath(rootpath, projectdirname, experimentdirname, datadirname)
     replicateresults = Vector{Vector{Result}}[]
-    for i ∈ 4:4 #1:nreplicates
+    for i ∈ 1:nreplicates
         sampleresults = Vector{Result}[]
         println("    Starting replicate $i.")
         replicatepath = joinpath(experimentpath, "Replicate $i")
+
+        samplenames = i == 1 ? samplenames1 : samplenames2
+
         for samplename ∈ samplenames
             results = Result[]
             println("        Starting sample $samplename.")
             for j ∈ 1:ncells
                 println("            Starting cell $j.")
+
+                ch1_startframe = 1
+                ch2_startframe = 11001
+
                 cellpath = joinpath(replicatepath, "$samplename $(Printf.@sprintf("%03i", j)).bin.txt")
                 localizations = loadlocalizations(cellpath, LocalizationMicroscopy.nikonelementstext)
-                # account for variances in data collection
-                if experimentdirname == experimentdirnames[2] && samplename ∈ samplenames[3:4]
-                    ch1_name = "561"
-                else
-                    ch1_name = "647"
-                end
+
+                ch1_name = "647"
                 ch2_name = "488"
-                if experimentdirname == experimentdirnames[2] &&
-                   ((i == 3 && samplename ∈ samplenames[1:3]) || (i == 2 && samplename == samplenames[2]))
-                    ch1_startframe = 1
-                    ch2_startframe = 15001
-                else
-                    ch1_startframe = 1
-                    ch2_startframe = 11001
-                end
+
                 ch1_molecules, ch1_localizations = getmolecules(
                     localizations,
                     ch1_name,
@@ -77,6 +74,7 @@ for experimentdirname ∈ [experimentdirnames[2]] #experimentdirnames
                     500,
                     200,
                 )
+
                 ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
 
                 percentileranks = montecarloaffinity(
@@ -116,8 +114,8 @@ for experimentdirname ∈ [experimentdirnames[2]] #experimentdirnames
         push!(replicateresults, sampleresults)
     end
     push!(experimentresults, replicateresults)
-end
 
-save(outputdatapath, "experimentresults", experimentresults)
+    save(outputdatapath, "replicateresults", experimentresults)
+end
 
 rmprocs(currentworkers)

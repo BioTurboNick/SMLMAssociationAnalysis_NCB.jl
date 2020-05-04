@@ -29,10 +29,14 @@
 #
 
 fractionsbound = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
-moleculecounts = [10, 20, 50, 100, 200]
+#moleculecounts = [10, 20, 50, 100, 200]
+moleculecounts = [100, 200, 500, 1000, 2000]
 boundradii = [10, 20, 50, 100, 200]
 
-cellradius = 2821 # 25 square micron circle
+#cellradius = 2821 # 25 square micron circle
+#cellradius = 3989 # 50 square micron circle
+#cellradius = 5642 # 100 square micron circle
+cellradius = 8921 # 250 square micron circle
 
 rootpath = "C:/Users/nicho/Dropbox (Partners HealthCare)/STORM MATLAB/STORM Single Molecule Clustering/MonteCarloAffinity/Simulated data"
 
@@ -54,7 +58,7 @@ function generateunboundmolecules(molecules::Vector{Molecule}, moleculecount, ce
     molecules
 end
 
-for i ∈ 1:1
+for i ∈ 1:30
     results = Result[]
 
     for moleculecount ∈ moleculecounts
@@ -88,7 +92,7 @@ for i ∈ 1:1
             end
         end
     end
-    save(joinpath(rootpath, "simulationresults$i.jld2"), "results", results)
+    save(joinpath(rootpath, "simulationresults_new$i.jld2"), "results", results)
 end
 
 rmprocs(currentworkers)
@@ -96,33 +100,35 @@ rmprocs(currentworkers)
 
 # plot
 
+nreplicates = 20
+
 using StatsPlots
 
 results = Vector{Result}[]
-for i ∈ 1:10
-    push!(results, load(joinpath(rootpath, "simulationresults$i.jld2"))["results"])
+for i ∈ 1:nreplicates
+    push!(results, load(joinpath(rootpath, "simulationresults_new$i.jld2"))["results"])
 end
 
-medianmeasurements = Array{Float64,4}(undef, 10, length(boundradii), length(fractionsbound), length(moleculecounts))
-montecarlomeasurements = Array{Float64,4}(undef, 10, length(boundradii), length(fractionsbound), length(moleculecounts))
+medianmeasurements = Array{Float64,4}(undef, nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
+montecarlomeasurements = Array{Float64,4}(undef, nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
 
 using InvertedIndices
 
-for i ∈ 1:10
+for i ∈ 1:nreplicates
     replicateresults = results[i]
     lessthanlimit = [(x.distances .< 200) .& (x.percentileranks .< 0.1) for x ∈ replicateresults]
     lessthan10 = count.(lessthanlimit) ./ length.(lessthanlimit)
     mediandistances = map(x -> x.mediandistance, replicateresults)
 
-    medianmeasurements[i,1,1,:] .= mediandistances[1:36:end]
+    medianmeasurements[i,:,1,:] .= reshape(repeat(mediandistances[1:36:end], inner=length(boundradii)), length(boundradii), length(moleculecounts))
     medianmeasurements[i,:,2:end,:] .= reshape(mediandistances[Not(1:36:end)], length(boundradii), length(fractionsbound)-1, length(moleculecounts))
 
-    montecarlomeasurements[i,1,1,:] .= lessthan10[1:36:end]
+    montecarlomeasurements[i,:,1,:] .= reshape(repeat(lessthan10[1:36:end], inner=length(boundradii)), length(boundradii), length(moleculecounts))
     montecarlomeasurements[i,:,2:end,:] .= reshape(lessthan10[Not(1:36:end)], length(boundradii), length(fractionsbound)-1, length(moleculecounts))
 end
 
 p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-xpos = reshape(repeat(1:8, inner=50, outer=5), 10, length(boundradii), length(fractionsbound), length(moleculecounts))
+xpos = reshape(repeat(1:8, inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
 for i ∈ eachindex(moleculecounts)
     for j ∈ eachindex(boundradii)
         p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, outliers=false, yaxis=(0:1))
@@ -131,4 +137,15 @@ for i ∈ eachindex(moleculecounts)
 end
 
 plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
-savefig("simulation.png")
+savefig("simulation_montecarlo.png")
+
+p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
+for i ∈ eachindex(moleculecounts)
+    for j ∈ eachindex(boundradii)
+        p[i,j] = boxplot(xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, outliers=false, yaxis=(0:200:1200))
+        dotplot!(p[i,j], xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, bar_width=0.1, markerstrokewidth=0, markersize=2, markercolor=:black)
+    end
+end
+
+plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
+savefig("simulation_median.png")
