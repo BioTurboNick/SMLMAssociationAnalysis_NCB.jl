@@ -70,10 +70,13 @@ for i ∈ 1:length(cellpaths)
     percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 200, 4, mc_iterations)
     mediandistance = length(distances) > 0 ? median(distances) : NaN
 
+    positivecontrol_percentileranks = simulate100(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, 80, mc_iterations)
+    negativecontrol_percentileranks = simulate0(ch1_molecules, ch2_molecules, 800, mc_iterations)
+
     ch1_data = ChannelData(ch1_name, ch1_molecules, ch1_neighbors)
     ch2_data = ChannelData(ch2_name, ch2_molecules, ch2_neighbors)
     result = Result("", "", 1, cellpath, i,
-                    [ch1_data, ch2_data], distances, mediandistance, percentileranks)
+                    [ch1_data, ch2_data], distances, mediandistance, percentilerank, positivecontrol_percentileranks, negativecontrol_percentileranks)
     push!(results, result)
 end
 

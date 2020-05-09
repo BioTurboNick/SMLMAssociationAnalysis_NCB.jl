@@ -57,7 +57,7 @@ end
 Evaluate the probability of chance association across all molecules by randomizing their neighbors.
 """
 function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_neighbors::Vector{T},
-                            ch2_neighbors::Vector{T}, distances, maxbindingdistance, rangefactor, iterations) where T <: DataEntity
+                            ch2_neighbors::Vector{T}, distances, localradius, iterations) where T <: DataEntity
     coordinates1, coordinates2 = extractcoordinates.([molecules1, molecules2])
 
     percentileranks = ones(length(ch1_neighbors))
@@ -68,8 +68,6 @@ function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_ne
     centerycoordinates = mean([neighborcoordinates1[2, :]'; neighborcoordinates2[2, :]'], dims = 1)
     centerzcoordinates = mean([neighborcoordinates1[3, :]'; neighborcoordinates2[3, :]'], dims = 1)
     centercoordinates = [centerxcoordinates; centerycoordinates; centerzcoordinates]
-
-    localradius = rangefactor * maxbindingdistance
 
     neighbor1tree, neighbor2tree = BallTree.([coordinates1, coordinates2])
     ineighbors1, ineighbors2 = inrange.([neighbor1tree, neighbor2tree], Ref(centercoordinates), localradius, true)

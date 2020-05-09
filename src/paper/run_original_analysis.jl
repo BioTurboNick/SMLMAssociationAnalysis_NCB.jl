@@ -13,10 +13,47 @@ nreplicates = 3
 nsamples = 4
 ncells = 10
 
+rootpath = raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis\SMLMAssociationAnalysis_NCB.jl\original"
 outputdir = "output"
-datapath = joinpath(outputdir, "results.jld2")
+datapath = joinpath(rootpath, outputdir, "results.jld2")
+datapathnew = joinpath(rootpath, outputdir, "resultsnew.jld2")
 
 experimentresults = load(datapath)["experimentresults"]
+
+# transfer old into new with pos/neg controls
+using Distributed
+currentworkers = addprocs(exeflags="--project")
+@everywhere using SMLMAssociationAnalysis_NCB
+mc_iterations = 10000
+newexperimentresults = Vector{Vector{Vector{NewResult}}}[]
+for k ∈ 1:2
+    kvec = Vector{Vector{NewResult}}[]
+    for i ∈ 1:nsamples
+        ivec = Vector{NewResult}[]
+        for j ∈ 1:nreplicates
+            jvec = NewResult[]
+            for l ∈ 1:ncells
+                println("exp $k sample $i replicate $j cell $l")
+                oldresult = experimentresults[k][i][j][l]
+
+                positivecontrol_percentileranks = simulate100(oldresult.channels[1].molecules, oldresult.channels[2].molecules, oldresult.channels[1].neighbormolecules, oldresult.channels[2].neighbormolecules, 80, 800, mc_iterations)
+                negativecontrol_percentileranks = simulate0(oldresult.channels[1].molecules, oldresult.channels[2].molecules, 800, mc_iterations)
+
+                newresult = NewResult(oldresult.projectdirname, oldresult.experimentdirname, oldresult.replicate, oldresult.samplename,
+                                   oldresult.cell, oldresult.channels, oldresult.distances, oldresult.mediandistance, oldresult.percentileranks,
+                                   positivecontrol_percentileranks, negativecontrol_percentileranks)
+
+                push!(jvec, newresult)
+            end
+            push!(ivec, jvec)
+        end
+        push!(kvec, ivec)
+    end
+    push!(newexperimentresults, kvec)
+end
+rmprocs(currentworkers)
+save(datapathnew)
+
 
 medianmeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
 montecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)

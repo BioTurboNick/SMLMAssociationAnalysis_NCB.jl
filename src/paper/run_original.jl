@@ -85,8 +85,7 @@ for experimentdirname ∈ [experimentdirnames[2]] #experimentdirnames
                     ch1_neighbors,
                     ch2_neighbors,
                     distances,
-                    200,
-                    4,
+                    800,
                     10000
                 )
 
