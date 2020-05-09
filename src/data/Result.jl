@@ -13,6 +13,8 @@ struct Result
     distances::Vector{AbstractFloat}
     mediandistance::AbstractFloat
     percentileranks::Vector{AbstractFloat}
+    positivecontrol_distances::Vector{AbstractFloat} # stores the distances obtained when simulating 100% bound from this cell
+    negativecontrol_distances::Vector{AbstractFloat} # stores the distances obtained when simulating 0% bound from this cell
     positivecontrol_percentileranks::Vector{AbstractFloat} # stores the percentile ranks obtained when simulating 100% bound from this cell
     negativecontrol_percentileranks::Vector{AbstractFloat} # stores the percentile ranks obtained when simulating 0% bound from this cell
 end

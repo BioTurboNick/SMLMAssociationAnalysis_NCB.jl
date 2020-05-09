@@ -95,7 +95,7 @@ for experimentdirname ∈ experimentdirnames
                     ch1_neighbors,
                     ch2_neighbors,
                     distances,
-                    800
+                    800,
                     10000
                 )
 

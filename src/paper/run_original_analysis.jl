@@ -9,7 +9,7 @@ using StatsPlots
 
 samplenames = ["A", "B", "C", "D"]
 
-nreplicates = 2
+nreplicates = 3
 nsamples = 4
 ncells = 10
 
@@ -21,37 +21,34 @@ experimentresults = load(datapath)["experimentresults"]
 
 medianmeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
 montecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
-localization1counts = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
-molecule1counts = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
-localization2counts = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
-molecule2counts = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
+positivecontrolmontecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
+negativecontrolmontecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
 
 for k ∈ 1:2
     for i ∈ 1:nsamples
         samplemedianresults = Array{Float64,2}(undef, ncells, nreplicates)
         samplelessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
-        samplelocalization1counts = Array{Float64,2}(undef, ncells, nreplicates)
-        samplemolecule1counts = Array{Float64,2}(undef, ncells, nreplicates)
-        samplelocalization2counts = Array{Float64,2}(undef, ncells, nreplicates)
-        samplemolecule2counts = Array{Float64,2}(undef, ncells, nreplicates)
+        samplepositivecontrollessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
+        samplenegativecontrollessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
+
         for j ∈ 1:nreplicates
             replicateresults = experimentresults[k][j][i]
             lessthanlimitreplicate = [(x.distances .< 200) .& (x.percentileranks .< 0.1) for x ∈ replicateresults]
+            positivecontrollessthanlimitreplicate = [(x.positivecontrol_distances .< 200) .& (x.positivecontrol_percentileranks .< 0.1) for x ∈ replicateresults]
+            negativecontrollessthanlimitreplicate = [(x.negativecontrol_distances .< 200) .& (x.negativecontrol_percentileranks .< 0.1) for x ∈ replicateresults]
             lessthan10 = count.(lessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
+            positivecontrollessthan10 = count.(lessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
+            negativecontrollessthan10 = count.(lessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
             mediandistances = map(x -> x.mediandistance, replicateresults)
             samplemedianresults[:, j] = mediandistances
             samplelessthan10results[:, j] = lessthan10
-            samplelocalization1counts[:, j] = [map(x -> x.group.localizations |> length, y.channels[1].molecules) |> sum for y ∈ replicateresults]
-            samplelocalization2counts[:, j] = [map(x -> x.group.localizations |> length, y.channels[2].molecules) |> sum for y ∈ replicateresults]
-            samplemolecule1counts[:, j] = map(x -> x.channels[1].molecules |> length, replicateresults)
-            samplemolecule2counts[:, j] = map(x -> x.channels[2].molecules |> length, replicateresults)
+            samplepositivecontrollessthan10results[:, j] = positivecontrollessthan10
+            samplenegativecontrollessthan10results[:, j] = negativecontrollessthan10
         end
         medianmeasurements[:, :, i, k] = samplemedianresults
         montecarlomeasurements[:, :, i, k] = samplelessthan10results
-        localization1counts[:, :, i, k] = samplelocalization1counts
-        molecule1counts[:, :, i, k] = samplemolecule1counts
-        localization2counts[:, :, i, k] = samplelocalization2counts
-        molecule2counts[:, :, i, k] = samplemolecule2counts
+        positivecontrolmontecarlomeasurements[:, :, i, k] = samplepositivecontrollessthan10results
+        negativecontrolmontecarlomeasurements[:, :, i, k] = samplenegativecontrollessthan10results
     end
 end
 

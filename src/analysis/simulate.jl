@@ -18,6 +18,7 @@ function simulate0(molecules1, molecules2, localradius, iterations)
     neighbors1, neighbors2, distances = exclusivenearestneighbors(newmolecules1, newmolecules2)
 
     percentileranks = montecarloaffinity(newmolecules1, newmolecules2, neighbors1, neighbors2, distances, localradius, iterations)
+    percentileranks, distances
 end
 
 """
@@ -52,4 +53,5 @@ function simulate100(molecules1, molecules2, neighbors1, neighbors2, bindingradi
     newneighbors1, newneighbors2, distances = exclusivenearestneighbors(newmolecules1, newmolecules2)
 
     percentileranks = montecarloaffinity(newmolecules1, newmolecules2, newneighbors1, newneighbors2, distances, localradius, iterations)
+    percentileranks, distances
 end
