@@ -46,6 +46,13 @@ function randomcoordinates2d(count, radius)
     return [x'; y'; z']
 end
 
+"""
+    reindex()
+
+Reindexes the array of molecules.
+"""
+reindex!(molecules) = foreach((m, i) -> m.index = i, molecules, eachindex(molecules))
+
 #="""
     generatelocalizations()
 

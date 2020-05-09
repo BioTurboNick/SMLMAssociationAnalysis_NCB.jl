@@ -41,6 +41,7 @@ function merge_close_molecules(molecules::Vector{Molecule}, radius)
         append!(mergedmolecules, localmaxima)
     end
 
+    reindex!(mergedmolecules)
     mergedmolecules
 end
 
