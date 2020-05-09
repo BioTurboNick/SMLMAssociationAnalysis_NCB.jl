@@ -67,7 +67,7 @@ for i ∈ 1:length(cellpaths)
                                                     ch2_endtrim, maximum_displacement, t_off, merge_radius)
     ch1_neighbors, ch2_neighbors, distances = exclusivenearestneighbors(ch1_molecules, ch2_molecules)
 
-    percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 200, 4, mc_iterations)
+    percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 800, mc_iterations)
     mediandistance = length(distances) > 0 ? median(distances) : NaN
 
     positivecontrol_percentileranks = simulate100(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, 80, mc_iterations)

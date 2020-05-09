@@ -16,7 +16,7 @@ ncells = 10
 outputdir = joinpath(rootpath, "SMLMAssociationAnalysis_NCB.jl", "original", "control", "output")
 datapath = joinpath(outputdir, "results.jld2")
 
-experimentresults = FileIO.load(datapath)["replicateresults"]
+experimentresults = FileIO.load(datapath)["experimentresults"]
 
 medianmeasurements = Array{Float64,3}(undef, ncells, nreplicates, 4)
 montecarlomeasurements = Array{Float64,3}(undef, ncells, nreplicates, 4)

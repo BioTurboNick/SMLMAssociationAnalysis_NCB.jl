@@ -95,10 +95,12 @@ for experimentdirname ∈ experimentdirnames
                     ch1_neighbors,
                     ch2_neighbors,
                     distances,
-                    200,
-                    4,
+                    800
                     10000
                 )
+
+                positivecontrol_percentileranks = simulate100(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, 80, mc_iterations)
+                negativecontrol_percentileranks = simulate0(ch1_molecules, ch2_molecules, 800, mc_iterations)
 
                 if length(distances) == 0
                     mediandistance = NaN
@@ -118,6 +120,8 @@ for experimentdirname ∈ experimentdirnames
                     distances,
                     mediandistance,
                     percentileranks,
+                    positivecontrol_percentileranks,
+                    negativecontrol_percentileranks
                 )
                 push!(results, result)
             end

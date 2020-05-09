@@ -29,6 +29,7 @@
 #
 
 fractionsbound = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
+#moleculecounts = [10, 20, 50, 100, 200]
 moleculecounts = [100, 200, 500, 1000, 2000]
 boundradii = [10, 20, 50, 100, 200]
 
@@ -58,7 +59,7 @@ function generateunboundmolecules(molecules::Vector{Molecule}, moleculecount, ce
 end
 
 for i ∈ 1:30
-    results = Result[]
+    results = ResultSimulate[]
 
     for moleculecount ∈ moleculecounts
         for fractionbound ∈ fractionsbound
@@ -80,12 +81,12 @@ for i ∈ 1:30
 
                 neighbors1, neighbors2, distances = exclusivenearestneighbors(molecules1, molecules2)
 
-                percentileranks = montecarloaffinity(molecules1, molecules2, neighbors1, neighbors2, distances, 800, 10000)
+                percentileranks = montecarloaffinity(molecules1, molecules2, neighbors1, neighbors2, distances, 200, 4, 10000)
                 mediandistance = length(distances) > 0 ? median(distances) : NaN
 
                 data1 = ChannelData("1", molecules1, neighbors1)
                 data2 = ChannelData("2", molecules2, neighbors2)
-                result = Result("", "", 1, "$moleculecount mols $fractionbound bound $boundradius radius", i,
+                result = ResultSimulate("", "", 1, "$moleculecount mols $fractionbound bound $boundradius radius", i,
                                 [data1, data2], distances, mediandistance, percentileranks)
                 push!(results, result)
             end
@@ -126,161 +127,25 @@ for i ∈ 1:nreplicates
     montecarlomeasurements[i,:,2:end,:] .= reshape(lessthan10[Not(1:36:end)], length(boundradii), length(fractionsbound)-1, length(moleculecounts))
 end
 
-import Plots.mm
 p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-xpos = reshape(repeat(["0", "1", "2", "5", "10", "20", "50", "100"], inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
+xpos = reshape(repeat(1:8, inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
 for i ∈ eachindex(moleculecounts)
     for j ∈ eachindex(boundradii)
-        p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, outliers=false, seriescolor=:white, linecolor=:gray, yaxis=((0.0,1.0), 0:0.2:1), tickfontsize=18, left_margin=5mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-        dotplot!(p[i,j], xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, markerstrokewidth=0, markersize=3, markercolor=:black)
+        p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, outliers=false, yaxis=(0:1))
+        dotplot!(p[i,j], xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, bar_width=0.1, markerstrokewidth=0, markersize=2, markercolor=:black)
     end
 end
 
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
+plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
 savefig("simulation_montecarlo.png")
 
 p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
 for i ∈ eachindex(moleculecounts)
     for j ∈ eachindex(boundradii)
-        p[i,j] = boxplot(xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, outliers=false, seriescolor=:white, linecolor=:gray, yaxis=((0, 1200), 0:200:1200), tickfontsize=18, left_margin=10mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-        dotplot!(p[i,j], xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, markerstrokewidth=0, markersize=3, markercolor=:black)
+        p[i,j] = boxplot(xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, outliers=false, yaxis=(0:200:1200))
+        dotplot!(p[i,j], xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, bar_width=0.1, markerstrokewidth=0, markersize=2, markercolor=:black)
     end
 end
 
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
+plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
 savefig("simulation_median.png")
-
-
-fractionsboundmatrix = reshape(repeat(fractionsbound, inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
-montecarlodeviations = fractionsboundmatrix .- montecarlomeasurements
-
-p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-for i ∈ eachindex(moleculecounts)
-    for j ∈ eachindex(boundradii)
-        p[i,j] = boxplot(xpos[:,j,:,i], montecarlodeviations[:,j,:,i], legend=:none, outliers=false, seriescolor=:white, linecolor=:gray, yaxis=((-0.1,1), -0.1:0.1:1), tickfontsize=18, left_margin=10mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-        dotplot!(p[i,j], xpos[:,j,:,i], montecarlodeviations[:,j,:,i], legend=:none, markerstrokewidth=0, markersize=3, markercolor=:black)
-    end
-end
-
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
-savefig("simulation_montecarlodeviation.png")
-
-montecarlorelativedeviations = montecarlodeviations[:,:,2:8,:] ./ fractionsboundmatrix[:,:,2:8,:]
-
-p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-for i ∈ eachindex(moleculecounts)
-    for j ∈ eachindex(boundradii)
-        p[i,j] = boxplot(xpos[:,j,2:8,i], montecarlorelativedeviations[:,j,:,i], legend=:none, outliers=false, seriescolor=:white, linecolor=:gray, yaxis=((-10,2), -10:2:2), tickfontsize=18, left_margin=6mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-        dotplot!(p[i,j], xpos[:,j,2:8,i], montecarlorelativedeviations[:,j,:,i], legend=:none, markerstrokewidth=0, markersize=3, markercolor=:black)
-    end
-end
-
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
-savefig("simulation_montecarlorelativedeviation.png")
-
-using Distributions
-dists = Normal.(mean(montecarlomeasurements, dims=1), std(montecarlomeasurements, dims=1))
-
-boundradiimatrix = reshape(repeat(boundradii, inner=nreplicates, outer=5*8), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
-moleculedensitymatrix = reshape(repeat(moleculecounts ./ 250, inner=nreplicates * 5, outer=8), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
-
-using DataFrames
-df = DataFrame(X = fractionsboundmatrix |> vec, Y = montecarlomeasurements |> vec, R = boundradiimatrix |> vec, D = moleculedensitymatrix |> vec)
-ols = lm(@formula(Y ~ (X^2) / (D * R)), df)
-predicted = DataFrame(X = fractionsboundmatrix[1,:,:,:] |> vec, R = boundradiimatrix[1,:,:,:] |> vec, D = moleculedensitymatrix[1,:,:,:] |> vec)
-predicted.Y = predict(ols, predicted)
-
-p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-for i ∈ eachindex(moleculecounts)
-    for j ∈ eachindex(boundradii)
-        p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, outliers=false, seriescolor=:white, linecolor=:gray, yaxis=((0.0,1.0), 0:0.2:1), tickfontsize=18, left_margin=5mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-        dotplot!(p[i,j], xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, markerstrokewidth=0, markersize=3, markercolor=:black)
-        plot!(p[i,j], xpos[1,j,:,i], reshape(predicted.Y, length(boundradii), length(fractionsbound), length(moleculecounts))[j,:,i])
-    end
-end
-
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
-savefig("simulation_montecarlo_regression.png")
-
-
-p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-xpos = reshape(repeat([0, .01, .02, .05, .1, .2, .5, 1], inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
-for i ∈ eachindex(moleculecounts)
-    for j ∈ eachindex(boundradii)
-        df = DataFrame(X = fractionsboundmatrix[:,j,:,i] |> vec, Y = montecarlomeasurements[:,j,:,i] |> vec, R = boundradiimatrix[:,j,:,i] |> vec, D = moleculedensitymatrix[:,j,:,i] |> vec)
-        ols = lm(@formula(Y ~ X), df)
-        predicted = DataFrame(X = fractionsboundmatrix[1,j,:,i] |> vec, D = moleculedensitymatrix[1,j,:,i] |> vec) #, R = boundradiimatrix[1,j,:,i] |> vec, )
-        predicted.Y = predict(ols, predicted)
-        p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, outliers=false, seriescolor=:white, bar_width=0.1, linecolor=:gray, yaxis=((0.0,1.0), 0:0.2:1), tickfontsize=18, left_margin=5mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-        dotplot!(p[i,j], xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, markerstrokewidth=0, markersize=3, bar_width=0.1, markercolor=:black)
-        plot!(p[i,j], xpos[1,j,:,i], predicted.Y)
-    end
-end
-
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
-savefig("simulation_montecarlo_regression.png")
-
-
-p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-xpos = reshape(repeat(["0", "1", "2", "5", "10", "20"], inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound) - 2, length(moleculecounts))
-for i ∈ eachindex(moleculecounts)
-    for j ∈ eachindex(boundradii)
-        df = DataFrame(X = fractionsboundmatrix[:,j,:,i] |> vec, Y = montecarlomeasurements[:,j,:,i] |> vec, R = boundradiimatrix[:,j,:,i] |> vec, D = moleculedensitymatrix[:,j,:,i] |> vec)
-        ols = lm(@formula(Y ~ exp(X) + X), df)
-        predicted = DataFrame(X = fractionsboundmatrix[1,j,1:6,i] |> vec, D = moleculedensitymatrix[1,j,1:6,i] |> vec) #, R = boundradiimatrix[1,j,:,i] |> vec, )
-        predicted.Y = predict(ols, predicted)
-        p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,1:6,i], legend=:none, outliers=false, seriescolor=:white, linecolor=:gray, yaxis=((0.0,0.3), 0:0.05:0.3), tickfontsize=18, left_margin=10mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-        dotplot!(p[i,j], xpos[:,j,:,i], montecarlomeasurements[:,j,1:6,i], legend=:none, markerstrokewidth=0, markersize=3, markercolor=:black)
-        plot!(p[i,j], xpos[1,j,:,i], predicted.Y)
-    end
-end
-
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
-savefig("simulation_montecarlo_0_20_regression.png")
-
-p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-xpos = reshape(repeat(["0", "1", "2", "5", "10", "20", "50", "100"], inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
-for i ∈ eachindex(moleculecounts)
-    for j ∈ eachindex(boundradii)
-        minval = minimum(mean(montecarlomeasurements[:,j,:,i], dims = 1))
-        normalized = (montecarlomeasurements[:,j,:,i] .- minval) ./ (mean(montecarlomeasurements[:,j,8,i]) - minval)
-        p[i,j] = boxplot(xpos[:,j,:,i], normalized, legend=:none, outliers=false, seriescolor=:white, linecolor=:gray, yaxis=((0.0,1.0), 0:0.2:1), tickfontsize=18, left_margin=5mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-        dotplot!(p[i,j], xpos[:,j,:,i], normalized, legend=:none, markerstrokewidth=0, markersize=3, markercolor=:black)
-        plot!(p[i,j], xpos[1,j,:,i], fractionsboundmatrix[1,j,1:8,i], opacity=0.5, linewidth=10)
-    end
-end
-
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
-savefig("simulation_montecarlo_normalized.png")
-
-p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-xpos = reshape(repeat(["0", "1", "2", "5", "10", "20", "50", "100"], inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
-for i ∈ eachindex(moleculecounts)
-    for j ∈ eachindex(boundradii)
-        minval = minimum(mean(montecarlomeasurements[:,j,:,i], dims = 1))
-        normalized = median((montecarlomeasurements[:,j,:,i] .- minval) ./ (mean(montecarlomeasurements[:,j,8,i]) - minval), dims = 1)
-        p[i,j] = plot(xpos[1,1,2:8,1], repeat([0], 7), linecolor=:black, linewidth=1)
-        plot!(xpos[1,j,2:8,i], (normalized[2:8] .- fractionsboundmatrix[1,j,2:8,i]) ./ fractionsboundmatrix[1,j,2:8,i], legend=:none, linewidth=10, seriescolor=:white, linecolor=:gray, yaxis=((-2, 2), -2:0.5:2), tickfontsize=18, left_margin=5mm, xrotation=45)
-        i > 1 && plot!(ytickfontcolor=:white)
-        j < 5 && plot!(xtickfontcolor=:white)
-    end
-end
-
-plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(2048,2048))
-savefig("simulation_montecarlo_normalized_deviations.png")

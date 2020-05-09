@@ -106,8 +106,7 @@ for experimentdirname ∈ experimentdirnames
                     Ref(ch1_neighbors),
                     Ref(ch2_neighbors),
                     Ref(distances),
-                    200,
-                    1:10,
+                    200:200:2000
                     10000
                 )
 
