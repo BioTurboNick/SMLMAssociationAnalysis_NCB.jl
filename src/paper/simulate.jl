@@ -81,7 +81,7 @@ for i ∈ 1:30
 
                 neighbors1, neighbors2, distances = exclusivenearestneighbors(molecules1, molecules2)
 
-                percentileranks = montecarloaffinity(molecules1, molecules2, neighbors1, neighbors2, distances, 200, 4, 10000)
+                percentileranks = montecarloaffinity(molecules1, molecules2, neighbors1, neighbors2, distances, 200, 10000)
                 mediandistance = length(distances) > 0 ? median(distances) : NaN
 
                 data1 = ChannelData("1", molecules1, neighbors1)
@@ -104,7 +104,7 @@ nreplicates = 30
 
 using StatsPlots
 
-results = Vector{Result}[]
+results = Vector{ResultSimulate}[]
 for i ∈ 1:nreplicates
     push!(results, load(joinpath(rootpath, "simulationresults_new$i.jld2"))["results"])
 end
@@ -127,11 +127,16 @@ for i ∈ 1:nreplicates
     montecarlomeasurements[i,:,2:end,:] .= reshape(lessthan10[Not(1:36:end)], length(boundradii), length(fractionsbound)-1, length(moleculecounts))
 end
 
+import Plots.mm
+
+# monte carlo plot
 p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
-xpos = reshape(repeat(1:8, inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
+xpos = reshape(repeat(["0", "1", "2", "5", "10", "20", "50", "100"], inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
 for i ∈ eachindex(moleculecounts)
     for j ∈ eachindex(boundradii)
-        p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, outliers=false, yaxis=(0:1))
+        p[i,j] = boxplot(xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, outliers=false, tickfontsize=12, seriescolor=:white, yaxis=(0:1), xrotation=60, left_margin=-0.5mm, bottom_margin=-3mm, gridopacity=0.2)
+        i > 1 && plot!(p[i,j], yaxis = false, left_margin=-10mm)
+        j < length(boundradii) && plot!(p[i,j], xaxis = false, bottom_margin=-10mm)
         dotplot!(p[i,j], xpos[:,j,:,i], montecarlomeasurements[:,j,:,i], legend=:none, bar_width=0.1, markerstrokewidth=0, markersize=2, markercolor=:black)
     end
 end
@@ -139,13 +144,57 @@ end
 plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
 savefig("simulation_montecarlo.png")
 
+# median plot
 p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
 for i ∈ eachindex(moleculecounts)
     for j ∈ eachindex(boundradii)
-        p[i,j] = boxplot(xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, outliers=false, yaxis=(0:200:1200))
+        p[i,j] = boxplot(xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, outliers=false, yaxis=((0, 1200), 0:200:1200), tickfontsize=12, seriescolor=:white, xrotation=60, left_margin=-0.5mm, bottom_margin=-3mm, gridopacity=0.2)
+        i > 1 && plot!(p[i,j], yaxis = false, left_margin=-10mm)
+        j < length(boundradii) && plot!(p[i,j], xaxis = false, bottom_margin=-10mm)
         dotplot!(p[i,j], xpos[:,j,:,i], medianmeasurements[:,j,:,i], legend=:none, bar_width=0.1, markerstrokewidth=0, markersize=2, markercolor=:black)
     end
 end
 
 plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
 savefig("simulation_median.png")
+
+# normalized monte carlo plot
+
+zero_montecarlomeasurements = reshape(repeat(median(montecarlomeasurements[:,:,1,:], dims = 1), inner = (30, 8, 1)), 30, 5, 8, 5)
+one_montecarlomeasurements = reshape(repeat(median(montecarlomeasurements[:,:,length(fractionsbound),:], dims = 1), inner = (30, 1, 1), outer = (1, 8, 1)), 30, 5, 8, 5)
+normalizedmontecarlomeasurements = (montecarlomeasurements .- zero_montecarlomeasurements) ./ (one_montecarlomeasurements .- zero_montecarlomeasurements)
+
+p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
+xpos = reshape(repeat(["0", "1", "2", "5", "10", "20", "50", "100"], inner=5 * nreplicates, outer=5), nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
+for i ∈ eachindex(moleculecounts)
+    for j ∈ eachindex(boundradii)
+        p[i,j] = boxplot(xpos[:,j,:,i], normalizedmontecarlomeasurements[:,j,:,i], legend=:none, outliers=false, tickfontsize=12, seriescolor=:white, yaxis=(0:1), xrotation=60, left_margin=-0.5mm, bottom_margin=-3mm, gridopacity=0.2)
+        plot!(p[i,j], xpos[1,j,:,i], fractionsbound, lineopacity = 0.25, linecolor=:black, linewidth=3)
+        i > 1 && plot!(p[i,j], yaxis = false, left_margin=-10mm)
+        j < length(boundradii) && plot!(p[i,j], xaxis = false, bottom_margin=-10mm)
+        dotplot!(p[i,j], xpos[:,j,:,i], normalizedmontecarlomeasurements[:,j,:,i], legend=:none, bar_width=0.1, markerstrokewidth=0, markersize=2, markercolor=:black)
+    end
+end
+
+plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
+savefig("simulation_montecarlo_normalized.png")
+
+
+
+# normalized monte carlo plot deviation
+
+deviations = (median(normalizedmontecarlomeasurements[:,:,eachindex(fractionsbound)[Not(1)],:], dims = 1) .- reshape(repeat(fractionsbound[Not(1)], inner = 5, outer = 5), 1, 5, 7, 5)) ./ reshape(repeat(fractionsbound[Not(1)], inner = 5, outer = 5), 1, 5, 7, 5)
+
+p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
+xpos = reshape(repeat(["1", "2", "5", "10", "20", "50", "100"], inner=5, outer=5), length(boundradii), length(fractionsbound) - 1, length(moleculecounts))
+for i ∈ eachindex(moleculecounts)
+    for j ∈ eachindex(boundradii)
+        p[i,j] = plot(xpos[j,:,i], deviations[1,j,:,i], legend=:none, outliers=false, tickfontsize=12, yaxis=((-5, 2), -5:1:2), xrotation=60, left_margin=-0.5mm, bottom_margin=-3mm, gridopacity=0.2, linewidth=3, linecolor=:black)
+        i > 1 && plot!(p[i,j], yaxis = false, left_margin=-10mm)
+        j < length(boundradii) && plot!(p[i,j], xaxis = false, bottom_margin=-10mm)
+        plot!(p[i,j], xpos[j,:,i], repeat([0], 7), linecolor=:gray, linewidth=3, lineopacity=0.5)
+    end
+end
+
+plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
+savefig("simulation_montecarlo_normalized_deviations.png")
