@@ -5,7 +5,7 @@ Obtain the percentile ranks that would be expected for the set of molecules if n
 simulated by randomly displacing all molecules within a given radius. This is done to simulate freedom of motion but
 to roughly maintain local density. This radius should be the same as that used for montecarloaffinity().
 """
-function simulate0(molecules1, molecules2, localradius, iterations)
+function simulate0(molecules1, molecules2, localradius, mc_iterations)
     displacements1 = randomcoordinates2d(length(molecules1), localradius)
     displacements2 = randomcoordinates2d(length(molecules2), localradius)
 

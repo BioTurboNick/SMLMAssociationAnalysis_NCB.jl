@@ -70,8 +70,17 @@ for i ∈ 1:length(cellpaths)
     percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 800, mc_iterations)
     mediandistance = length(distances) > 0 ? median(distances) : NaN
 
-    positivecontrol_percentileranks = simulate100(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, 80, mc_iterations)
-    negativecontrol_percentileranks = simulate0(ch1_molecules, ch2_molecules, 800, mc_iterations)
+    positivecontrol_percentileranks, positivecontrol_distances = simulate100(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, 80, mc_iterations)
+    # I found that the variance in running the negative control drops smoothly as a function of neighbor counts.
+    # This heuristic cuts down on computational time without sacrificing quality of the correction.
+    negative_iterations = length(distances) < 250 ? 30 :
+                          length(distances) < 500 ? 20 :
+                          length(distances) < 1000 ? 10 :
+                          length(distances) < 2000 ? 5 :
+                          1
+    negativecontrol = [simulate0(x.channels[1].molecules, x.channels[2].molecules, 800, 10000) for i in 1:negative_iterations]
+    negativecontrol_percentileranks = [first(i) for i in c]
+    negativecontrol_distances = [last(i) for i in c]
 
     ch1_data = ChannelData(ch1_name, ch1_molecules, ch1_neighbors)
     ch2_data = ChannelData(ch2_name, ch2_molecules, ch2_neighbors)

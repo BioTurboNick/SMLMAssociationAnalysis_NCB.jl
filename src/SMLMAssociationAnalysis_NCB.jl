@@ -18,7 +18,7 @@ include("analysis/association.jl")
 include("analysis/simulate.jl")
 include("plots.jl")
 
-export ChannelData, Molecule, Result, NewResult
+export ChannelData, Molecule, Result, ResultSimulate
 export ChannelDataOptimizing, ResultOptimizing
 export getmolecules, exclusivenearestneighbors, montecarloaffinity
 export moleculesplot, localizationsplot, insetplot, distanceprobabilityplot, neighborsplot, neighborsplot_forprint
