@@ -3,6 +3,7 @@
 using SMLMAssociationAnalysis_NCB
 using FileIO
 using StatsBase
+using Statistics
 using StatsPlots
 
 ### Load saved data
@@ -24,10 +25,6 @@ montecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
 positivecontrolmontecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
 negativecontrolmontecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
 
-negstd = AbstractFloat[]
-negcounts = AbstractFloat[]
-neg
-
 for k ∈ 1:2
     for i ∈ 1:nsamples
         samplemedianresults = Array{Float64,2}(undef, ncells, nreplicates)
@@ -37,17 +34,12 @@ for k ∈ 1:2
 
         for j ∈ 1:nreplicates
             replicateresults = experimentresults[k][j][i]
-            lessthanlimitreplicate = count.([(x.distances .< 200) .& (x.percentileranks .< 0.1) for x ∈ replicateresults])
-            positivecontrollessthanlimitreplicate = count.([(x.positivecontrol_distances .< 200) .& (x.positivecontrol_percentileranks .< 0.1) for x ∈ replicateresults])
-            negativecontrollessthanlimitreplicate = [count.([(x.negativecontrol_distances[i] .< 200) .& (x.negativecontrol_percentileranks[i] .< 0.1) for i in 1:30]) for x ∈ replicateresults]
-            neighborcount = length.(x.percentileranks for x in replicateresults)
-
-            lessthan10 = lessthanlimitreplicate ./ neighborcount
-            positivecontrollessthan10 = positivecontrollessthanlimitreplicate ./ neighborcount
-            negativecontrollessthan10 = median.(negativecontrollessthanlimitreplicate ./ neighborcount)
-            append!(negstd, std.(negativecontrollessthanlimitreplicate ./ neighborcount))
-            append!(negcounts, neighborcount)
-
+            lessthanlimitreplicate = [(x.distances .< 200) .& (x.percentileranks .< 0.1) for x ∈ replicateresults]
+            positivecontrollessthanlimitreplicate = [(x.positivecontrol_distances .< 200) .& (x.positivecontrol_percentileranks .< 0.1) for x ∈ replicateresults]
+            negativecontrollessthanlimitreplicate = median.([count.([(x.negativecontrol_distances[m] .< 200) .& (x.negativecontrol_percentileranks[m] .< 0.1) for m ∈ eachindex(x.negativecontrol_distances)]) for x ∈ replicateresults])
+            lessthan10 = count.(lessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
+            positivecontrollessthan10 = count.(positivecontrollessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
+            negativecontrollessthan10 = negativecontrollessthanlimitreplicate ./ length.(lessthanlimitreplicate)
             mediandistances = map(x -> x.mediandistance, replicateresults)
             samplemedianresults[:, j] = mediandistances
             samplelessthan10results[:, j] = lessthan10
@@ -61,10 +53,6 @@ for k ∈ 1:2
     end
 end
 
-savefig("negative control neighbor counts vs. stddev for 30 iterations.png")
-
-
-
 medianmeasurements = cat(
     cat(medianmeasurements[:, :, 1:2, 1], medianmeasurements[:, :, 3:4, 1], dims = 4),
     cat(medianmeasurements[:, :, 1:2, 2], medianmeasurements[:, :, 3:4, 2], dims = 4),
@@ -75,13 +63,11 @@ montecarlomeasurements = cat(
     cat(montecarlomeasurements[:, :, 1:2, 2], montecarlomeasurements[:, :, 3:4, 2], dims = 4),
     dims = 5,
 )
-
 positivecontrolmontecarlomeasurements = cat(
     cat(positivecontrolmontecarlomeasurements[:, :, 1:2, 1], positivecontrolmontecarlomeasurements[:, :, 3:4, 1], dims = 4),
     cat(positivecontrolmontecarlomeasurements[:, :, 1:2, 2], positivecontrolmontecarlomeasurements[:, :, 3:4, 2], dims = 4),
     dims = 5,
 )
-
 negativecontrolmontecarlomeasurements = cat(
     cat(negativecontrolmontecarlomeasurements[:, :, 1:2, 1], negativecontrolmontecarlomeasurements[:, :, 3:4, 1], dims = 4),
     cat(negativecontrolmontecarlomeasurements[:, :, 1:2, 2], negativecontrolmontecarlomeasurements[:, :, 3:4, 2], dims = 4),
@@ -89,7 +75,6 @@ negativecontrolmontecarlomeasurements = cat(
 )
 
 normalizedmontecarlomeasurements = (montecarlomeasurements .- negativecontrolmontecarlomeasurements) ./ (positivecontrolmontecarlomeasurements .- negativecontrolmontecarlomeasurements)
-
 
 
 #### Analysis
@@ -105,6 +90,7 @@ p4 = boxplot(medianmeasurements[:, :, 2, 2, 1], xaxis = ("Replicates", [1, 2, 3]
 
 plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "MDM2-p53")
 savefig(joinpath(outputdir, "Mdm2-p53 boxplots.png"))
+
 
 #ZResid/ZPred plot and Levene's test
 mediansflat = [medianmeasurements[:, :, 1, 1, 1] medianmeasurements[:, :, 2, 1, 1] medianmeasurements[:, :, 1, 2, 1] medianmeasurements[
@@ -162,13 +148,6 @@ p4 = boxplot(montecarlomeasurements[:, :, 2, 2, 1], xaxis = ("Replicates", [1, 2
 plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "Mdm2-p53")
 savefig(joinpath(outputdir, "Mdm2-p53 boxplots montecarlo.png"))
 
-p1 = boxplot(normalizedmontecarlomeasurements[:, :, 1, 1, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p2 = boxplot(normalizedmontecarlomeasurements[:, :, 2, 1, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p3 = boxplot(normalizedmontecarlomeasurements[:, :, 1, 2, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p4 = boxplot(normalizedmontecarlomeasurements[:, :, 2, 2, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-
-plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "Mdm2-p53")
-savefig(joinpath(outputdir, "Mdm2-p53 boxplots montecarlo normalized.png"))
 
 #ZResid/ZPred plot and Levene's test
 montecarloflat = [montecarlomeasurements[:, :, 1, 1, 1] montecarlomeasurements[:, :, 2, 1, 1] montecarlomeasurements[:, :, 1, 2, 1] montecarlomeasurements[:, :, 2, 2, 1]]
@@ -184,23 +163,7 @@ scatter(
 )
 savefig(joinpath(outputdir, "Mdm2-p53 zresid-zpred montecarlo.png"))
 
-normalizedmontecarloflat = [normalizedmontecarlomeasurements[:, :, 1, 1, 1] normalizedmontecarlomeasurements[:, :, 2, 1, 1] normalizedmontecarlomeasurements[:, :, 1, 2, 1] normalizedmontecarlomeasurements[:, :, 2, 2, 1]]
-z = zscore(normalizedmontecarloflat)
-zprednorm = repeat(mean(z, dims = 1), 10)
-zresidnorm = z .- zpred
-scatter(
-    zresidnorm,
-    zprednorm,
-    xaxis = ("Standardized Residual (ZResid)"),
-    yaxis = ("Standardized Predicted Value (ZPred)"),
-    legend = :none,
-)
-savefig(joinpath(outputdir, "Mdm2-p53 zresid-zpred montecarlo normalized.png"))
-
-
 levene(montecarloflat)
-
-levene(normalizedmontecarloflat)
 
 # qqnorm, skewness, kurtosis
 p = [qqnorm(zresid[:, i]) for i ∈ 1:12]
@@ -209,13 +172,6 @@ savefig(joinpath(outputdir, "Mdm2-p53 qqnorm montecarlo.png"))
 
 [skewness(montecarloflat[:, i]) for i ∈ 1:12]
 [kurtosis(montecarloflat[:, i]) for i ∈ 1:12]
-
-p = [qqnorm(zresidnorm[:, i]) for i ∈ 1:12]
-plot(p..., layout = grid(4, 3), legend = :none, plot_title = "MDM2-p53 qqnorm montecarlo")
-savefig(joinpath(outputdir, "Mdm2-p53 qqnorm montecarlo normalized.png"))
-
-[skewness(normalizedmontecarloflat[:, i]) for i ∈ 1:12]
-[kurtosis(normalizedmontecarloflat[:, i]) for i ∈ 1:12]
 
 
 # anova
@@ -240,46 +196,27 @@ montecarloresultNutPlus = anova(
     factornames = ["Replicate", "Doxycycline"],
 )
 
-
-normmontecarloresult = anova(
-    normalizedmontecarlomeasurements[:, :, :, :, 1],
-    [nested],
-    factornames = ["Replicate", "Doxycycline", "Nutlin-3a"],
-)
-
-plot(normmontecarloresult)
-savefig(joinpath(outputdir, "Mdm2-p53 interactionplot montecarlo normalized.png"))
-
-normmontecarloresultNutMinus = anova(
-    normalizedmontecarlomeasurements[:, :, :, 1, 1],
-    [nested],
-    factornames = ["Replicate", "Doxycycline"],
-)
-normmontecarloresultNutPlus = anova(
-    normalizedmontecarlomeasurements[:, :, :, 2, 1],
-    [nested],
-    factornames = ["Replicate", "Doxycycline"],
-)
-
 ### Paper figure
 
 nutdoxgroups = repeat([2, 1, 4, 3], inner=30)
 p53_mdm2_median = [medianmeasurements[:,:,1,1,1] |> vec; medianmeasurements[:,:,2,1,1] |> vec; medianmeasurements[:,:,1,2,1] |> vec; medianmeasurements[:,:,2,2,1] |> vec]
 boxplot(nutdoxgroups, p53_mdm2_median, outliers=false,
         label=["- Dox", "+ Dox"],
-        guidefontsize=12,
-        tickfontsize=72,
+        guidefontsize=52,
+        tickfontsize=48,
         legend=:none,
-        left_margin=20mm,
-        top_margin=5mm,
-        bottom_margin=5mm,
+        top_margin=10mm,
+        bottom_margin=-25mm,
+        left_margin=-3mm,
         seriescolor=[:white :lightgray],
         line=(6, 1.0),
+        gridopacity=0.3,
+        xgrid=:none,
         size=(1024,2048),
         xaxis=("Condition", (1:4, ["-Dox -Nut", "+Dox -Nut", "-Dox +Nut", "+Dox +Nut"])),
         yaxis=("Median exclusive pairwise distance (nm)", (0,500)))
 dotplot!(nutdoxgroups, p53_mdm2_median, mode = :density, label="", marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
-savefig(joinpath(outputdir, "p53_mdm2_median_boxplot.png"))
+savefig( "p53_mdm2_median_boxplot.png")
 
 p53_mdm2_montecarlo = [montecarlomeasurements[:,:,1,1,1] |> vec; montecarlomeasurements[:,:,2,1,1] |> vec; montecarlomeasurements[:,:,1,2,1] |> vec; montecarlomeasurements[:,:,2,2,1] |> vec]
 groupedboxplot(nutdoxgroups, p53_mdm2_montecarlo, outliers=false,
@@ -298,23 +235,25 @@ groupedboxplot(nutdoxgroups, p53_mdm2_montecarlo, outliers=false,
 groupeddotplot!(nutdoxgroups, p53_mdm2_montecarlo, mode = :density, label="", marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
 savefig(joinpath(outputdir, "p53_mdm2_montecarlo_boxplot.png"))
 
-p53_mdm2_normalizedmontecarlo = [normalizedmontecarlomeasurements[:,:,1,1,1] |> vec; normalizedmontecarlomeasurements[:,:,2,1,1] |> vec; normalizedmontecarlomeasurements[:,:,1,2,1] |> vec; normalizedmontecarlomeasurements[:,:,2,2,1] |> vec]
-groupedboxplot(nutdoxgroups, p53_mdm2_normalizedmontecarlo, outliers=false,
+p53_mdm2_montecarlo = [normalizedmontecarlomeasurements[:,:,1,1,1] |> vec; normalizedmontecarlomeasurements[:,:,2,1,1] |> vec; normalizedmontecarlomeasurements[:,:,1,2,1] |> vec; normalizedmontecarlomeasurements[:,:,2,2,1] |> vec]
+groupedboxplot(nutdoxgroups, p53_mdm2_montecarlo, outliers=false,
         label=["- Dox", "+ Dox"],
-        guidefontsize=12,
-        tickfontsize=72,
+        guidefontsize=52,
+        tickfontsize=48,
         legend=:none,
-        left_margin=10mm,
-        top_margin=5mm,
-        bottom_margin=5mm,
+        top_margin=10mm,
+        bottom_margin=-25mm,
+        left_margin=5mm,
         seriescolor=[:white :lightgray],
         line=(6, 1.0),
+        gridopacity=0.3,
+        xgrid=:none,
         size=(1024,2048),
         xaxis=("Condition", (1:4, ["-Dox -Nut", "+Dox -Nut", "-Dox +Nut", "+Dox +Nut"])),
-        yaxis=("Fraction bound", (-0.03,0.1)))
-groupeddotplot!(nutdoxgroups, p53_mdm2_normalizedmontecarlo, mode = :density, label="", marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
-savefig(joinpath(outputdir, "p53_mdm2_normalizedmontecarlo_boxplot.png"))
-
+        yaxis=("Fraction bound", (-0.04,0.1), -0.04:0.02:0.1))
+groupeddotplot!(nutdoxgroups, p53_mdm2_montecarlo, mode = :density, label="",
+        marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+savefig("p53_mdm2_normalizedmontecarlo_boxplot.png")
 
 ### Median Exp 3
 
@@ -326,7 +265,6 @@ p4 = boxplot(medianmeasurements[:, :, 2, 2, 2], xaxis = ("Replicates", [1, 2, 3]
 
 plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "MEG3-p53")
 savefig(joinpath(outputdir, "MEG3-p53 boxplots.png"))
-
 
 
 #ZResid/ZPred plot and Levene's test
@@ -376,15 +314,6 @@ plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "MEG3-p53
 savefig(joinpath(outputdir, "MEG3-p53 boxplots montecarlo.png"))
 
 
-p1 = boxplot(normalizedmontecarlomeasurements[:, :, 1, 1, 2], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p2 = boxplot(normalizedmontecarlomeasurements[:, :, 2, 1, 2], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p3 = boxplot(normalizedmontecarlomeasurements[:, :, 1, 2, 2], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p4 = boxplot(normalizedmontecarlomeasurements[:, :, 2, 2, 2], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-
-plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "MEG3-p53")
-savefig(joinpath(outputdir, "MEG3-p53 boxplots montecarlo normalized.png"))
-
-
 #ZResid/ZPred plot and Levene's test
 montecarloflat = [montecarlomeasurements[:, :, 1, 1, 2] montecarlomeasurements[:, :, 2, 1, 2] montecarlomeasurements[:, :, 1, 2, 2] montecarlomeasurements[:, :, 2, 2, 2]]
 z = zscore(montecarloflat)
@@ -399,24 +328,7 @@ scatter(
 )
 savefig(joinpath(outputdir, "MEG3-p53 zresid-zpred montecarlo.png"))
 
-normmontecarloflat = [normalizedmontecarlomeasurements[:, :, 1, 1, 2] normalizedmontecarlomeasurements[:, :, 2, 1, 2] normalizedmontecarlomeasurements[:, :, 1, 2, 2] normalizedmontecarlomeasurements[:, :, 2, 2, 2]]
-znorm = zscore(normmontecarloflat)
-zprednorm = repeat(mean(znorm, dims = 1), 10)
-zresidnorm = znorm .- zprednorm
-scatter(
-    zresidnorm,
-    zprednorm,
-    xaxis = ("Standardized Residual (ZResid)"),
-    yaxis = ("Standardized Predicted Value (ZPred)"),
-    legend = :none,
-)
-savefig(joinpath(outputdir, "MEG3-p53 zresid-zpred montecarlo normalized.png"))
-
-
 levene(montecarloflat)
-
-levene(normmontecarloflat)
-
 
 # qqnorm, skewness, kurtosis
 p = [qqnorm(zresid[:, i]) for i ∈ 1:12]
@@ -425,14 +337,6 @@ savefig(joinpath(outputdir, "MEG3-p53 qqnorm montecarlo.png"))
 
 [skewness(montecarloflat[:, i]) for i ∈ 1:12]
 [kurtosis(montecarloflat[:, i]) for i ∈ 1:12]
-
-
-p = [qqnorm(zresidnorm[:, i]) for i ∈ 1:12]
-plot(p..., layout = grid(4, 3), legend = :none, plot_title = "MEG3-p53 qqnorm montecarlo")
-savefig(joinpath(outputdir, "MEG3-p53 qqnorm montecarlo normalized.png"))
-
-[skewness(normmontecarloflat[:, i]) for i ∈ 1:12]
-[kurtosis(normmontecarloflat[:, i]) for i ∈ 1:12]
 
 
 # anova
@@ -457,28 +361,6 @@ montecarloresultGAPDH = anova(
     factornames = ["Replicate", "Doxycycline"],
 )
 
-
-
-normalizedmontecarloresult = anova(
-    normalizedmontecarlomeasurements[:, :, :, :, 2],
-    [nested],
-    factornames = ["Replicate", "Doxycycline", "RNA"],
-)
-
-plot(normalizedmontecarloresult)
-savefig(joinpath(outputdir, "MEG3-p53 interactionplot montecarlo normalized.png"))
-
-normalizedmontecarloresultMEG3 = anova(
-    normalizedmontecarlomeasurements[:, :, :, 1, 2],
-    [nested],
-    factornames = ["Replicate", "Doxycycline"],
-)
-normalizedmontecarloresultGAPDH = anova(
-    normalizedmontecarlomeasurements[:, :, :, 2, 2],
-    [nested],
-    factornames = ["Replicate", "Doxycycline"],
-)
-
 ### Paper figure
 
 import Plots.mm
@@ -487,19 +369,20 @@ doxgroups = repeat([2, 1], inner = 30, outer = 2)
 p53_meg3_median = [medianmeasurements[:,:,1,1,2] |> vec; medianmeasurements[:,:,2,1,2] |> vec; medianmeasurements[:,:,1,2,2] |> vec; medianmeasurements[:,:,2,2,2] |> vec]
 groupedboxplot(rnagroups, p53_meg3_median, group = doxgroups, outliers=false,
         label=["- Dox", "+ Dox"],
-        guidefontsize=12,
-        tickfontsize=72,
-        left_margin=20mm,
-        top_margin=5mm,
-        bottom_margin=5mm,
+        guidefontsize=52,
+        tickfontsize=48,
         legend=:none,
+        top_margin=10mm,
+        bottom_margin=-25mm,
         seriescolor=[:white :lightgray],
         line=(6, 1.0),
+        gridopacity=0.3,
+        xgrid=:none,
         xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
         size=(1024,2048),
         yaxis=("Median exclusive pairwise distance (nm)", (0,1200)))
 groupeddotplot!(rnagroups, p53_meg3_median, group = doxgroups, mode = :density, label="", marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
-savefig(joinpath(outputdir, "p53_meg3_median_boxplot.png"))
+savefig("p53_meg3_median_boxplot.png")
 
 p53_meg3_montecarlo = [montecarlomeasurements[:,:,1,1,2] |> vec; montecarlomeasurements[:,:,2,1,2] |> vec; montecarlomeasurements[:,:,1,2,2] |> vec; montecarlomeasurements[:,:,2,2,2] |> vec]
 groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
@@ -518,21 +401,23 @@ groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false
 groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
 savefig(joinpath(outputdir, "p53_meg3_montecarlo_boxplot.png"))
 
-p53_meg3_normalizedmontecarlo = [normalizedmontecarlomeasurements[:,:,1,1,2] |> vec; normalizedmontecarlomeasurements[:,:,2,1,2] |> vec; normalizedmontecarlomeasurements[:,:,1,2,2] |> vec; normalizedmontecarlomeasurements[:,:,2,2,2] |> vec]
-groupedboxplot(rnagroups, p53_meg3_normalizedmontecarlo, group = doxgroups, outliers=false,
+p53_meg3_montecarlo = [normalizedmontecarlomeasurements[:,:,1,1,2] |> vec; normalizedmontecarlomeasurements[:,:,2,1,2] |> vec; normalizedmontecarlomeasurements[:,:,1,2,2] |> vec; normalizedmontecarlomeasurements[:,:,2,2,2] |> vec]
+groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
         label=["- Dox", "+ Dox"],
-        guidefontsize=12,
-        tickfontsize=72,
+        guidefontsize=52,
+        tickfontsize=48,
         legend=:none,
-        left_margin=20mm,
-        top_margin=5mm,
-        bottom_margin=5mm,
+        top_margin=10mm,
+        bottom_margin=-25mm,
         seriescolor=[:white :lightgray],
         line=(6, 1.0),
+        gridopacity=0.3,
+        xgrid=:none,
         size=(1024,2048),
         xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
-        yaxis=("Fraction bound", (-0.05,0.2)))
-groupeddotplot!(rnagroups, p53_meg3_normalizedmontecarlo, group = doxgroups, mode = :density, label="", marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+        yaxis=("Fraction bound", (-0.05,0.2), -0.05:0.05:0.2))
+groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="",
+        marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
 savefig(joinpath(outputdir, "p53_meg3_normalizedmontecarlo_boxplot.png"))
 
 # localization plots of example cells
