@@ -52,17 +52,3 @@ end
 Reindexes the array of molecules.
 """
 reindex!(molecules) = foreach((m, i) -> m.index = i, molecules, eachindex(molecules))
-
-#="""
-    generatelocalizations()
-
-Generate a cloud of localizations around a localization.
-
-0, 1, or 2 secondary antibodies (random), with a fluorophore count determined by a random number selected from a Poisson
-distribution (λ = 1), and number of blinks determined by
-"""
-function generatelocalizations(coordinate)
-    secondaryantibodycount = rand(0:2)
-    fluorophorecount = rand(Poisson(1), 1) * secondaryantibodycount
-    frames =
-end=#

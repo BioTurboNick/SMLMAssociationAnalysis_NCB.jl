@@ -86,20 +86,6 @@ function montecarloaffinity(molecules1::Vector{T}, molecules2::Vector{T}, ch1_ne
     return percentileranks
 end
 
-#=function localmontecarlo(nlocalmolecules1, nlocalmolecules2, testdistance, radius, iterations) where T <: DataEntity
-    (nlocalmolecules1 == 0 || nlocalmolecules2 == 0) && return 1.0
-    (testdistance > 2 * radius) && return 1.0
-
-    randomcoordinates1 = [randomcoordinates2d(nlocalmolecules1, radius) for i ∈ 1:iterations]
-    randomcoordinates2 = [randomcoordinates2d(nlocalmolecules2, radius) for i ∈ 1:iterations]
-    randomtrees = nlocalmolecules1 > nlocalmolecules2 ? KDTree.(randomcoordinates1) : KDTree.(randomcoordinates2)
-    randomcoordinates = nlocalmolecules1 > nlocalmolecules2 ? randomcoordinates2 : randomcoordinates1
-    mindistance = (nn(randomtrees[i], randomcoordinates[i]) |> last for i ∈ 1:iterations) .|> minimum
-    percentilerank = count(mindistance .≤ testdistance) / iterations
-
-    return percentilerank
-end=#
-
 """
     localmontecarlo()
 
