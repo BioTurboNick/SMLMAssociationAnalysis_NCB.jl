@@ -14,7 +14,7 @@ nreplicates = 3
 nsamples = 4
 ncells = 10
 
-rootpath = raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis\SMLMAssociationAnalysis_NCB.jl\original"
+rootpath = "dataset"
 outputdir = "output"
 datapath = joinpath(rootpath, outputdir, "results.jld2")
 

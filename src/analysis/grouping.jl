@@ -25,7 +25,7 @@ function groupby_localmax_temporallimit(localizations::Vector{Localization}, rad
 end
 
 """
-    merge_close_molecules
+    merge_close_molecules()
 
 Merge closely clustered molecules (which may be physically associated) into single molecules.
 """
@@ -181,7 +181,7 @@ function findlocalmaxima(entities::Vector{T}, neighborsdict::IdDict{T, Vector{T}
 end
 
 """
-    buildmolecules!
+    buildmolecules!()
 
 Build grouped molecules from the molecule seeds and the other entities (`Localization`s or `Molecule`s) to join.
 """

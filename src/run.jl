@@ -1,6 +1,9 @@
 ############
 # PARAMETERS
 
+# name of the project to save with the data
+projectname = "My Project"
+
 # the file paths of each file to analyze
 # you may wish to write a loop to populate this
 # The / path separator works on both Windows and Linux
@@ -70,7 +73,7 @@ for i ∈ 1:length(cellpaths)
     percentileranks = montecarloaffinity(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, distances, 800, mc_iterations)
     mediandistance = length(distances) > 0 ? median(distances) : NaN
 
-    positivecontrol_percentileranks, positivecontrol_distances = simulate100(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, 80, mc_iterations)
+    positivecontrol_percentileranks, positivecontrol_distances = simulate100(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, 80, 800, mc_iterations)
     # I found that the variance in running the negative control drops smoothly as a function of neighbor counts.
     # This heuristic cuts down on computational time without sacrificing quality of the correction.
     negative_iterations = length(distances) < 250 ? 30 :
@@ -78,17 +81,20 @@ for i ∈ 1:length(cellpaths)
                           length(distances) < 1000 ? 10 :
                           length(distances) < 2000 ? 5 :
                           1
-    negativecontrol = [simulate0(x.channels[1].molecules, x.channels[2].molecules, 800, 10000) for i in 1:negative_iterations]
-    negativecontrol_percentileranks = [first(i) for i in c]
-    negativecontrol_distances = [last(i) for i in c]
+    negativecontrol = [simulate0(ch1_molecules, ch2_molecules, 800, 10000) for i in 1:negative_iterations]
+    negativecontrol_percentileranks = [first(i) for i in negativecontrol]
+    negativecontrol_distances = [last(i) for i in negativecontrol]
 
     ch1_data = ChannelData(ch1_name, ch1_molecules, ch1_neighbors)
     ch2_data = ChannelData(ch2_name, ch2_molecules, ch2_neighbors)
-    result = Result("", "", 1, cellpath, i,
-                    [ch1_data, ch2_data], distances, mediandistance, percentilerank, positivecontrol_percentileranks, negativecontrol_percentileranks)
+    result = Result(projectname, "", 1, cellpath, i,
+                    [ch1_data, ch2_data], distances, mediandistance, percentileranks,
+                    positivecontrol_distances, negativecontrol_distances,
+                    positivecontrol_percentileranks, negativecontrol_percentileranks)
     push!(results, result)
 end
 
+mkpath(outputpath |> dirname)
 save(outputpath, "results", results)
 
 rmprocs(currentworkers)

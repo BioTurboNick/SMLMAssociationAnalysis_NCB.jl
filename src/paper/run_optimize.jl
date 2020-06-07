@@ -9,7 +9,7 @@ nreplicates = 3
 nsamples = 4
 ncells = 10
 
-outputdir = "output"
+outputdir = "output/optimize"
 mkpath(outputdir)
 outputdatapath = joinpath(outputdir, "results_optimize.jld2")
 
@@ -106,7 +106,7 @@ for experimentdirname ∈ experimentdirnames
                     Ref(ch1_neighbors),
                     Ref(ch2_neighbors),
                     Ref(distances),
-                    200:200:2000
+                    200:200:2000,
                     10000
                 )
 
@@ -119,7 +119,7 @@ for experimentdirname ∈ experimentdirnames
                 ch1_data = ChannelDataOptimizing(ch1_name, first.(ch1), ch1_neighbors)
                 ch2_data = ChannelDataOptimizing(ch2_name, first.(ch2), ch2_neighbors)
                 result = ResultOptimizing(
-                    projectdirname,
+                    "",
                     experimentdirname,
                     i,
                     samplename,

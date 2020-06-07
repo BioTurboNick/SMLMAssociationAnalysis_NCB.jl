@@ -29,16 +29,12 @@
 #
 
 fractionsbound = [0.0, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1.0]
-#moleculecounts = [10, 20, 50, 100, 200]
 moleculecounts = [100, 200, 500, 1000, 2000]
 boundradii = [10, 20, 50, 100, 200]
 
-#cellradius = 2821 # 25 square micron circle
-#cellradius = 3989 # 50 square micron circle
-#cellradius = 5642 # 100 square micron circle
 cellradius = 8921 # 250 square micron circle
 
-rootpath = "C:/Users/nicho/Dropbox (Partners HealthCare)/STORM MATLAB/STORM Single Molecule Clustering/MonteCarloAffinity/Simulated data"
+rootpath = "output/simulation"
 
 using Distributed
 using Statistics
@@ -92,7 +88,7 @@ for i ∈ 1:30
             end
         end
     end
-    save(joinpath(rootpath, "simulationresults_new$i.jld2"), "results", results)
+    save(joinpath(rootpath, "simulationresults$i.jld2"), "results", results)
 end
 
 rmprocs(currentworkers)
@@ -106,7 +102,7 @@ using StatsPlots
 
 results = Vector{ResultSimulate}[]
 for i ∈ 1:nreplicates
-    push!(results, load(joinpath(rootpath, "simulationresults_new$i.jld2"))["results"])
+    push!(results, load(joinpath(rootpath, "simulationresults$i.jld2"))["results"])
 end
 
 medianmeasurements = Array{Float64,4}(undef, nreplicates, length(boundradii), length(fractionsbound), length(moleculecounts))
@@ -142,7 +138,7 @@ for i ∈ eachindex(moleculecounts)
 end
 
 plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
-savefig("simulation_montecarlo.png")
+savefig(joinpath(rootpath, "simulation_montecarlo.png"))
 
 # median plot
 p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))
@@ -156,7 +152,7 @@ for i ∈ eachindex(moleculecounts)
 end
 
 plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
-savefig("simulation_median.png")
+savefig(joinpath(rootpath,"simulation_median.png"))
 
 # normalized monte carlo plot
 
@@ -177,7 +173,7 @@ for i ∈ eachindex(moleculecounts)
 end
 
 plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
-savefig("simulation_montecarlo_normalized.png")
+savefig(joinpath(rootpath,"simulation_montecarlo_normalized.png"))
 
 
 
@@ -197,4 +193,4 @@ for i ∈ eachindex(moleculecounts)
 end
 
 plot(p..., layout=grid(length(moleculecounts), length(boundradii)), size=(1024,1024))
-savefig("simulation_montecarlo_normalized_deviations.png")
+savefig(joinpath(rootpath,"simulation_montecarlo_normalized_deviations.png"))

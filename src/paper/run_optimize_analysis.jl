@@ -9,19 +9,18 @@ using StatsPlots
 
 samplenames = ["A", "B", "C", "D"]
 
+nexperiments = 2
 nreplicates = 3
 nsamples = 4
 ncells = 10
 
-outputdir = raw"C:\Users\nicho\Dropbox (Partners HealthCare)\Data Analysis\SMLMAssociationAnalysis_NCB.jl\original\output"
+outputdir = "output/optimize"
 datapath = joinpath(outputdir, "results_optimize.jld2")
 
 experimentresults = load(datapath)["experimentresults"]
 
 
 ### Following optimization requires running run_optimize.jl instead of run_original.jl
-using Plots
-using StatsBase
 
 # robustness (local distance)
 average_percentileranks = [[[[[mean(x) for x ∈ experimentresults[l][k][j][i].percentileranks_by_localdensity]
@@ -30,10 +29,10 @@ average_percentileranks = [[[[[mean(x) for x ∈ experimentresults[l][k][j][i].p
                                        for k ∈ eachindex(experimentresults[l])]
                                        for l ∈ eachindex(experimentresults)]
 
-average_percentileranks1 = [[average_percentileranks[l][k][j][i][m] for i in 1:10
-                                                                    for j in 1:4
-                                                                    for k in 1:3
-                                                                    for l in 1:2]
+average_percentileranks1 = [[average_percentileranks[l][k][j][i][m] for i in 1:ncells
+                                                                    for j in 1:nsamples
+                                                                    for k in 1:nreplicates
+                                                                    for l in 1:nexperiments]
                                                                     for m in 1:10]
 
 mean_average_percentileranks = mean.(average_percentileranks1)
@@ -63,10 +62,10 @@ ch1_frac = [[[[[x ./ ch1_counts[l][k][j][i][1] for x ∈ ch1_counts[l][k][j][i]]
                                             for k ∈ eachindex(experimentresults[l])]
                                             for l ∈ eachindex(experimentresults)]
 
-ch1_frac1 = [[ch1_frac[l][k][j][i][m] for i in 1:10
-                                       for j in 1:4
-                                       for k in 1:3
-                                       for l in 1:2]
+ch1_frac1 = [[ch1_frac[l][k][j][i][m] for i in 1:ncells
+                                       for j in 1:nsamples
+                                       for k in 1:nreplicates
+                                       for l in 1:nexperiments]
                                        for m in 1:10]
 
 mean_ch1_frac = mean.(ch1_frac1)
@@ -94,10 +93,10 @@ ch2_frac = [[[[[x ./ ch2_counts[l][k][j][i][1] for x ∈ ch2_counts[l][k][j][i]]
                                                 for k ∈ eachindex(experimentresults[l])]
                                                 for l ∈ eachindex(experimentresults)]
 
-ch2_frac1 = [[ch2_frac[l][k][j][i][m] for i in 1:10
-                                       for j in 1:4
-                                       for k in 1:3
-                                       for l in 1:2]
+ch2_frac1 = [[ch2_frac[l][k][j][i][m] for i in 1:ncells
+                                       for j in 1:nsamples
+                                       for k in 1:nreplicates
+                                       for l in 1:nexperiments]
                                        for m in 1:10]
 
 mean_ch2_frac = mean.(ch2_frac1)
