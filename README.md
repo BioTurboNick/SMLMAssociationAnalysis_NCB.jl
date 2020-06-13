@@ -27,6 +27,7 @@ julia> using SMLMAssociationAnalysis_NCB # load the module
 3. Execute `run.jl`. (If using the console only, `include("run.jl")` will execute the script.)
 4. Execute `run_plots.jl` to generate some basic plots.
 
+
 Recrate the paper's analysis
 ----------------------------
 The underlying data files have some quirks that need to be adjusted, so a special run file is provided.
