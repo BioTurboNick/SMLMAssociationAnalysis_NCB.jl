@@ -35,6 +35,7 @@ Follow the instructions above but use the scripts in `src/paper`.
  - run_optimize.jl: run the calculations with various parameter choices for optimization
  - run_optimize_analysis.jl: generate graphs of the parameters for optimization.
 
+```
 Key to dataset:
      Mdm2-p53: A = + Dox / - Nut
                B = - Dox / - Nut
@@ -44,3 +45,4 @@ Key to dataset:
                B = - Dox / MEG3
                C = + Dox / GAPDH
                D = - Dox / GAPDH
+```
