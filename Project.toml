@@ -23,7 +23,7 @@ Tau = "c544e3c2-d3e5-5802-ac44-44683f340e4a"
 [compat]
 FileIO = "1"
 JLD2 = "0.1"
-LocalizationMicroscopy = ">= 0.1.1"
+LocalizationMicroscopy = "0.1.1"
 NearestNeighbors = "0.4"
 Plots = "1"
 SimpleANOVA = "0.6"
