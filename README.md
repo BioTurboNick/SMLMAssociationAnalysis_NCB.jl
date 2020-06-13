@@ -38,6 +38,7 @@ deposited into `output/`.
  - run_optimize_analysis.jl: generate graphs of the parameters for optimization.
  - simulate.jl: Simulate cells to test the algorithm.
 
+```
 Key to dataset:
      Mdm2-p53: A = + Dox / - Nut
                B = - Dox / - Nut
@@ -47,3 +48,4 @@ Key to dataset:
                B = - Dox / MEG3
                C = + Dox / GAPDH
                D = - Dox / GAPDH
+```
