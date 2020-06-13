@@ -49,6 +49,7 @@ mc_iterations = 10000
 ################
 
 using Distributed
+using SMLMAssociationAnalysis_NCB # necessary at the moment or else the workers may choke
 currentworkers = addprocs(exeflags="--project")
 @everywhere using SMLMAssociationAnalysis_NCB
 using Statistics
