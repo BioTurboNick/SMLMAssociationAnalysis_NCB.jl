@@ -9,7 +9,7 @@ using SimpleANOVA
 
 ### Load saved data
 
-samplenames = ["A", "B", "C", "D"]
+samplenames = ["E", "F", "G", "H"]
 
 nreplicates = 3
 nsamples = 4
@@ -20,80 +20,65 @@ datapath = joinpath(outputdir, "results.jld2")
 
 experimentresults = load(datapath)["experimentresults"]
 
-medianmeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
-montecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
-positivecontrolmontecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
-negativecontrolmontecarlomeasurements = Array{Float64,4}(undef, ncells, nreplicates, 4, 2)
+medianmeasurements = Array{Float64,3}(undef, ncells, nreplicates, 4)
+montecarlomeasurements = Array{Float64,3}(undef, ncells, nreplicates, 4)
+positivecontrolmontecarlomeasurements = Array{Float64,3}(undef, ncells, nreplicates, 4)
+negativecontrolmontecarlomeasurements = Array{Float64,3}(undef, ncells, nreplicates, 4)
 
-for k ∈ 1:2
-    for i ∈ 1:nsamples
-        samplemedianresults = Array{Float64,2}(undef, ncells, nreplicates)
-        samplelessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
-        samplepositivecontrollessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
-        samplenegativecontrollessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
+for i ∈ 1:nsamples
+    samplemedianresults = Array{Float64,2}(undef, ncells, nreplicates)
+    samplelessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
+    samplepositivecontrollessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
+    samplenegativecontrollessthan10results = Array{Float64,2}(undef, ncells, nreplicates)
 
-        for j ∈ 1:nreplicates
-            replicateresults = experimentresults[k][j][i]
-            lessthanlimitreplicate = [(x.distances .< 200) .& (x.percentileranks .< 0.1) for x ∈ replicateresults]
-            positivecontrollessthanlimitreplicate = [(x.positivecontrol_distances .< 200) .& (x.positivecontrol_percentileranks .< 0.1) for x ∈ replicateresults]
-            negativecontrollessthanlimitreplicate = median.([count.([(x.negativecontrol_distances[m] .< 200) .& (x.negativecontrol_percentileranks[m] .< 0.1) for m ∈ eachindex(x.negativecontrol_distances)]) for x ∈ replicateresults])
-            lessthan10 = count.(lessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
-            positivecontrollessthan10 = count.(positivecontrollessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
-            negativecontrollessthan10 = negativecontrollessthanlimitreplicate ./ length.(lessthanlimitreplicate)
-            mediandistances = map(x -> x.mediandistance, replicateresults)
-            samplemedianresults[:, j] = mediandistances
-            samplelessthan10results[:, j] = lessthan10
-            samplepositivecontrollessthan10results[:, j] = positivecontrollessthan10
-            samplenegativecontrollessthan10results[:, j] = negativecontrollessthan10
-        end
-        medianmeasurements[:, :, i, k] = samplemedianresults
-        montecarlomeasurements[:, :, i, k] = samplelessthan10results
-        positivecontrolmontecarlomeasurements[:, :, i, k] = samplepositivecontrollessthan10results
-        negativecontrolmontecarlomeasurements[:, :, i, k] = samplenegativecontrollessthan10results
+    for j ∈ 1:nreplicates
+        replicateresults = experimentresults[1][j][i]
+        lessthanlimitreplicate = [(x.distances .< 200) .& (x.percentileranks .< 0.1) for x ∈ replicateresults]
+        positivecontrollessthanlimitreplicate = [(x.positivecontrol_distances .< 200) .& (x.positivecontrol_percentileranks .< 0.1) for x ∈ replicateresults]
+        negativecontrollessthanlimitreplicate = median.([count.([(x.negativecontrol_distances[m] .< 200) .& (x.negativecontrol_percentileranks[m] .< 0.1) for m ∈ eachindex(x.negativecontrol_distances)]) for x ∈ replicateresults])
+        lessthan10 = count.(lessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
+        positivecontrollessthan10 = count.(positivecontrollessthanlimitreplicate) ./ length.(lessthanlimitreplicate)
+        negativecontrollessthan10 = negativecontrollessthanlimitreplicate ./ length.(lessthanlimitreplicate)
+        mediandistances = map(x -> x.mediandistance, replicateresults)
+        samplemedianresults[:, j] = mediandistances
+        samplelessthan10results[:, j] = lessthan10
+        samplepositivecontrollessthan10results[:, j] = positivecontrollessthan10
+        samplenegativecontrollessthan10results[:, j] = negativecontrollessthan10
     end
+    medianmeasurements[:, :, i] = samplemedianresults
+    montecarlomeasurements[:, :, i] = samplelessthan10results
+    positivecontrolmontecarlomeasurements[:, :, i] = samplepositivecontrollessthan10results
+    negativecontrolmontecarlomeasurements[:, :, i] = samplenegativecontrollessthan10results
 end
-
-medianmeasurements = cat(
-    cat(medianmeasurements[:, :, 1:2, 1], medianmeasurements[:, :, 3:4, 1], dims = 4),
-    cat(medianmeasurements[:, :, 1:2, 2], medianmeasurements[:, :, 3:4, 2], dims = 4),
-    dims = 5,
-)
-montecarlomeasurements = cat(
-    cat(montecarlomeasurements[:, :, 1:2, 1], montecarlomeasurements[:, :, 3:4, 1], dims = 4),
-    cat(montecarlomeasurements[:, :, 1:2, 2], montecarlomeasurements[:, :, 3:4, 2], dims = 4),
-    dims = 5,
-)
-positivecontrolmontecarlomeasurements = cat(
-    cat(positivecontrolmontecarlomeasurements[:, :, 1:2, 1], positivecontrolmontecarlomeasurements[:, :, 3:4, 1], dims = 4),
-    cat(positivecontrolmontecarlomeasurements[:, :, 1:2, 2], positivecontrolmontecarlomeasurements[:, :, 3:4, 2], dims = 4),
-    dims = 5,
-)
-negativecontrolmontecarlomeasurements = cat(
-    cat(negativecontrolmontecarlomeasurements[:, :, 1:2, 1], negativecontrolmontecarlomeasurements[:, :, 3:4, 1], dims = 4),
-    cat(negativecontrolmontecarlomeasurements[:, :, 1:2, 2], negativecontrolmontecarlomeasurements[:, :, 3:4, 2], dims = 4),
-    dims = 5,
-)
 
 normalizedmontecarlomeasurements = (montecarlomeasurements .- negativecontrolmontecarlomeasurements) ./ (positivecontrolmontecarlomeasurements .- negativecontrolmontecarlomeasurements)
 
+# reoganize first replicate because its results are in a different order (0, 20, 10, 40)
+medianmeasurements = [cat(medianmeasurements[:,1,1], medianmeasurements[:,1,3], medianmeasurements[:,1,2], medianmeasurements[:,1,4], dims = 3) medianmeasurements[:,2:3,:]]
+montecarlomeasurements = [cat(montecarlomeasurements[:,1,1], montecarlomeasurements[:,1,3], montecarlomeasurements[:,1,2], montecarlomeasurements[:,1,4], dims = 3) montecarlomeasurements[:,2:3,:]]
+normalizedmontecarlomeasurements = [cat(normalizedmontecarlomeasurements[:,1,1], normalizedmontecarlomeasurements[:,1,3], normalizedmontecarlomeasurements[:,1,2], normalizedmontecarlomeasurements[:,1,4], dims = 3) normalizedmontecarlomeasurements[:,2:3,:]]
 
 #### Analysis
 show("Automatically executing this section isn't ideal, as results may not all print, although graphics will be saved. Intended to go through one-by-one as part of the analysis.")
 
-### Median Exp 2
+### Median
 
 # Check for unusual cases
-p1 = boxplot(medianmeasurements[:, :, 1, 1, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
-p2 = boxplot(medianmeasurements[:, :, 2, 1, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
-p3 = boxplot(medianmeasurements[:, :, 1, 2, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
-p4 = boxplot(medianmeasurements[:, :, 2, 2, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
+p1 = boxplot(medianmeasurements[:, :, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
+p2 = boxplot(medianmeasurements[:, :, 2], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
+p3 = boxplot(medianmeasurements[:, :, 3], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
+p4 = boxplot(medianmeasurements[:, :, 4], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Median distance (nm)"))
 
-plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "MDM2-p53")
-savefig(joinpath(outputdir, "Mdm2-p53 boxplots.png"))
+plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "FKBP12-mTOR")
+savefig(joinpath(outputdir, "FKBP12-mTOR boxplots.png"))
+
+# Windsorizing two extreme values
+medianmeasurements[4,1,1] = medianmeasurements[5,1,1]
+medianmeasurements[3,3,4] = medianmeasurements[2,3,4]
 
 
 #ZResid/ZPred plot and Levene's test
-mediansflat = [medianmeasurements[:, :, 1, 1, 1] medianmeasurements[:, :, 2, 1, 1] medianmeasurements[:, :, 1, 2, 1] medianmeasurements[:, :, 2, 2, 1]]
+mediansflat = [medianmeasurements[:, :, 1] medianmeasurements[:, :, 2] medianmeasurements[:, :, 3] medianmeasurements[:, :, 4]]
 z = zscore(mediansflat)
 zpred = repeat(mean(z, dims = 1), 10)
 zresid = z .- zpred
@@ -104,14 +89,14 @@ scatter(
     yaxis = ("Standardized Predicted Value (ZPred)"),
     legend = :none,
 )
-savefig(joinpath(outputdir, "Mdm2-p53 zresid-zpred.png"))
+savefig(joinpath(outputdir, "FKBP12-mTOR zresid-zpred.png"))
 
 levene(mediansflat)
 
 # qqnorm, skewness, kurtosis
 p = [qqnorm(zresid[:, i]) for i ∈ 1:12]
-plot(p..., layout = grid(4, 3), legend = :none, plot_title = "MDM2-p53 qqnorm")
-savefig(joinpath(outputdir, "Mdm2-p53 qqnorm.png"))
+plot(p..., layout = grid(4, 3), legend = :none, plot_title = "FKBP12-mTOR qqnorm")
+savefig(joinpath(outputdir, "FKBP12-mTOR qqnorm.png"))
 
 [skewness(mediansflat[:, i]) for i ∈ 1:12]
 [kurtosis(mediansflat[:, i]) for i ∈ 1:12]
@@ -120,31 +105,26 @@ savefig(joinpath(outputdir, "Mdm2-p53 qqnorm.png"))
 # anova
 
 medianresult = anova(
-    medianmeasurements[:, :, :, :, 1],
+    medianmeasurements[:, :, :],
     [nested],
-    factornames = ["Replicate", "Doxycycline", "Nutlin-3a"],
+    factornames = ["Replicate", "Rapamycin"],
 )
 
-plot(medianresult)
-savefig(joinpath(outputdir, "Mdm2-p53 interactionplot.png"))
 
-
-
-
-### Monte Carlo Exp 2
+### Monte Carlo
 
 # Check for unusual cases
-p1 = boxplot(montecarlomeasurements[:, :, 1, 1, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p2 = boxplot(montecarlomeasurements[:, :, 2, 1, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p3 = boxplot(montecarlomeasurements[:, :, 1, 2, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
-p4 = boxplot(montecarlomeasurements[:, :, 2, 2, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
+p1 = boxplot(normalizedmontecarlomeasurements[:, :, 1], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
+p2 = boxplot(normalizedmontecarlomeasurements[:, :, 2], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
+p3 = boxplot(normalizedmontecarlomeasurements[:, :, 3], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
+p4 = boxplot(normalizedmontecarlomeasurements[:, :, 4], xaxis = ("Replicates", [1, 2, 3]), yaxis = ("Fraction bound"))
 
-plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "Mdm2-p53")
-savefig(joinpath(outputdir, "Mdm2-p53 boxplots montecarlo.png"))
+plot(p1, p2, p3, p4, layout = grid(2, 2), legend = :none, plot_title = "FKBP12-mTOR")
+savefig(joinpath(outputdir, "FKBP12-mTOR boxplots montecarlo.png"))
 
 
 #ZResid/ZPred plot and Levene's test
-montecarloflat = [montecarlomeasurements[:, :, 1, 1, 1] montecarlomeasurements[:, :, 2, 1, 1] montecarlomeasurements[:, :, 1, 2, 1] montecarlomeasurements[:, :, 2, 2, 1]]
+montecarloflat = [normalizedmontecarlomeasurements[:, :, 1] normalizedmontecarlomeasurements[:, :, 2] normalizedmontecarlomeasurements[:, :, 3] normalizedmontecarlomeasurements[:, :, 4]]
 z = zscore(montecarloflat)
 zpred = repeat(mean(z, dims = 1), 10)
 zresid = z .- zpred
@@ -155,14 +135,14 @@ scatter(
     yaxis = ("Standardized Predicted Value (ZPred)"),
     legend = :none,
 )
-savefig(joinpath(outputdir, "Mdm2-p53 zresid-zpred montecarlo.png"))
+savefig(joinpath(outputdir, "FKBP12-mTOR zresid-zpred montecarlo.png"))
 
 levene(montecarloflat)
 
 # qqnorm, skewness, kurtosis
 p = [qqnorm(zresid[:, i]) for i ∈ 1:12]
-plot(p..., layout = grid(4, 3), legend = :none, plot_title = "MDM2-p53 qqnorm montecarlo")
-savefig(joinpath(outputdir, "Mdm2-p53 qqnorm montecarlo.png"))
+plot(p..., layout = grid(4, 3), legend = :none, plot_title = "FKBP12-mTOR qqnorm montecarlo")
+savefig(joinpath(outputdir, "FKBP12-mTOR qqnorm montecarlo.png"))
 
 [skewness(montecarloflat[:, i]) for i ∈ 1:12]
 [kurtosis(montecarloflat[:, i]) for i ∈ 1:12]
@@ -171,9 +151,9 @@ savefig(joinpath(outputdir, "Mdm2-p53 qqnorm montecarlo.png"))
 # anova
 
 montecarloresult = anova(
-    montecarlomeasurements[:, :, :, :, 1],
+    normalizedmontecarlomeasurements[:, :, :],
     [nested],
-    factornames = ["Replicate", "Doxycycline", "Nutlin-3a"],
+    factornames = ["Replicate", "Rapamycin"],
 )
 
 plot(montecarloresult)

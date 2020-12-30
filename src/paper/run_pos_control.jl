@@ -2,9 +2,9 @@
 
 datapath = "dataset"
 projectname = "MEG3"
-experimentdirnames = ["Mdm2-p53", "Meg3-p53"]
+experimentdirnames = ["FKBP12-mTOR"]
 
-samplenames = ["A", "B", "C", "D"]
+samplenames = ["E", "F", "G", "H"]
 
 nreplicates = 3
 nsamples = 4
@@ -14,7 +14,7 @@ mc_iterations = 10000
 
 outputdir = "output"
 mkpath(outputdir)
-outputdatapath = joinpath(outputdir, "results.jld2")
+outputdatapath = joinpath(outputdir, "resultstest.jld2")
 
 using Distributed
 currentworkers = addprocs(exeflags = "--project")
@@ -37,26 +37,21 @@ for experimentdirname ∈ experimentdirnames
             results = Result[]
             println("        Starting sample $samplename.")
             for j ∈ 1:ncells
-                println("            Starting cell $j.")
-                cellpath = joinpath(replicatepath, "$samplename $(Printf.@sprintf("%03i", j)).bin.txt")
-                localizations = loadlocalizations(cellpath, LocalizationMicroscopy.nikonelementstext)
-                # account for variances in data collection
-                if experimentdirname == experimentdirnames[2] && samplename ∈ samplenames[3:4]
-                    ch1_name = "561"
-                else
-                    ch1_name = "647"
-                end
-                ch2_name = "488"
-                if experimentdirname == experimentdirnames[2] &&
-                   ((i == 3 && samplename ∈ samplenames[1:3]) || (i == 2 && samplename == samplenames[2]))
-                    ch1_startframe = 1
-                    ch2_startframe = 15001
-                else
-                    ch1_startframe = 1
-                    ch2_startframe = 11001
+                jcell = j
+                if i == 1 && samplename ∈ ("E","F")
+                    jcell += 10
                 end
 
-                ch1_task = remotecall(getmolecules, localizations,
+                println("            Starting cell $jcell.")
+                cellpath = joinpath(replicatepath, "$samplename $(Printf.@sprintf("%03i", jcell)).bin.txt")
+                localizations = loadlocalizations(cellpath, LocalizationMicroscopy.nikonelementstext)
+                ch1_name = i == 2 ? "488" : "647"
+                ch2_name = i == 2 ? "647" : "488"  # the channels were reversed for replicate 2. Unsure if this caused other issues.
+                
+                ch1_startframe = 1
+                ch2_startframe = 11001
+                
+                ch1_task = remotecall(getmolecules, currentworkers[1], localizations,
                     ch1_name,
                     ch1_startframe,
                     11000,
@@ -66,7 +61,7 @@ for experimentdirname ∈ experimentdirnames
                     500,
                     200,
                 )
-                ch2_task = remotecall(getmolecules, localizations,
+                ch2_task = remotecall(getmolecules, currentworkers[2], localizations,
                     ch2_name,
                     ch2_startframe,
                     11000,
