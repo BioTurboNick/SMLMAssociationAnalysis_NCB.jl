@@ -69,7 +69,7 @@ savefig(joinpath(outputdir, "FKBP12-mTOR ext.png"))
 # combined with previous positive control data
 datapath = joinpath(outputdir, "results.jld2")
 nsamples = 4
-nreplicates = 4
+nreplicates = 3
 
 experimentresults1 = load(datapath)["experimentresults"]
 
@@ -107,6 +107,7 @@ montecarlomeasurements1 = [cat(montecarlomeasurements1[:,1,1], montecarlomeasure
 normalizedmontecarlomeasurements1 = [cat(normalizedmontecarlomeasurements1[:,1,1], normalizedmontecarlomeasurements1[:,1,3], normalizedmontecarlomeasurements1[:,1,2], normalizedmontecarlomeasurements1[:,1,4], dims = 3) normalizedmontecarlomeasurements1[:,2:3,:]]
 
 combinednormalizedmontecarlomeasurements = [normalizedmontecarlomeasurements1[:,:,1:2] normalizedmontecarlomeasurements[:,2:2,[3,6]]]
+combinedmontecarlomeasurements = [montecarlomeasurements1[:,:,1:2] montecarlomeasurements[:,2:2,[3,6]]]
 
 
 #### Analysis
@@ -154,6 +155,7 @@ montecarloresult = anova(
 
 import Plots.mm
 fkbp12_mtor_montecarlo = [combinednormalizedmontecarlomeasurements[:,:,1] |> vec; combinednormalizedmontecarlomeasurements[:,:,2] |> vec]
+fkbp12_mtor_montecarlo = [combinedmontecarlomeasurements[:,:,1] |> vec; combinedmontecarlomeasurements[:,:,2] |> vec]
 groups = repeat([1,2], inner = 40)
 boxplot(groups, fkbp12_mtor_montecarlo, outliers=false,
         guidefontsize=36,
@@ -167,8 +169,9 @@ boxplot(groups, fkbp12_mtor_montecarlo, outliers=false,
         size=(1024,2048),
         xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
         yaxis=("Fraction bound", (-0.1,0.2)))
-fkbp12_mtor_montecarlo_means = dropdims(median(combinednormalizedmontecarlomeasurements, dims=1), dims=1)
-dotplot!([1,1,1,1,2,2,2,2], fkbp12_mtor_montecarlo_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen]), stroke(0)))
+fkbp12_mtor_montecarlo_means = dropdims(mean(combinednormalizedmontecarlomeasurements, dims=1), dims=1)
+fkbp12_mtor_montecarlo_medians = dropdims(median(combinednormalizedmontecarlomeasurements, dims=1), dims=1)
+dotplot!([1,1,1,1,2,2,2,2], fkbp12_mtor_montecarlo_medians |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen]), stroke(0)))
 dotplot!(groups, fkbp12_mtor_montecarlo, mode = :density, label="", marker=(8, 0.5, repeat([:orange, :darkblue, :darkred, :darkgreen], inner=10), stroke(0)))
 
 savefig(joinpath(outputdir, "fkbp12_mtor_montecarlo_boxplot.png"))

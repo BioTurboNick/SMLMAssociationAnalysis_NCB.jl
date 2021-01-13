@@ -2,7 +2,7 @@
 
 datapath = "dataset"
 projectname = "MEG3"
-experimentdirnames = ["Mdm2-p53", "Meg3-p53"]
+experimentdirnames = ["p53-Mdm2", "p53-MEG3"]
 
 samplenames = ["A", "B", "C", "D"]
 
@@ -56,7 +56,7 @@ for experimentdirname ∈ experimentdirnames
                     ch2_startframe = 11001
                 end
 
-                ch1_task = remotecall(getmolecules, localizations,
+                ch1_task = remotecall(getmolecules, currentworkers[1], localizations,
                     ch1_name,
                     ch1_startframe,
                     11000,
@@ -66,7 +66,7 @@ for experimentdirname ∈ experimentdirnames
                     500,
                     200,
                 )
-                ch2_task = remotecall(getmolecules, localizations,
+                ch2_task = remotecall(getmolecules, currentworkers[2], localizations,
                     ch2_name,
                     ch2_startframe,
                     11000,
@@ -92,6 +92,7 @@ for experimentdirname ∈ experimentdirnames
                     mc_iterations
                 )
 
+                
                 positivecontrol_percentileranks, positivecontrol_distances = simulate100(ch1_molecules, ch2_molecules, ch1_neighbors, ch2_neighbors, 80, 800, mc_iterations)
                 # I found that the variance in running the negative control drops smoothly as a function of neighbor counts.
                 # This heuristic cuts down on computational time without sacrificing quality of the correction.
@@ -103,7 +104,7 @@ for experimentdirname ∈ experimentdirnames
                 negativecontrol = [simulate0(ch1_molecules, ch2_molecules, 800, 10000) for i in 1:negative_iterations]
                 negativecontrol_percentileranks = [first(i) for i in negativecontrol]
                 negativecontrol_distances = [last(i) for i in negativecontrol]
-
+                
                 mediandistance = length(distances) == 0 ? NaN : median(distances)
 
                 println("                Done: $(length(distances)) neighbors from $(length(ch1_molecules)) and $(length(ch2_molecules)) molecules, $(length(ch1_localizations)) and $(length(ch2_localizations)) localizations; median distance $mediandistance")

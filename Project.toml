@@ -1,12 +1,13 @@
 name = "SMLMAssociationAnalysis_NCB"
 uuid = "502b64d0-c436-11e9-3033-a3ceb19233e3"
 authors = ["Nicholas Bauer <nicholasbauer@outlook.com>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+HypothesisTests = "09f84164-cd44-5f33-b23f-e6b0d136a0d5"
 InvertedIndices = "41ab1584-1d38-5bbf-9106-f11c6c58b48f"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
 LocalizationMicroscopy = "798e6d30-19ab-11e9-36f8-37cfc5a8426e"
@@ -26,7 +27,7 @@ JLD2 = "0.1"
 LocalizationMicroscopy = "0.1.1"
 NearestNeighbors = "0.4"
 Plots = "1"
-SimpleANOVA = "0.6"
+SimpleANOVA = "0.7"
 StatsBase = "0.32"
 StatsPlots = "0.12, 0.14"
 Tau = "0.2"

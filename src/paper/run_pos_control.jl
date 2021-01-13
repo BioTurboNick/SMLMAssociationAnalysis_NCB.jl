@@ -4,7 +4,8 @@ datapath = "dataset"
 projectname = "MEG3"
 experimentdirnames = ["FKBP12-mTOR"]
 
-samplenames = ["E", "F", "G", "H"]
+samplenames123 = ["E", "F"]
+samplenames4 = ["C", "F"]
 
 nreplicates = 3
 nsamples = 4
@@ -14,7 +15,7 @@ mc_iterations = 10000
 
 outputdir = "output"
 mkpath(outputdir)
-outputdatapath = joinpath(outputdir, "resultstest.jld2")
+outputdatapath = joinpath(outputdir, "resultspos.jld2")
 
 using Distributed
 currentworkers = addprocs(exeflags = "--project")
@@ -33,6 +34,8 @@ for experimentdirname ∈ experimentdirnames
         sampleresults = Vector{Result}[]
         println("    Starting replicate $i.")
         replicatepath = joinpath(experimentpath, "Replicate $i")
+        samplenames = i == 4 ? samplenames4 :
+                               samplenames123
         for samplename ∈ samplenames
             results = Result[]
             println("        Starting sample $samplename.")
