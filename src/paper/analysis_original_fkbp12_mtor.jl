@@ -135,8 +135,8 @@ Potential outliers in box plots:
 # ╔═╡ f02df530-5515-11eb-0d9e-8dbb63ed2023
 md"""Evaluating z-scores within each replicate:"""
 
-# ╔═╡ ffa9f6c0-576e-11eb-0f11-3139a34ff859
-mediansflat = [medianmeasurements[:, :, 1] medianmeasurements[:, :, 2]]
+# ╔═╡ f55402f2-6a25-11eb-18df-59b6da713a4d
+mediansflat = [medianmeasurements[:,:,1] medianmeasurements[:,:,2]]
 
 # ╔═╡ 25253910-5516-11eb-0a7a-1d73ed51d4a1
 medianzscores = [zscore(mediansflat[:,i]) for i ∈ axes(mediansflat, 2)]
@@ -256,6 +256,7 @@ let
 			legend=:none,
 			bottom_margin=5mm,
 			seriescolor=[:white :lightgray],
+			size=(512, 1024),
 			line=(6, 0.75),
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
 			yaxis=("Median distance (nm)"))
@@ -272,8 +273,8 @@ md"""
 
 # ╔═╡ 8c0ebd10-56a9-11eb-3e8c-95b53bf12061
 let
-	p1 = boxplot(montecarlomeasurements[:, :, 1], xaxis = ("Replicates", [1, 2, 3, 4, 5]), yaxis = ("Fraction bound"))
-	p2 = boxplot(montecarlomeasurements[:, :, 2], xaxis = ("Replicates", [1, 2, 3, 4, 5]), yaxis = ("Fraction bound"))
+	p1 = boxplot(montecarlomeasurements[:, :, 1], xaxis = ("Replicates", [1, 2, 3, 4, 5]), yaxis = ("Fraction associated"))
+	p2 = boxplot(montecarlomeasurements[:, :, 2], xaxis = ("Replicates", [1, 2, 3, 4, 5]), yaxis = ("Fraction associated"))
 
 	plot(p1, p2, layout = grid(1, 2), legend = :none, plot_title = "FKBP12-mTOR")
 end
@@ -629,7 +630,7 @@ qqnormplot(normmontecarloflat)
 # ╟─27e24820-5514-11eb-1415-8711a194892d
 # ╠═f0393540-5514-11eb-2f76-3514cc3bc85c
 # ╟─f02df530-5515-11eb-0d9e-8dbb63ed2023
-# ╟─ffa9f6c0-576e-11eb-0f11-3139a34ff859
+# ╟─f55402f2-6a25-11eb-18df-59b6da713a4d
 # ╟─25253910-5516-11eb-0a7a-1d73ed51d4a1
 # ╟─d8c96c5e-5517-11eb-0861-056d5e425f04
 # ╟─87eb8f70-5518-11eb-1639-f91b4bcb5c9b
@@ -650,7 +651,7 @@ qqnormplot(normmontecarloflat)
 # ╠═c101d900-57ab-11eb-04ab-77cd4e0ff4b3
 # ╟─fd2d4a40-57ab-11eb-2688-53b009a37680
 # ╟─895181b0-59f2-11eb-3d4e-1d92833b0e72
-# ╟─95fd3850-59f2-11eb-0914-a999ed3b9e5f
+# ╠═95fd3850-59f2-11eb-0914-a999ed3b9e5f
 # ╟─25d0ce1e-5691-11eb-2cc8-49980b6b2161
 # ╟─8c0ebd10-56a9-11eb-3e8c-95b53bf12061
 # ╟─faa812c0-56aa-11eb-3b6b-99fe5f200b67

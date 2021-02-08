@@ -214,7 +214,7 @@ Conducted Levene's test, a 1-way ANOVA of the absolute deviation between each va
 """
 
 # ╔═╡ 0ffdd990-5519-11eb-376b-33be0cc966d7
-levene(mediansflat)
+levene(mediansflatw)
 
 # ╔═╡ 28a8da30-5519-11eb-2fb0-efe693c6e44c
 md"""
@@ -234,10 +234,10 @@ There are a couple notable deviations but for the *most* part they appear close 
 """
 
 # ╔═╡ cf59a26e-55bd-11eb-1c4b-316a603b9007
-medianskewness = [skewness(mediansflat[:,i]) for i ∈ axes(mediansflat, 2)]
+medianskewness = [skewness(mediansflat[:,i]) for i ∈ axes(mediansflatw, 2)]
 
 # ╔═╡ 135dbe6e-55be-11eb-3a89-dd3d02c3ad4a
-mediankurtosis = [kurtosis(mediansflat[:,i]) for i ∈ axes(mediansflat, 2)]
+mediankurtosis = [kurtosis(mediansflatw[:,i]) for i ∈ axes(mediansflatw, 2)]
 
 # ╔═╡ 6778a880-55be-11eb-1016-c59335beef0a
 md"""
@@ -256,7 +256,7 @@ md"""
 
 # ╔═╡ c101d900-57ab-11eb-04ab-77cd4e0ff4b3
 medianresult = anova(
-    permutedims(medianmeasurements[:, :, :, :, 2], (1,3,4,2)),
+    permutedims(medianmeasurementsw[:, :, :, :, 2], (1,3,4,2)),
     [fixed, fixed, subject],
     factornames = ["Doxycycline", "RNA", "Replicate"],
 )
@@ -284,14 +284,14 @@ Doxycycline is not significant and has an insignificant effect size. As the RNA 
 
 # ╔═╡ 5f1ce3b0-55c1-11eb-3d03-b53516cfc976
 medianresultMEG3 = anova(
-    permutedims(medianmeasurements[:, :, :, 1, 2], (1, 3, 2)),
+    permutedims(medianmeasurementsw[:, :, :, 1, 2], (1, 3, 2)),
     [fixed, subject],
     factornames = ["Doxycycline", "Replicate"],
 )
 
 # ╔═╡ 0fddbb50-5772-11eb-01cc-e57dbec14a6b
 medianresultGAPDH = anova(
-    permutedims(medianmeasurements[:, :, :, 2, 2], (1, 3, 2)),
+    permutedims(medianmeasurementsw[:, :, :, 2, 2], (1, 3, 2)),
     [fixed, subject],
     factornames = ["Doxycycline", "Replicate"],
 )
@@ -304,6 +304,30 @@ Doxycycline produced an insignificant effect with GAPDH (both in size and probab
 
 Doxycycline produced a large but not significant effect with MEG3, indicating MEG3 and p53 were brought closer together but not unambiguously. This is probably mostly due to the induced expression of MEG3.
 """
+
+# ╔═╡ 68a010a0-6a3a-11eb-07df-9d60e51f3aab
+let
+	rnagroups = repeat([1,2], inner = 60)
+	doxgroups = repeat([2, 1], inner = 30, outer = 2)
+	p53_meg3_median = [medianmeasurementsw[:,:,1,1,2] |> vec; medianmeasurementsw[:,:,2,1,2] |> vec; medianmeasurementsw[:,:,1,2,2] |> vec; medianmeasurementsw[:,:,2,2,2] |> vec]
+	groupedboxplot(rnagroups, p53_meg3_median, group = doxgroups, outliers=false,
+			label=["- Dox", "+ Dox"],
+			guidefontsize=26,
+			tickfontsize=24,
+			legend=:none,
+			top_margin=10mm,
+		    left_margin=10mm,
+			seriescolor=[:white :lightgray],
+			line=(3, 1.0),
+			gridopacity=0.3,
+			xgrid=:none,
+			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
+			size=(512,1024),
+			yaxis=("Median exclusive pairwise distance (nm)", (0,1200)))
+	p53_meg3_median_means = dropdims(mean(medianmeasurementsw[:,:,:,:,2], dims=1), dims=1)
+	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_median_means |> vec, mode = :none, label="", marker=(6, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	groupeddotplot!(rnagroups, p53_meg3_median, group = doxgroups, mode = :density, label="", marker=(4, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+end
 
 # ╔═╡ 25d0ce1e-5691-11eb-2cc8-49980b6b2161
 md"""
@@ -411,7 +435,7 @@ md"""
 # ╔═╡ c29f8040-57a7-11eb-2cb4-7974bcf74e27
 montecarloresult = anova(
     permutedims(montecarlomeasurements[:, :, :, :, 2], (1, 3, 4, 2)),
-    [fixed, fixed, random],
+    [fixed, fixed, subject],
     factornames = ["Doxycycline", "RNA", "Replicate"],
 )
 
@@ -444,6 +468,31 @@ Doxycycline had a medium effect on MEG3 and p53, although not significant. Doxyc
 
 Doxycyline had no effect on GAPDH and p53 and was highly nonsignificant (4.30% to 4.22%).
 """
+
+# ╔═╡ 174f2590-6a46-11eb-0621-73610de2d1c0
+let
+	rnagroups = repeat([1,2], inner = 60)
+	doxgroups = repeat([2, 1], inner = 30, outer = 2)
+	p53_meg3_montecarlo = [montecarlomeasurements[:,:,1,1,2] |> vec; montecarlomeasurements[:,:,2,1,2] |> vec; montecarlomeasurements[:,:,1,2,2] |> vec; montecarlomeasurements[:,:,2,2,2] |> vec]
+	groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
+			label=["- Dox", "+ Dox"],
+			guidefontsize=26,
+			tickfontsize=24,
+			legend=:none,
+			top_margin=10mm,
+			bottom_margin=0mm,
+	        left_margin=10mm,
+			seriescolor=[:white :lightgray],
+			line=(3, 1.0),
+			gridopacity=0.3,
+			xgrid=:none,
+			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
+			size=(512,1024),
+			yaxis=("Fraction associated", (0,0.25)))
+	p53_meg3_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,2], dims=1), dims=1)
+	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_montecarlo_means |> vec, mode = :none, label="", marker=(6, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(4, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+end
 
 # ╔═╡ 78883b10-5756-11eb-32cf-b95fdeebda79
 md"""
@@ -595,6 +644,31 @@ Doxycycline had a small but nonsignificant effect with MEG3 (1.55% to 3.72%). In
 Doxycyline had no significant effect with GAPDH (0.678% to 1.19%). Doxycycline shouldn't do anything to GAPDH, so this is expected.
 """
 
+# ╔═╡ bca6b8f0-6a46-11eb-09dc-1b398bf010e9
+let
+	rnagroups = repeat([1,2], inner = 60)
+	doxgroups = repeat([2, 1], inner = 30, outer = 2)
+	p53_meg3_montecarlo = [normalizedmontecarlomeasurements[:,:,1,1,2] |> vec; normalizedmontecarlomeasurements[:,:,2,1,2] |> vec; normalizedmontecarlomeasurements[:,:,1,2,2] |> vec; normalizedmontecarlomeasurements[:,:,2,2,2] |> vec]
+	groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
+			label=["- Dox", "+ Dox"],
+			guidefontsize=26,
+			tickfontsize=24,
+			legend=:none,
+			top_margin=10mm,
+			bottom_margin=0mm,
+	        left_margin=10mm,
+			seriescolor=[:white :lightgray],
+			line=(3, 1.0),
+			gridopacity=0.3,
+			xgrid=:none,
+			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
+			size=(512,1024),
+			yaxis=("Fraction associated", (-0.1,0.2)))
+	p53_meg3_montecarlo_means = dropdims(mean(normalizedmontecarlomeasurements[:,:,:,:,2], dims=1), dims=1)
+	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_montecarlo_means |> vec, mode = :none, label="", marker=(6, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(4, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+end
+
 # ╔═╡ 9c92b290-56ae-11eb-2595-85845fe95f0e
 md"""
 ## Functions
@@ -621,7 +695,7 @@ function zresid_zpred_plot(data)
 end
 
 # ╔═╡ c8f83d60-5518-11eb-2643-a30df2dd9fb9
-zresid_zpred_plot(mediansflat)
+zresid_zpred_plot(mediansflatw)
 
 # ╔═╡ 3a3fa580-56ae-11eb-1f19-f3c06ef2d9d7
 zresid_zpred_plot(montecarloflat)
@@ -664,7 +738,7 @@ qqnormplot(normmontecarloflat)
 # ╟─87eb8f70-5518-11eb-1639-f91b4bcb5c9b
 # ╠═74a25f10-59ab-11eb-3a45-bf3b0554a07a
 # ╟─a87aac80-5518-11eb-38d4-5fe90140b820
-# ╠═c8f83d60-5518-11eb-2643-a30df2dd9fb9
+# ╟─c8f83d60-5518-11eb-2643-a30df2dd9fb9
 # ╟─f6e23cd0-5518-11eb-226a-c5751eb65b34
 # ╟─0ffdd990-5519-11eb-376b-33be0cc966d7
 # ╟─28a8da30-5519-11eb-2fb0-efe693c6e44c
@@ -676,7 +750,7 @@ qqnormplot(normmontecarloflat)
 # ╟─6778a880-55be-11eb-1016-c59335beef0a
 # ╟─9bf9aaf0-55be-11eb-17a2-75b3eec550f8
 # ╟─265006c0-55c1-11eb-2ba8-3d628d096704
-# ╠═c101d900-57ab-11eb-04ab-77cd4e0ff4b3
+# ╟─c101d900-57ab-11eb-04ab-77cd4e0ff4b3
 # ╟─19934eb0-57ba-11eb-3f45-11c68057c1f7
 # ╟─25bb5660-57ba-11eb-3999-4bbf47d29d8a
 # ╟─342cfff0-57ba-11eb-07d6-2b90717f7c7b
@@ -684,6 +758,7 @@ qqnormplot(normmontecarloflat)
 # ╠═5f1ce3b0-55c1-11eb-3d03-b53516cfc976
 # ╠═0fddbb50-5772-11eb-01cc-e57dbec14a6b
 # ╟─2ed8ff90-568e-11eb-10a3-0b97b2425d2f
+# ╟─68a010a0-6a3a-11eb-07df-9d60e51f3aab
 # ╟─25d0ce1e-5691-11eb-2cc8-49980b6b2161
 # ╟─8c0ebd10-56a9-11eb-3e8c-95b53bf12061
 # ╟─faa812c0-56aa-11eb-3b6b-99fe5f200b67
@@ -710,6 +785,7 @@ qqnormplot(normmontecarloflat)
 # ╠═755d8510-56b3-11eb-3a0c-53b643ba2053
 # ╠═28212d70-57a7-11eb-1c94-3fa38021ba8e
 # ╟─248d1560-5753-11eb-2156-89cfb6742205
+# ╠═174f2590-6a46-11eb-0621-73610de2d1c0
 # ╟─78883b10-5756-11eb-32cf-b95fdeebda79
 # ╟─df7dce20-5756-11eb-3796-037e8e3c49f9
 # ╟─faf5aa60-5756-11eb-3b5b-f1ad5e004af2
@@ -738,6 +814,7 @@ qqnormplot(normmontecarloflat)
 # ╠═f325b3c0-57ba-11eb-1cae-17d58dd4ec29
 # ╠═0f2bc640-57bb-11eb-2632-e1058fbc9108
 # ╟─408e5d30-5764-11eb-124f-4f2630d1d908
+# ╟─bca6b8f0-6a46-11eb-09dc-1b398bf010e9
 # ╟─9c92b290-56ae-11eb-2595-85845fe95f0e
 # ╟─2623d480-56af-11eb-2ab8-0d0afd8c45dc
 # ╟─a655a120-56ae-11eb-30be-459d7c3067dc

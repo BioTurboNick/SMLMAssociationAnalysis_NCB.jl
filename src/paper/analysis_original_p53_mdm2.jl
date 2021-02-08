@@ -202,9 +202,6 @@ begin
 	mediansflatw[10,11] = mediansflat[7,11]
 end
 
-# ╔═╡ 21245b90-68f1-11eb-07f1-73bba14e2319
-mediansflatw[:,11:12]
-
 # ╔═╡ a87aac80-5518-11eb-38d4-5fe90140b820
 md"""
 #### Check assumption of homoscedasticity
@@ -624,7 +621,6 @@ qqnormplot(normmontecarloflat)
 # ╠═f0393540-5514-11eb-2f76-3514cc3bc85c
 # ╟─f02df530-5515-11eb-0d9e-8dbb63ed2023
 # ╟─1bf98170-5516-11eb-0c24-77ac43672fba
-# ╠═21245b90-68f1-11eb-07f1-73bba14e2319
 # ╟─25253910-5516-11eb-0a7a-1d73ed51d4a1
 # ╟─d8c96c5e-5517-11eb-0861-056d5e425f04
 # ╟─87eb8f70-5518-11eb-1639-f91b4bcb5c9b
