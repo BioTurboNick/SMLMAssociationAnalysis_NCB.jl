@@ -4,11 +4,12 @@ datapath = "dataset"
 projectname = "MEG3"
 experimentdirnames = ["FKBP12-mTOR"]
 
-samplenames123 = ["E", "F"]
+samplenames1 = ["E", "G"]
+samplenames23 = ["E", "F"]
 samplenames4 = ["C", "F"]
+samplenames5 = ["A", "B"]
 
-nreplicates = 3
-nsamples = 4
+nreplicates = 5
 ncells = 10
 
 mc_iterations = 10000
@@ -34,14 +35,16 @@ for experimentdirname ∈ experimentdirnames
         sampleresults = Vector{Result}[]
         println("    Starting replicate $i.")
         replicatepath = joinpath(experimentpath, "Replicate $i")
-        samplenames = i == 4 ? samplenames4 :
-                               samplenames123
+        samplenames = i == 5 ? samplenames5 :
+                      i == 4 ? samplenames4 :
+                      i == 1 ? samplenames1 :
+                               samplenames23
         for samplename ∈ samplenames
             results = Result[]
             println("        Starting sample $samplename.")
             for j ∈ 1:ncells
                 jcell = j
-                if i == 1 && samplename ∈ ("E","F")
+                if i == 1 && samplename == "E"
                     jcell += 10
                 end
 
