@@ -19,6 +19,9 @@ struct Result
     negativecontrol_percentileranks::Vector{Vector{AbstractFloat}} # stores the percentile ranks obtained when simulating 0% bound from this cell
 end
 
+Result(r::Result, newchannels::Vector{ChannelData}) = Result(r.projectdirname, r.experimentdirname, r.replicate, r.samplename, r.cell, newchannels, r.distances, r.mediandistance, r.percentileranks,
+                                                             r.positivecontrol_distances, r.negativecontrol_distances, r.positivecontrol_percentileranks, r.negativecontrol_percentileranks)
+
 """
     ResultOptimizing
 
