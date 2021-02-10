@@ -1,5 +1,5 @@
-import Plots.scatter
-import Plots.mm
+import StatsPlots.scatter
+import StatsPlots.mm
 
 using LocalizationMicroscopy
 
