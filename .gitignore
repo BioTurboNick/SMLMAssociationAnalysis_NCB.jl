@@ -24,3 +24,7 @@ docs/site/
 Manifest.toml
 
 .vscode/settings.json
+
+# Dataset is stored separately and output shouldn't be synced
+dataset/*
+output/*
