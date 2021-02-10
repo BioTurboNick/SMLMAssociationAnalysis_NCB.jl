@@ -1,7 +1,7 @@
 name = "SMLMAssociationAnalysis_NCB"
 uuid = "502b64d0-c436-11e9-3033-a3ceb19233e3"
 authors = ["Nicholas Bauer <nicholasbauer@outlook.com>"]
-version = "0.2.4"
+version = "0.2.5"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"

@@ -3,8 +3,8 @@ module SMLMAssociationAnalysis_NCB
 using Distributed
 using LocalizationMicroscopy
 using NearestNeighbors
-using Plots
 using SharedArrays
+using StatsPlots
 using Statistics
 using Tau
 

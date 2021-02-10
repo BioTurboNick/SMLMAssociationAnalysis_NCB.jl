@@ -238,46 +238,41 @@ function localizationsinsetplot_forprint(result::Result, xlims, ylims; color1 = 
     plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
 end
 
-insetplot(result::Result, args...) = insetplot(result.channels[1].molecules, result.channels[2].molecules, args...)
-function insetplot(molecules1::Vector{Molecule}, molecules2::Vector{Molecule}, xlims, ylims, include_scalebar = false)
-    mol1coords = molecules1 |> extractcoordinates
-    mol2coords = molecules2 |> extractcoordinates
-    scatter(mol1coords[1,:], mol1coords[2,:], marker=(8, stroke(2, :magenta), :white))
-    include_scalebar && plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
-          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+function insetplot(result::Result, xlims, ylims; color1 = :magenta, color2 = :green, include_scalebar = false, forprint = false)
+    if forprint
+        locmarkersize = 16
+        molmarkersize = 64
+		molstrokesize = 2
+		scalewidth = 12
+		textsize = 48
+        size = (2048, 2048)
+    else
+        locmarkersize = 2
+        molmarkersize = 8
+		molstrokesize = 4
+		scalewidth = 3
+		textsize = 10
+        size = (256, 256)
+    end
 
-    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(8, stroke(2, :green), :white))
-    plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
-
-    loc1coords = mapreduce(x -> x.group.localizations, vcat, molecules1) |> extractcoordinates
-    loc2coords = mapreduce(x -> x.group.localizations, vcat, molecules2) |> extractcoordinates
-    scatter!(loc1coords[1,:], loc1coords[2,:], marker=(1, stroke(0), :magenta))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
-          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
-
-    scatter!(loc2coords[1,:], loc2coords[2,:], marker=(1, stroke(0), :green))
-    plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:box)
-end
-
-function insetplot_forprint(result::Result, xlims, ylims; color1 = :magenta, color2 = :green, include_scalebar = false)
     mol1coords = result.channels[1].molecules |> extractcoordinates
     mol2coords = result.channels[2].molecules |> extractcoordinates
-    scatter(mol1coords[1,:], mol1coords[2,:], marker=(24, stroke(2, color1), 0.75, :white),
-            framestyle=:none, size=(2048,2048))
-    include_scalebar && plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
-          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
 
-    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(24, stroke(2, color2), 0.75, :white))
-    plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
+    scatter(mol1coords[1,:], mol1coords[2,:], marker=(molmarkersize, stroke(molstrokesize, color1), 0.75, :white))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(molmarkersize, stroke(molstrokesize, color2), 0.75, :white))
+	scatter!(mol1coords[1,:], mol1coords[2,:], marker=(molmarkersize, stroke(0), 0.25, color1))
+    scatter!(mol2coords[1,:], mol2coords[2,:], marker=(molmarkersize, stroke(0), 0.25, color2))
 
     loc1coords = mapreduce(x -> x.group.localizations, vcat, result.channels[1].molecules) |> extractcoordinates
     loc2coords = mapreduce(x -> x.group.localizations, vcat, result.channels[2].molecules) |> extractcoordinates
-    scatter!(loc1coords[1,:], loc1coords[2,:], marker=(8, stroke(0), 0.75, color1))
-    plot!(first(xlims) .+ [100; 600], first(ylims) .+ [100; 100], line=(3, :black),
-          annotations=(first(xlims) + 100, first(ylims) + 125,text("500 nm", 10, :left, :top)))
+    
+    scatter!(loc1coords[1,:], loc1coords[2,:], marker=(locmarkersize, stroke(0), 0.75, color1))
+    scatter!(loc2coords[1,:], loc2coords[2,:], marker=(locmarkersize, stroke(0), 0.75, color2))
 
-    scatter!(loc2coords[1,:], loc2coords[2,:], marker=(8, stroke(0), 0.75, color2))
-    plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0))
+    include_scalebar && plot!(first(xlims) .+ [10; 210], first(ylims) .+ [10; 10], line=(scalewidth, :black),
+          annotations=(first(xlims) + 10, first(ylims) + 20, text("200 nm", textsize, :left, :top)))
+
+    plot!(aspect_ratio=:equal, xlims=xlims, yaxis=(ylims, :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:none, size=size)
 end
 
 function yzframelocalizationplot(result::Result)
