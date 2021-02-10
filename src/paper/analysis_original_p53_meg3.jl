@@ -106,7 +106,7 @@ begin
 
 	normalizedmontecarlomeasurements = (montecarlomeasurements .- negativecontrolmontecarlomeasurements) ./ (positivecontrolmontecarlomeasurements .- negativecontrolmontecarlomeasurements)
 
-	()
+	nothing
 end
 
 # ╔═╡ 294e6a02-550e-11eb-3450-d9d5989ec08c
@@ -256,9 +256,9 @@ md"""
 
 # ╔═╡ c101d900-57ab-11eb-04ab-77cd4e0ff4b3
 medianresult = anova(
-    permutedims(medianmeasurementsw[:, :, :, :, 2], (1,3,4,2)),
-    [fixed, fixed, subject],
-    factornames = ["Doxycycline", "RNA", "Replicate"],
+    permutedims(medianmeasurementsw[:, :, :, :, 2], (1, 3, 2, 4)),
+    [fixed, subject, fixed],
+    factornames = ["Doxycycline", "Replicate", "RNA"],
 )
 
 # ╔═╡ 19934eb0-57ba-11eb-3f45-11c68057c1f7
@@ -305,28 +305,63 @@ Doxycycline produced an insignificant effect with GAPDH (both in size and probab
 Doxycycline produced a large but not significant effect with MEG3, indicating MEG3 and p53 were brought closer together but not unambiguously. This is probably mostly due to the induced expression of MEG3.
 """
 
+# ╔═╡ 98c74810-6af9-11eb-3988-1f4c77155983
+md"""
+### Figure
+"""
+
 # ╔═╡ 68a010a0-6a3a-11eb-07df-9d60e51f3aab
 let
+	import StatsPlots.mm
 	rnagroups = repeat([1,2], inner = 60)
 	doxgroups = repeat([2, 1], inner = 30, outer = 2)
 	p53_meg3_median = [medianmeasurementsw[:,:,1,1,2] |> vec; medianmeasurementsw[:,:,2,1,2] |> vec; medianmeasurementsw[:,:,1,2,2] |> vec; medianmeasurementsw[:,:,2,2,2] |> vec]
 	groupedboxplot(rnagroups, p53_meg3_median, group = doxgroups, outliers=false,
 			label=["- Dox", "+ Dox"],
-			guidefontsize=26,
-			tickfontsize=24,
+			guidefontsize=13,
+			tickfontsize=12,
 			legend=:none,
 			top_margin=10mm,
 		    left_margin=10mm,
 			seriescolor=[:white :lightgray],
-			line=(3, 1.0),
+			line=(2, 1.0),
 			gridopacity=0.3,
 			xgrid=:none,
 			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
-			size=(512,1024),
+			size=(256,512),
 			yaxis=("Median exclusive pairwise distance (nm)", (0,1200)))
 	p53_meg3_median_means = dropdims(mean(medianmeasurementsw[:,:,:,:,2], dims=1), dims=1)
-	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_median_means |> vec, mode = :none, label="", marker=(6, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
-	groupeddotplot!(rnagroups, p53_meg3_median, group = doxgroups, mode = :density, label="", marker=(4, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_median_means |> vec, mode = :none, label="", marker=(4, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	groupeddotplot!(rnagroups, p53_meg3_median, group = doxgroups, mode = :density, label="", marker=(2, 0.5, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+end
+
+# ╔═╡ 26985da0-6afa-11eb-2675-69a745a338c4
+md"""Create paper-quality version and save it:"""
+
+# ╔═╡ 252c7190-6afa-11eb-00fd-5f527f9fa189
+let
+	import StatsPlots.mm
+	rnagroups = repeat([1,2], inner = 60)
+	doxgroups = repeat([2, 1], inner = 30, outer = 2)
+	p53_meg3_median = [medianmeasurementsw[:,:,1,1,2] |> vec; medianmeasurementsw[:,:,2,1,2] |> vec; medianmeasurementsw[:,:,1,2,2] |> vec; medianmeasurementsw[:,:,2,2,2] |> vec]
+	groupedboxplot(rnagroups, p53_meg3_median, group = doxgroups, outliers=false,
+			label=["- Dox", "+ Dox"],
+			guidefontsize=52,
+			tickfontsize=48,
+			legend=:none,
+			top_margin=10mm,
+		    left_margin=25mm,
+			seriescolor=[:white :lightgray],
+			line=(8, 1.0),
+			gridopacity=0.3,
+			xgrid=:none,
+			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
+			size=(1024,2048),
+			yaxis=("Median exclusive pairwise distance (nm)", (0,1200)))
+	p53_meg3_median_means = dropdims(mean(medianmeasurementsw[:,:,:,:,2], dims=1), dims=1)
+	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_median_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	groupeddotplot!(rnagroups, p53_meg3_median, group = doxgroups, mode = :density, label="", marker=(8, 0.5, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+	savefig(joinpath(outputdir, "p53-meg3-medians.png"))
 end
 
 # ╔═╡ 25d0ce1e-5691-11eb-2cc8-49980b6b2161
@@ -434,10 +469,13 @@ md"""
 
 # ╔═╡ c29f8040-57a7-11eb-2cb4-7974bcf74e27
 montecarloresult = anova(
-    permutedims(montecarlomeasurements[:, :, :, :, 2], (1, 3, 4, 2)),
-    [fixed, fixed, subject],
-    factornames = ["Doxycycline", "RNA", "Replicate"],
+    permutedims(montecarlomeasurements[:, :, :, :, 2], (1, 3, 2, 4)),
+    [fixed, subject, fixed],
+    factornames = ["Doxycycline", "Replicate", "RNA"],
 )
+
+# ╔═╡ d1259f32-6b0e-11eb-36a0-0308ec00088c
+mean(montecarloresult.crossedcellmeans, dims = 2)
 
 # ╔═╡ 2553a3a0-57a9-11eb-247d-a161d85d4410
 md"""
@@ -471,27 +509,56 @@ Doxycyline had no effect on GAPDH and p53 and was highly nonsignificant (4.30% t
 
 # ╔═╡ 174f2590-6a46-11eb-0621-73610de2d1c0
 let
+	import StatsPlots.mm
 	rnagroups = repeat([1,2], inner = 60)
 	doxgroups = repeat([2, 1], inner = 30, outer = 2)
 	p53_meg3_montecarlo = [montecarlomeasurements[:,:,1,1,2] |> vec; montecarlomeasurements[:,:,2,1,2] |> vec; montecarlomeasurements[:,:,1,2,2] |> vec; montecarlomeasurements[:,:,2,2,2] |> vec]
 	groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
 			label=["- Dox", "+ Dox"],
-			guidefontsize=26,
-			tickfontsize=24,
+			guidefontsize=13,
+			tickfontsize=12,
 			legend=:none,
 			top_margin=10mm,
-			bottom_margin=0mm,
-	        left_margin=10mm,
+		    left_margin=10mm,
 			seriescolor=[:white :lightgray],
-			line=(3, 1.0),
+			line=(2, 1.0),
 			gridopacity=0.3,
 			xgrid=:none,
 			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
-			size=(512,1024),
+			size=(256,512),
 			yaxis=("Fraction associated", (0,0.25)))
 	p53_meg3_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,2], dims=1), dims=1)
-	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_montecarlo_means |> vec, mode = :none, label="", marker=(6, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
-	groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(4, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_montecarlo_means |> vec, mode = :none, label="", marker=(4, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(2, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+end
+
+# ╔═╡ 0185bed0-6afb-11eb-279d-b9e008c964c3
+md"""Create paper-quality version and save it:"""
+
+# ╔═╡ fecb59c0-6afa-11eb-15fe-cbab4e3f44e1
+let
+	import StatsPlots.mm
+	rnagroups = repeat([1,2], inner = 60)
+	doxgroups = repeat([2, 1], inner = 30, outer = 2)
+	p53_meg3_montecarlo = [montecarlomeasurements[:,:,1,1,2] |> vec; montecarlomeasurements[:,:,2,1,2] |> vec; montecarlomeasurements[:,:,1,2,2] |> vec; montecarlomeasurements[:,:,2,2,2] |> vec]
+	groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
+			label=["- Dox", "+ Dox"],
+			guidefontsize=52,
+			tickfontsize=48,
+			legend=:none,
+		    left_margin=25mm,
+		    top_margin=10mm,
+			seriescolor=[:white :lightgray],
+			line=(8, 1.0),
+			gridopacity=0.3,
+			xgrid=:none,
+			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
+			size=(1024,2048),
+			yaxis=("Fraction associated", (0,0.25)))
+	p53_meg3_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,2], dims=1), dims=1)
+	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_montecarlo_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(8, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+	savefig(joinpath(outputdir, "p53-meg3-montecarlo.png"))
 end
 
 # ╔═╡ 78883b10-5756-11eb-32cf-b95fdeebda79
@@ -604,9 +671,9 @@ Regular ANOVA
 
 # ╔═╡ b7624d5e-575d-11eb-1221-974537c3b48e
 normmontecarloresult = anova(
-    permutedims(normalizedmontecarlomeasurements[:, :, :, :, 2], (1, 3, 4, 2)),
-    [fixed, fixed, subject],
-    factornames = ["Doxycycline", "RNA", "Replicate"],
+    permutedims(normalizedmontecarlomeasurements[:, :, :, :, 2], (1, 3, 2, 4)),
+    [fixed, subject, fixed],
+    factornames = ["Doxycycline", "Replicate", "RNA"],
 )
 
 # ╔═╡ 8f0dad80-575f-11eb-2312-adae92d50e83
@@ -750,7 +817,8 @@ qqnormplot(normmontecarloflat)
 # ╟─6778a880-55be-11eb-1016-c59335beef0a
 # ╟─9bf9aaf0-55be-11eb-17a2-75b3eec550f8
 # ╟─265006c0-55c1-11eb-2ba8-3d628d096704
-# ╟─c101d900-57ab-11eb-04ab-77cd4e0ff4b3
+# ╠═c101d900-57ab-11eb-04ab-77cd4e0ff4b3
+# ╠═d1259f32-6b0e-11eb-36a0-0308ec00088c
 # ╟─19934eb0-57ba-11eb-3f45-11c68057c1f7
 # ╟─25bb5660-57ba-11eb-3999-4bbf47d29d8a
 # ╟─342cfff0-57ba-11eb-07d6-2b90717f7c7b
@@ -758,7 +826,10 @@ qqnormplot(normmontecarloflat)
 # ╠═5f1ce3b0-55c1-11eb-3d03-b53516cfc976
 # ╠═0fddbb50-5772-11eb-01cc-e57dbec14a6b
 # ╟─2ed8ff90-568e-11eb-10a3-0b97b2425d2f
+# ╟─98c74810-6af9-11eb-3988-1f4c77155983
 # ╟─68a010a0-6a3a-11eb-07df-9d60e51f3aab
+# ╟─26985da0-6afa-11eb-2675-69a745a338c4
+# ╠═252c7190-6afa-11eb-00fd-5f527f9fa189
 # ╟─25d0ce1e-5691-11eb-2cc8-49980b6b2161
 # ╟─8c0ebd10-56a9-11eb-3e8c-95b53bf12061
 # ╟─faa812c0-56aa-11eb-3b6b-99fe5f200b67
@@ -785,7 +856,9 @@ qqnormplot(normmontecarloflat)
 # ╠═755d8510-56b3-11eb-3a0c-53b643ba2053
 # ╠═28212d70-57a7-11eb-1c94-3fa38021ba8e
 # ╟─248d1560-5753-11eb-2156-89cfb6742205
-# ╠═174f2590-6a46-11eb-0621-73610de2d1c0
+# ╟─174f2590-6a46-11eb-0621-73610de2d1c0
+# ╟─0185bed0-6afb-11eb-279d-b9e008c964c3
+# ╠═fecb59c0-6afa-11eb-15fe-cbab4e3f44e1
 # ╟─78883b10-5756-11eb-32cf-b95fdeebda79
 # ╟─df7dce20-5756-11eb-3796-037e8e3c49f9
 # ╟─faf5aa60-5756-11eb-3b5b-f1ad5e004af2

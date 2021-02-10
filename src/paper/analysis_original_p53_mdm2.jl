@@ -108,7 +108,7 @@ begin
 
 	normalizedmontecarlomeasurements = (montecarlomeasurements .- negativecontrolmontecarlomeasurements) ./ (positivecontrolmontecarlomeasurements .- negativecontrolmontecarlomeasurements)
 
-	()
+	nothing
 end
 
 # ╔═╡ 294e6a02-550e-11eb-3450-d9d5989ec08c
@@ -288,6 +288,53 @@ md"""
 Nutlin-3a is just above the significance threshold with a medium effect size while Doxycyline produced no changes whatsoever. Nutlin-3a was thus associated with a drop in median distance, likely due to an increase in expression level.
 """
 
+# ╔═╡ 76abe9e0-6af2-11eb-0dc5-4594d89c209b
+md"""
+### Figure
+"""
+
+# ╔═╡ 81b932c0-6af2-11eb-0a5c-09c0b3f10519
+let
+	import StatsPlots.mm
+	p53_mdm2_median = [medianmeasurementsw[:,:,1,1,1] |> vec; medianmeasurementsw[:,:,2,1,1] |> vec; medianmeasurementsw[:,:,1,2,1] |> vec; medianmeasurementsw[:,:,2,2,1] |> vec]
+	groups = repeat([2, 1, 4, 3], inner = 30)
+	boxplot(groups, p53_mdm2_median, outliers=false,
+		    label=["- Dox", "+ Dox"],
+			legend=:none,
+			seriescolor=:white,
+			size=(256, 512),
+			line=(2, 0.75),
+			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
+			yaxis=("Median distance (nm)", [0, 600]))
+	p53_mdm2_median_means = dropdims(mean(medianmeasurementsw[:,:,:,:,1], dims = 1), dims = 1) |> vec
+	dotplot!(repeat([2, 1, 4, 3], inner=3), p53_mdm2_median_means |> vec, mode = :none, label="", marker=(4, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	dotplot!(groups, p53_mdm2_median, mode = :density, label="", marker=(2, 0.5, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+end
+
+# ╔═╡ b69b87b2-6af5-11eb-30c2-bfa8159a8e0d
+md"""Create paper-quality version and save it:"""
+
+# ╔═╡ deafcdc0-6af4-11eb-1673-0101d277b4b3
+let
+	import StatsPlots.mm
+	p53_mdm2_median = [medianmeasurementsw[:,:,1,1,1] |> vec; medianmeasurementsw[:,:,2,1,1] |> vec; medianmeasurementsw[:,:,1,2,1] |> vec; medianmeasurementsw[:,:,2,2,1] |> vec]
+	groups = repeat([2, 1, 4, 3], inner = 30)
+	boxplot(groups, p53_mdm2_median, outliers=false,
+			legend=:none,
+		    left_margin=25mm,
+			seriescolor=:white,
+		    guidefontsize=52,
+            tickfontsize=48,
+			size=(1024, 2048),
+			line=(8, 0.75),
+			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
+			yaxis=("Median distance (nm)", [0, 600]))
+	p53_mdm2_median_means = dropdims(mean(medianmeasurementsw[:,:,:,:,1], dims=1), dims=1) |> vec
+	dotplot!(repeat([2, 1, 4, 3], inner=3), p53_mdm2_median_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	dotplot!(groups, p53_mdm2_median, mode = :density, label="", marker=(8, 0.5, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+	savefig(joinpath(outputdir, "p53-mdm2-medians.png"))
+end
+
 # ╔═╡ 25d0ce1e-5691-11eb-2cc8-49980b6b2161
 md"""
 ### Monte Carlo fraction associated
@@ -400,6 +447,9 @@ montecarloresult = anova(
     factornames = ["Doxycycline", "Nutlin-3a", "Replicate"],
 )
 
+# ╔═╡ c59d8c90-6b04-11eb-0f0c-2b9961963427
+mean(montecarloresult.crossedcellmeans, dims= (1,3))
+
 # ╔═╡ bf915350-574e-11eb-2f66-236c4ec9e600
 md"""
 Effect sizes can be classified as Large, Small, Insignificant, and Large, respectively.
@@ -423,6 +473,55 @@ md"""
 #### Interpret main effects
 Nutlin-3a is below the significance threshold with a large effect size while Doxycyline produced a small effect with low probability. Nutlin-3a was thus associated with a decrease in fraction associated (7.34% to 5.13%), while MEG3 expression likely was not associated with a change (6.80% to 5.67%).
 """
+
+# ╔═╡ 552d3550-6af5-11eb-2fcb-fb755145a298
+md"""
+### Figure
+"""
+
+# ╔═╡ 5ab31670-6af5-11eb-2e08-83b5228005d1
+let
+	import StatsPlots.mm
+	p53_mdm2_montecarlo = [montecarlomeasurements[:,:,1,1,1] |> vec; montecarlomeasurements[:,:,2,1,1] |> vec; montecarlomeasurements[:,:,1,2,1] |> vec; montecarlomeasurements[:,:,2,2,1] |> vec]
+	groups = repeat([2, 1, 4, 3], inner = 30)
+	boxplot(groups, p53_mdm2_montecarlo, outliers=false,
+		    label=["- Dox", "+ Dox"],
+			legend=:none,
+			seriescolor=:white,
+		    left_margin=2mm,
+			size=(256, 512),
+			line=(2, 0.75),
+			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
+			yaxis=("Median distance (nm)", [0, 0.25]))
+	p53_mdm2_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,1], dims = 1), dims = 1) |> vec
+	dotplot!(repeat([2, 1, 4, 3], inner=3), p53_mdm2_montecarlo_means |> vec, mode = :none, label="", marker=(4, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	dotplot!(groups, p53_mdm2_montecarlo, mode = :density, label="", marker=(2, 0.5, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+end
+
+# ╔═╡ bc4851c0-6af5-11eb-0db5-cb71d67f93e3
+md"""Create paper-quality version and save it:"""
+
+# ╔═╡ af04a0e0-6af5-11eb-05ed-99c27fd1a0ef
+let
+	import StatsPlots.mm
+	p53_mdm2_montecarlo = [montecarlomeasurements[:,:,1,1,1] |> vec; montecarlomeasurements[:,:,2,1,1] |> vec; montecarlomeasurements[:,:,1,2,1] |> vec; montecarlomeasurements[:,:,2,2,1] |> vec]
+	groups = repeat([2, 1, 4, 3], inner = 30)
+	boxplot(groups, p53_mdm2_montecarlo, outliers=false,
+		    label=["- Dox", "+ Dox"],
+			legend=:none,
+			seriescolor=:white,
+		    left_margin=25mm,
+		    guidefontsize=52,
+            tickfontsize=48,
+			size=(1024, 2048),
+			line=(8, 0.75),
+			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
+			yaxis=("Fraction associated", [0, 0.25]))
+	p53_mdm2_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,1], dims=1), dims=1) |> vec
+	dotplot!(repeat([2, 1, 4, 3], inner=3), p53_mdm2_montecarlo_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
+	dotplot!(groups, p53_mdm2_montecarlo, mode = :density, label="", marker=(8, 0.5, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+	savefig(joinpath(outputdir, "p53-mdm2-montecarlo.png"))
+end
 
 # ╔═╡ 78883b10-5756-11eb-32cf-b95fdeebda79
 md"""
@@ -644,6 +743,10 @@ qqnormplot(normmontecarloflat)
 # ╟─e3220a00-55c1-11eb-080c-451cd462a4d6
 # ╟─cbfc9a20-55d0-11eb-3cd3-23a3413a033c
 # ╟─2ed8ff90-568e-11eb-10a3-0b97b2425d2f
+# ╟─76abe9e0-6af2-11eb-0dc5-4594d89c209b
+# ╟─81b932c0-6af2-11eb-0a5c-09c0b3f10519
+# ╟─b69b87b2-6af5-11eb-30c2-bfa8159a8e0d
+# ╠═deafcdc0-6af4-11eb-1673-0101d277b4b3
 # ╟─25d0ce1e-5691-11eb-2cc8-49980b6b2161
 # ╟─8c0ebd10-56a9-11eb-3e8c-95b53bf12061
 # ╟─faa812c0-56aa-11eb-3b6b-99fe5f200b67
@@ -665,12 +768,17 @@ qqnormplot(normmontecarloflat)
 # ╟─047df370-56b3-11eb-3036-2393031bd967
 # ╟─3316f790-56b3-11eb-3d9c-e9ebf797c923
 # ╟─6f1da2c0-56b3-11eb-2506-5f9a944735b6
-# ╟─755d8510-56b3-11eb-3a0c-53b643ba2053
+# ╠═755d8510-56b3-11eb-3a0c-53b643ba2053
+# ╠═c59d8c90-6b04-11eb-0f0c-2b9961963427
 # ╟─bf915350-574e-11eb-2f66-236c4ec9e600
 # ╟─d79abcc0-574e-11eb-3777-4f8b85036436
 # ╟─f5f23950-574e-11eb-02b5-2fb9b6272ce6
 # ╟─27747350-5752-11eb-12b9-dfffc84b15c8
 # ╟─248d1560-5753-11eb-2156-89cfb6742205
+# ╟─552d3550-6af5-11eb-2fcb-fb755145a298
+# ╟─5ab31670-6af5-11eb-2e08-83b5228005d1
+# ╟─bc4851c0-6af5-11eb-0db5-cb71d67f93e3
+# ╠═af04a0e0-6af5-11eb-05ed-99c27fd1a0ef
 # ╟─78883b10-5756-11eb-32cf-b95fdeebda79
 # ╟─df7dce20-5756-11eb-3796-037e8e3c49f9
 # ╟─faf5aa60-5756-11eb-3b5b-f1ad5e004af2

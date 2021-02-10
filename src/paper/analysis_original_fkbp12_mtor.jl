@@ -83,7 +83,7 @@ begin
 
 	normalizedmontecarlomeasurements = (montecarlomeasurements .- negativecontrolmontecarlomeasurements) ./ (positivecontrolmontecarlomeasurements .- negativecontrolmontecarlomeasurements)
 
-	()
+	nothing
 end
 
 # ╔═╡ 294e6a02-550e-11eb-3450-d9d5989ec08c
@@ -219,11 +219,6 @@ md"""
 From skewness and kurtosis statistics, all values were within 1.96 (5% level).
 """
 
-# ╔═╡ 9bf9aaf0-55be-11eb-17a2-75b3eec550f8
-md"""
-The primary source of non-normality appear to be outliers, relatively minimal. While I will further windsorize the outlier in [2] Replicate 2, I won't intend to do anything special.
-"""
-
 # ╔═╡ 265006c0-55c1-11eb-2ba8-3d628d096704
 md"""
 #### Conduct ANOVA tests
@@ -239,7 +234,7 @@ medianresult = anova(
 # ╔═╡ fd2d4a40-57ab-11eb-2688-53b009a37680
 md"""
 #### Interpret main effects
-Rapamycin does not cause a significant effect on median distance.
+Rapamycin caused a detectable but small decrease in median distance from 356.0 nm ± 128.59 nm to 317.5 nm ± 102.44 nm (Mean ± SD).
 """
 
 # ╔═╡ 895181b0-59f2-11eb-3d4e-1d92833b0e72
@@ -254,15 +249,39 @@ let
 	groups = repeat([1,2], inner = 50)
 	boxplot(groups, fkbp12_mtor_median, outliers=false,
 			legend=:none,
-			bottom_margin=5mm,
-			seriescolor=[:white :lightgray],
-			size=(512, 1024),
-			line=(6, 0.75),
+			seriescolor=:white,
+		    left_margin=2mm,
+			size=(256, 512),
+			line=(2, 0.75),
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
-			yaxis=("Median distance (nm)"))
+			yaxis=("Median distance (nm)", [0, 600]))
+	fkbp12_mtor_median_means = dropdims(mean(medianmeasurementsw, dims=1), dims=1)
+	dotplot!([1,1,1,1,1,2,2,2,2,2], fkbp12_mtor_median_means |> vec, mode = :none, label="", marker=(4, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray]), stroke(0)))
+	dotplot!(groups, fkbp12_mtor_median, mode = :density, label="", marker=(2, 0.5, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray], inner=10), stroke(0)))
+end
+
+# ╔═╡ 1715afae-6aee-11eb-3c61-a3902bf7e827
+md"""Create paper-quality version and save it:"""
+
+# ╔═╡ 15ee46b0-6aee-11eb-0dce-e39b244d6d3c
+let
+	import StatsPlots.mm
+	fkbp12_mtor_median = [medianmeasurementsw[:,:,1] |> vec; medianmeasurementsw[:,:,2] |> vec]
+	groups = repeat([1,2], inner = 50)
+	boxplot(groups, fkbp12_mtor_median, outliers=false,
+			legend=:none,
+		    left_margin=25mm,
+			seriescolor=:white,
+		    guidefontsize=52,
+            tickfontsize=48,
+			size=(1024, 2048),
+			line=(8, 0.75),
+			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
+			yaxis=("Median distance (nm)", [0, 600]))
 	fkbp12_mtor_median_means = dropdims(mean(medianmeasurementsw, dims=1), dims=1)
 	dotplot!([1,1,1,1,1,2,2,2,2,2], fkbp12_mtor_median_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray]), stroke(0)))
 	dotplot!(groups, fkbp12_mtor_median, mode = :density, label="", marker=(8, 0.5, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray], inner=10), stroke(0)))
+	savefig(joinpath(outputdir, "fkbp12-mTOR-medians.png"))
 end
 
 # ╔═╡ 25d0ce1e-5691-11eb-2cc8-49980b6b2161
@@ -405,15 +424,39 @@ let
 	groups = repeat([1,2], inner = 50)
 	boxplot(groups, fkbp12_mtor_montecarlo, outliers=false,
 			legend=:none,
-			bottom_margin=5mm,
-			seriescolor=[:white :lightgray],
-			line=(6, 0.75),
-		size=(512, 1024),
+			seriescolor=:white,
+		    left_margin=3mm,
+			line=(2, 0.75),
+		    size=(256, 512),
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
-			yaxis=("Fraction associated"))
+			yaxis=("Fraction associated", [0, 0.25]))
+	fkbp12_mtor_montecarlo_means = dropdims(mean(montecarlomeasurementsw, dims=1), dims=1)
+	dotplot!([1,1,1,1,1,2,2,2,2,2], fkbp12_mtor_montecarlo_means |> vec, mode = :none, label="", marker=(4, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray]), stroke(0)))
+	dotplot!(groups, fkbp12_mtor_montecarlo, mode = :density, label="", marker=(2, 0.5, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray], inner=10), stroke(0)))
+end
+
+# ╔═╡ 9f7009e0-6aef-11eb-0a49-a15c24bee94d
+md"""Create paper-quality version and save it:"""
+
+# ╔═╡ c3d837e0-6aee-11eb-1840-053a9dca4891
+let
+	import StatsPlots.mm
+	fkbp12_mtor_montecarlo = [montecarlomeasurementsw[:,:,1] |> vec; montecarlomeasurementsw[:,:,2] |> vec]
+	groups = repeat([1,2], inner = 50)
+	boxplot(groups, fkbp12_mtor_montecarlo, outliers=false,
+			legend=:none,
+		    left_margin=25mm,
+			seriescolor=:white,
+		    guidefontsize=52,
+            tickfontsize=48,
+			size=(1024, 2048),
+			line=(8, 0.75),
+			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
+			yaxis=("Fraction associated", [0, 0.25]))
 	fkbp12_mtor_montecarlo_means = dropdims(mean(montecarlomeasurementsw, dims=1), dims=1)
 	dotplot!([1,1,1,1,1,2,2,2,2,2], fkbp12_mtor_montecarlo_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray]), stroke(0)))
 	dotplot!(groups, fkbp12_mtor_montecarlo, mode = :density, label="", marker=(8, 0.5, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray], inner=10), stroke(0)))
+	savefig(joinpath(outputdir, "fkbp12-mTOR-montecarlo.png"))
 end
 
 # ╔═╡ 78883b10-5756-11eb-32cf-b95fdeebda79
@@ -557,14 +600,15 @@ let
 	groups = repeat([1,2], inner = 50)
 	boxplot(groups, fkbp12_mtor_montecarlo, outliers=false,
 			legend=:none,
-			bottom_margin=5mm,
-			seriescolor=[:white :lightgray],
-			line=(6, 0.75),
+			seriescolor=:white,
+		    left_margin=3mm,
+			line=(3, 0.75),
+		    size=(256, 512),
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
-			yaxis=("Median distance (nm)"))
+			yaxis=("Median distance (nm)", [-0.1,0.2]))
 	fkbp12_mtor_montecarlo_means = dropdims(mean(normalizedmontecarlomeasurements, dims=1), dims=1)
-	dotplot!([1,1,1,1,1,2,2,2,2,2], fkbp12_mtor_montecarlo_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray]), stroke(0)))
-	dotplot!(groups, fkbp12_mtor_montecarlo, mode = :density, label="", marker=(8, 0.5, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray], inner=10), stroke(0)))
+	dotplot!([1,1,1,1,1,2,2,2,2,2], fkbp12_mtor_montecarlo_means |> vec, mode = :none, label="", marker=(6, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray]), stroke(0)))
+	dotplot!(groups, fkbp12_mtor_montecarlo, mode = :density, label="", marker=(4, 0.5, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray], inner=10), stroke(0)))
 end
 
 # ╔═╡ 9c92b290-56ae-11eb-2595-85845fe95f0e
@@ -646,12 +690,13 @@ qqnormplot(normmontecarloflat)
 # ╟─cf59a26e-55bd-11eb-1c4b-316a603b9007
 # ╟─135dbe6e-55be-11eb-3a89-dd3d02c3ad4a
 # ╟─6778a880-55be-11eb-1016-c59335beef0a
-# ╟─9bf9aaf0-55be-11eb-17a2-75b3eec550f8
 # ╟─265006c0-55c1-11eb-2ba8-3d628d096704
 # ╠═c101d900-57ab-11eb-04ab-77cd4e0ff4b3
 # ╟─fd2d4a40-57ab-11eb-2688-53b009a37680
 # ╟─895181b0-59f2-11eb-3d4e-1d92833b0e72
-# ╠═95fd3850-59f2-11eb-0914-a999ed3b9e5f
+# ╟─95fd3850-59f2-11eb-0914-a999ed3b9e5f
+# ╟─1715afae-6aee-11eb-3c61-a3902bf7e827
+# ╠═15ee46b0-6aee-11eb-0dce-e39b244d6d3c
 # ╟─25d0ce1e-5691-11eb-2cc8-49980b6b2161
 # ╟─8c0ebd10-56a9-11eb-3e8c-95b53bf12061
 # ╟─faa812c0-56aa-11eb-3b6b-99fe5f200b67
@@ -678,13 +723,15 @@ qqnormplot(normmontecarloflat)
 # ╟─2553a3a0-57a9-11eb-247d-a161d85d4410
 # ╟─38571c12-59f3-11eb-337f-13164dbd552b
 # ╟─475acc70-59f3-11eb-08a1-99e272fbc933
+# ╟─9f7009e0-6aef-11eb-0a49-a15c24bee94d
+# ╠═c3d837e0-6aee-11eb-1840-053a9dca4891
 # ╟─78883b10-5756-11eb-32cf-b95fdeebda79
 # ╟─df7dce20-5756-11eb-3796-037e8e3c49f9
 # ╟─faf5aa60-5756-11eb-3b5b-f1ad5e004af2
 # ╠═ff845a40-5756-11eb-2ce8-d5ba8458e2ae
 # ╟─d2282670-5757-11eb-0bd9-b1aaf0b37d70
 # ╟─d99fec80-5757-11eb-39cd-4b0febbf61e3
-# ╠═edee22b2-5757-11eb-317a-d3e4d31486cd
+# ╟─edee22b2-5757-11eb-317a-d3e4d31486cd
 # ╟─a05efb90-5758-11eb-10ca-fb9fb8e05821
 # ╟─7323e450-5759-11eb-1c62-7ba711bf418b
 # ╠═49094280-66a6-11eb-1261-7fe254f02b6d
