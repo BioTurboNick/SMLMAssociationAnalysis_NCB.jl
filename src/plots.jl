@@ -155,12 +155,12 @@ end
 function localizationsplot(result::Result; color1 = :magenta, color2 = :green, insetbox = [[0,0], [0,0]], include_scalebar = false, forprint = false)
     if forprint
         locmarkersize = 8
-        boxlinewidth = 16
+        boxlinewidth = 12
         textsize = 48
         size = (2048, 2048)
     else
         locmarkersize = 1
-        boxlinewidth = 4
+        boxlinewidth = 3
         textsize = 20
         size = (512, 512)
     end
@@ -173,7 +173,7 @@ function localizationsplot(result::Result; color1 = :magenta, color2 = :green, i
 
     if insetbox != [[0,0], [0,0]]
         xlims, ylims = first(insetbox), last(insetbox)
-        plot!([xlims[1], xlims[2], xlims[2], xlims[1]], [ylims[1], ylims[1], ylims[2], ylims[2]], line = (boxlinewidth, :black))
+        plot!([xlims[1], xlims[2], xlims[2], xlims[1], xlims[1]], [ylims[1], ylims[1], ylims[2], ylims[2], ylims[1]], line = (boxlinewidth, :black))
     end
 
     include_scalebar && plot!([100; 5100], [100; 100], line=(scalewidth, :black),
