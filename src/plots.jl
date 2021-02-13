@@ -156,11 +156,13 @@ function localizationsplot(result::Result; color1 = :magenta, color2 = :green, i
     if forprint
         locmarkersize = 8
         boxlinewidth = 12
+        scalewidth = 12
         textsize = 48
         size = (2048, 2048)
     else
         locmarkersize = 1
         boxlinewidth = 3
+        scalewidth = 8
         textsize = 20
         size = (512, 512)
     end
