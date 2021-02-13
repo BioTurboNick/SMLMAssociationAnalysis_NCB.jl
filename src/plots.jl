@@ -160,7 +160,7 @@ function localizationsplot(result::Result; color1 = :magenta, color2 = :green, i
         textsize = 48
         size = (2048, 2048)
     else
-        locmarkersize = 1
+        locmarkersize = 2
         boxlinewidth = 3
         scalewidth = 6
         textsize = 20
@@ -178,7 +178,7 @@ function localizationsplot(result::Result; color1 = :magenta, color2 = :green, i
         plot!([xlims[1], xlims[2], xlims[2], xlims[1], xlims[1]], [ylims[1], ylims[1], ylims[2], ylims[2], ylims[1]], line = (boxlinewidth, :black))
     end
 
-    include_scalebar && plot!([1000; 6000], [1500; 1500], line=(scalewidth, :black),
+    include_scalebar && plot!([1000; 6000], [1300; 1300], line=(scalewidth, :black),
           annotations=(1000, 2000, text("5 \\mum", textsize, :left, :top)))
 
     plot!(aspect_ratio=:equal, xlims=(0, 40960), yaxis=((0, 40960), :flip), legend=:none, grid=:hide, ticks=(0), framestyle=:none, size=size)
