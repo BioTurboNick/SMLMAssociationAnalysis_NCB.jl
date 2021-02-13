@@ -40,7 +40,7 @@ sem_average_percentileranks = sem.(average_percentileranks1)
 ci95_average_percentileranks = 1.96 .* sem_average_percentileranks
 
 xvals = [200, 400, 600, 800, 1000, 1200, 1400, 1600, 1800, 2000]
-import Plots.mm
+import StatsPlots.mm
 plot(xvals, average_percentileranks, line=(0.25))
 plot!(xvals, mean_average_percentileranks - ci95_average_percentileranks, line=(stroke(10), :gray))
 plot!(xvals, mean_average_percentileranks + ci95_average_percentileranks, line=(stroke(10), :gray))

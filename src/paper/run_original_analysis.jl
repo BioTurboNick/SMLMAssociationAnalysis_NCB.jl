@@ -406,102 +406,10 @@ groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false
         seriescolor=[:white :lightgray],
         line=(6, 1.0),
         gridopacity=0.3,
-        xgrid=:none,
+        xgrid=:none, #######################
         size=(1024,2048),
         xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
         yaxis=("Fraction bound", (-0.05,0.2), -0.05:0.05:0.2))
 groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="",
         marker=(8, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
 savefig(joinpath(outputdir, "p53_meg3_normalizedmontecarlo_boxplot.png"))
-
-# localization plots of example cells
-# Exp 3 (p53-MEG3)
-# A2
-insetx, insety = [11000, 15096], [19000, 23096]
-localizationsplot_forprint(experimentresults[2][1][1][2], insetbox = [insetx, insety])
-savefig(joinpath(outputdir, "3 - A2 dSTORM points.png"))
-localizationsinsetplot_forprint(experimentresults[2][1][1][2], insetx, insety)
-savefig(joinpath(outputdir, "3 - A2 dSTORM points 10x.png"))
-moleculesinsetplot_forprint(experimentresults[2][1][1][2], insetx, insety)
-savefig(joinpath(outputdir, "3 - A2 dSTORM molecules 10x.png"))
-insetplot_forprint(experimentresults[2][1][1][2], insetx, insety)
-savefig(joinpath(outputdir, "3 - A2 dSTORM 10x.png"))
-
-# B2
-insetx, insety = [17000, 21096], [18000, 22096]
-localizationsplot_forprint(experimentresults[2][1][2][2], insetbox = [insetx, insety])
-savefig(joinpath(outputdir, "3 - B2 dSTORM points.png"))
-localizationsinsetplot_forprint(experimentresults[2][1][2][2], insetx, insety)
-savefig(joinpath(outputdir, "3 - B2 dSTORM points 10x.png"))
-moleculesinsetplot_forprint(experimentresults[2][1][2][2], insetx, insety)
-savefig(joinpath(outputdir, "3 - B2 dSTORM molecules 10x.png"))
-insetplot_forprint(experimentresults[2][1][2][2], insetx, insety)
-savefig(joinpath(outputdir, "3 - B2 dSTORM 10x.png"))
-
-# C10
-insetx, insety = [7500, 11596], [20000, 24096]
-localizationsplot_forprint(experimentresults[2][1][3][10], insetbox = [insetx, insety])
-savefig(joinpath(outputdir, "3 - C10 dSTORM points.png"))
-localizationsinsetplot_forprint(experimentresults[2][1][3][10], insetx, insety)
-savefig(joinpath(outputdir, "3 - C10 dSTORM points 10x.png"))
-moleculesinsetplot_forprint(experimentresults[2][1][3][10], insetx, insety)
-savefig(joinpath(outputdir, "3 - C10 dSTORM molecules 10x.png"))
-insetplot_forprint(experimentresults[2][1][3][10], insetx, insety)
-savefig(joinpath(outputdir, "3 - C10 dSTORM 10x.png"))
-
-
-# D10
-insetx, insety = [7500, 11596], [20000, 24096]
-localizationsplot_forprint(experimentresults[2][1][4][10], insetbox = [insetx, insety])
-savefig(joinpath(outputdir, "3 - D10 dSTORM points.png"))
-localizationsinsetplot_forprint(experimentresults[2][1][4][10], insetx, insety)
-savefig(joinpath(outputdir, "3 - D10 dSTORM points 10x.png"))
-moleculesinsetplot_forprint(experimentresults[2][1][4][10], insetx, insety)
-savefig(joinpath(outputdir, "3 - D10 dSTORM molecules 10x.png"))
-insetplot_forprint(experimentresults[2][1][4][10], insetx, insety)
-savefig(joinpath(outputdir, "3 - D10 dSTORM 10x.png"))
-
-# Exp 2 (p53-MDM2)
-# R3 A8
-insetx, insety = [14000, 18096], [28000, 32096]
-localizationsplot_forprint(experimentresults[1][3][1][8], insetbox = [insetx, insety])
-savefig(joinpath(outputdir, "2 - A8 dSTORM points.png"))
-localizationsinsetplot_forprint(experimentresults[1][3][1][8], insetx, insety)
-savefig(joinpath(outputdir, "2 - A8 dSTORM points 10x.png"))
-moleculesinsetplot_forprint(experimentresults[1][3][1][8], insetx, insety)
-savefig(joinpath(outputdir, "2 - A8 dSTORM molecules 10x.png"))
-insetplot_forprint(experimentresults[1][3][1][8], insetx, insety)
-savefig(joinpath(outputdir, "2 - A8 dSTORM 10x.png"))
-
-# R3 B5
-insetx, insety = [14000, 18096], [20000, 24096]
-localizationsplot_forprint(experimentresults[1][3][2][5], insetbox = [insetx, insety])
-savefig(joinpath(outputdir, "2 - B5 dSTORM points.png"))
-localizationsinsetplot_forprint(experimentresults[1][3][2][5], insetx, insety)
-savefig(joinpath(outputdir, "2 - B5 dSTORM points 10x.png"))
-moleculesinsetplot_forprint(experimentresults[1][3][2][5], insetx, insety)
-savefig(joinpath(outputdir, "2 - B5 dSTORM molecules 10x.png"))
-insetplot_forprint(experimentresults[1][3][2][5], insetx, insety)
-savefig(joinpath(outputdir, "2 - B5 dSTORM 10x.png"))
-
-# R2 C9
-insetx, insety = [15000, 19096], [20000, 24096]
-localizationsplot_forprint(experimentresults[1][2][3][9], insetbox = [insetx, insety])
-savefig(joinpath(outputdir, "2 - C9 dSTORM points.png"))
-localizationsinsetplot_forprint(experimentresults[1][2][3][9], insetx, insety)
-savefig(joinpath(outputdir, "2 - C9 dSTORM points 10x.png"))
-moleculesinsetplot_forprint(experimentresults[1][2][3][9], insetx, insety)
-savefig(joinpath(outputdir, "2 - C9 dSTORM molecules 10x.png"))
-insetplot_forprint(experimentresults[1][2][3][9], insetx, insety)
-savefig(joinpath(outputdir, "2 - C9 dSTORM 10x.png"))
-
-# R2 D4
-insetx, insety = [21500, 25596], [12500, 16596]
-localizationsplot_forprint(experimentresults[1][2][4][4], insetbox = [insetx, insety])
-savefig(joinpath(outputdir, "2 - D4 dSTORM points.png"))
-localizationsinsetplot_forprint(experimentresults[1][2][4][4], insetx, insety)
-savefig(joinpath(outputdir, "2 - D4 dSTORM points 10x.png"))
-moleculesinsetplot_forprint(experimentresults[1][2][4][4], insetx, insety)
-savefig(joinpath(outputdir, "2 - D4 dSTORM molecules 10x.png"))
-insetplot_forprint(experimentresults[1][2][4][4], insetx, insety)
-savefig(joinpath(outputdir, "2 - D4 dSTORM 10x.png"))

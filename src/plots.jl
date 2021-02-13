@@ -169,7 +169,7 @@ function localizationsplot(localizations1::Vector{Localization}, localizations2:
         plot!(repeat([last(xlims)], 2), ylims, line=(1, :black))
     end
 
-    plot!()
+    plot!(fmt=:png)
 end
 
 function localizationsplot_forprint(result::Result; color1 = :magenta, color2 = :green, insetbox = [[0,0], [0,0]], include_scalebar = false)
@@ -247,12 +247,12 @@ function insetplot(result::Result, xlims, ylims; color1 = :magenta, color2 = :gr
 		textsize = 48
         size = (2048, 2048)
     else
-        locmarkersize = 2
-        molmarkersize = 8
+        locmarkersize = 4
+        molmarkersize = 16
 		molstrokesize = 4
-		scalewidth = 3
-		textsize = 10
-        size = (256, 256)
+		scalewidth = 6
+		textsize = 20
+        size = (512, 512)
     end
 
     mol1coords = result.channels[1].molecules |> extractcoordinates

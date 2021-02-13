@@ -123,7 +123,7 @@ for i ∈ 1:nreplicates
     montecarlomeasurements[i,:,2:end,:] .= reshape(lessthan10[Not(1:36:end)], length(boundradii), length(fractionsbound)-1, length(moleculecounts))
 end
 
-import Plots.mm
+import StatsPlots.mm
 
 # monte carlo plot
 p = Array{Plots.Plot,2}(undef, length(moleculecounts), length(boundradii))

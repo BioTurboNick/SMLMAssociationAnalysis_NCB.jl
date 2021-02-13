@@ -199,7 +199,7 @@ begin
 	mediansflatw[5,4] = mediansflat[4,4]
 	medianmeasurementsw[6,1,2,2,2] = medianmeasurements[8,1,2,2,2]
 	mediansflatw[6,10] = mediansflat[8,10]
-end
+end;
 
 # ╔═╡ a87aac80-5518-11eb-38d4-5fe90140b820
 md"""
@@ -414,9 +414,19 @@ md"""
 - In [2,2] Replicate 3: 1 value, Cell 8 (10%) outside 1.96. None outside 2.58.
 """
 
+# ╔═╡ 03d7ceae-6d78-11eb-3f4b-13cf782576c0
+begin
+	montecarlomeasurementsw = copy(montecarlomeasurements)
+	montecarloflatw = copy(montecarloflat)
+	montecarlomeasurementsw[2,3,1,1,2] = montecarlomeasurements[8,3,1,1,2]
+	montecarloflatw[2,3] = montecarloflat[8,3]
+end;
+
 # ╔═╡ c18cc050-56ad-11eb-261c-4177aa31ca7c
 md"""
 None of these potential outliers are due to data entry error or measurement error. Sampling a different population is possible but unknown. These potential outliers are relatively modest. In addition, since an ANOVA will be used, must be careful not to delete points from a balanced design. Therefore, no outliers will be removed.
+
+However, I will Windsorize the one severe outlier in [1,1] Replicate 3.
 """
 
 # ╔═╡ 2bba9b02-56ae-11eb-2e30-439dc20273f8
@@ -432,7 +442,7 @@ Conducted Levene's test, a 1-way ANOVA of the absolute deviation between each va
 """
 
 # ╔═╡ b1ae0750-56af-11eb-0714-35b78e197b5e
-levene(montecarloflat)
+levene(montecarloflatw)
 
 # ╔═╡ f9676320-56af-11eb-1481-ef9502edded8
 md"""
@@ -452,10 +462,10 @@ There are a couple notable deviations but for the *most* part they appear close 
 """
 
 # ╔═╡ db6922c0-56b2-11eb-2601-5525d3f6bf70
-montecarloskewness = [skewness(montecarloflat[:,i]) for i ∈ axes(montecarloflat, 2)]
+montecarloskewness = [skewness(montecarloflatw[:,i]) for i ∈ axes(montecarloflatw, 2)]
 
 # ╔═╡ 047df370-56b3-11eb-3036-2393031bd967
-montecarlokurtosis = [kurtosis(montecarloflat[:,i]) for i ∈ axes(montecarloflat, 2)]
+montecarlokurtosis = [kurtosis(montecarloflatw[:,i]) for i ∈ axes(montecarloflatw, 2)]
 
 # ╔═╡ 3316f790-56b3-11eb-3d9c-e9ebf797c923
 md"""
@@ -469,13 +479,10 @@ md"""
 
 # ╔═╡ c29f8040-57a7-11eb-2cb4-7974bcf74e27
 montecarloresult = anova(
-    permutedims(montecarlomeasurements[:, :, :, :, 2], (1, 3, 2, 4)),
+    permutedims(montecarlomeasurementsw[:, :, :, :, 2], (1, 3, 2, 4)),
     [fixed, subject, fixed],
     factornames = ["Doxycycline", "Replicate", "RNA"],
 )
-
-# ╔═╡ d1259f32-6b0e-11eb-36a0-0308ec00088c
-mean(montecarloresult.crossedcellmeans, dims = 2)
 
 # ╔═╡ 2553a3a0-57a9-11eb-247d-a161d85d4410
 md"""
@@ -487,14 +494,14 @@ Doxycycline is not significant and has a small effect size. As the RNA should be
 
 # ╔═╡ 755d8510-56b3-11eb-3a0c-53b643ba2053
 montecarloresultMEG3 = anova(
-    permutedims(montecarlomeasurements[:, :, :, 1, 2], (1, 3, 2)),
+    permutedims(montecarlomeasurementsw[:, :, :, 1, 2], (1, 3, 2)),
     [fixed, subject],
     factornames = ["Doxycycline", "Replicate"],
 )
 
 # ╔═╡ 28212d70-57a7-11eb-1c94-3fa38021ba8e
 montecarloresultGAPDH = anova(
-    permutedims(montecarlomeasurements[:, :, :, 2, 2], (1, 3, 2)),
+    permutedims(montecarlomeasurementsw[:, :, :, 2, 2], (1, 3, 2)),
     [fixed, subject],
     factornames = ["Doxycycline", "Replicate"],
 )
@@ -512,7 +519,7 @@ let
 	import StatsPlots.mm
 	rnagroups = repeat([1,2], inner = 60)
 	doxgroups = repeat([2, 1], inner = 30, outer = 2)
-	p53_meg3_montecarlo = [montecarlomeasurements[:,:,1,1,2] |> vec; montecarlomeasurements[:,:,2,1,2] |> vec; montecarlomeasurements[:,:,1,2,2] |> vec; montecarlomeasurements[:,:,2,2,2] |> vec]
+	p53_meg3_montecarlo = [montecarlomeasurementsw[:,:,1,1,2] |> vec; montecarlomeasurementsw[:,:,2,1,2] |> vec; montecarlomeasurementsw[:,:,1,2,2] |> vec; montecarlomeasurementsw[:,:,2,2,2] |> vec]
 	groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
 			label=["- Dox", "+ Dox"],
 			guidefontsize=13,
@@ -527,7 +534,7 @@ let
 			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
 			size=(256,512),
 			yaxis=("Fraction associated", (0,0.25)))
-	p53_meg3_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,2], dims=1), dims=1)
+	p53_meg3_montecarlo_means = dropdims(mean(montecarlomeasurementsw[:,:,:,:,2], dims=1), dims=1)
 	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_montecarlo_means |> vec, mode = :none, label="", marker=(4, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
 	groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(2, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
 end
@@ -540,7 +547,7 @@ let
 	import StatsPlots.mm
 	rnagroups = repeat([1,2], inner = 60)
 	doxgroups = repeat([2, 1], inner = 30, outer = 2)
-	p53_meg3_montecarlo = [montecarlomeasurements[:,:,1,1,2] |> vec; montecarlomeasurements[:,:,2,1,2] |> vec; montecarlomeasurements[:,:,1,2,2] |> vec; montecarlomeasurements[:,:,2,2,2] |> vec]
+	p53_meg3_montecarlo = [montecarlomeasurementsw[:,:,1,1,2] |> vec; montecarlomeasurementsw[:,:,2,1,2] |> vec; montecarlomeasurementsw[:,:,1,2,2] |> vec; montecarlomeasurementsw[:,:,2,2,2] |> vec]
 	groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
 			label=["- Dox", "+ Dox"],
 			guidefontsize=52,
@@ -555,7 +562,7 @@ let
 			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
 			size=(1024,2048),
 			yaxis=("Fraction associated", (0,0.25)))
-	p53_meg3_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,2], dims=1), dims=1)
+	p53_meg3_montecarlo_means = dropdims(mean(montecarlomeasurementsw[:,:,:,:,2], dims=1), dims=1)
 	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_montecarlo_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
 	groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(8, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
 	savefig(joinpath(outputdir, "p53-meg3-montecarlo.png"))
@@ -711,29 +718,83 @@ Doxycycline had a small but nonsignificant effect with MEG3 (1.55% to 3.72%). In
 Doxycyline had no significant effect with GAPDH (0.678% to 1.19%). Doxycycline shouldn't do anything to GAPDH, so this is expected.
 """
 
-# ╔═╡ bca6b8f0-6a46-11eb-09dc-1b398bf010e9
+# ╔═╡ 795d7b9e-6bbe-11eb-1871-777e334518d5
+md"""
+## Localization/molecule maps
+"""
+
+# ╔═╡ abdc8f60-6bc5-11eb-1203-c36ca41662e8
+md"""
+#### Examples
+"""
+
+# ╔═╡ 892650c0-6bbe-11eb-3154-eb5c97e8c955
 let
-	rnagroups = repeat([1,2], inner = 60)
-	doxgroups = repeat([2, 1], inner = 30, outer = 2)
-	p53_meg3_montecarlo = [normalizedmontecarlomeasurements[:,:,1,1,2] |> vec; normalizedmontecarlomeasurements[:,:,2,1,2] |> vec; normalizedmontecarlomeasurements[:,:,1,2,2] |> vec; normalizedmontecarlomeasurements[:,:,2,2,2] |> vec]
-	groupedboxplot(rnagroups, p53_meg3_montecarlo, group = doxgroups, outliers=false,
-			label=["- Dox", "+ Dox"],
-			guidefontsize=26,
-			tickfontsize=24,
-			legend=:none,
-			top_margin=10mm,
-			bottom_margin=0mm,
-	        left_margin=10mm,
-			seriescolor=[:white :lightgray],
-			line=(3, 1.0),
-			gridopacity=0.3,
-			xgrid=:none,
-			xaxis=("RNA", (1:2, ["MEG3", "GAPDH"])),
-			size=(512,1024),
-			yaxis=("Fraction associated", (-0.1,0.2)))
-	p53_meg3_montecarlo_means = dropdims(mean(normalizedmontecarlomeasurements[:,:,:,:,2], dims=1), dims=1)
-	groupeddotplot!([1,1,1,1,1,1,2,2,2,2,2,2], group = [2,2,2,1,1,1,2,2,2,1,1,1], p53_meg3_montecarlo_means |> vec, mode = :none, label="", marker=(6, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
-	groupeddotplot!(rnagroups, p53_meg3_montecarlo, group = doxgroups, mode = :density, label="", marker=(4, 0.75, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
+	# Exp 3 (p53-MEG3)
+	# A2
+	insetx, insety = [13800, 15200], [20300, 21700]
+	r = experimentresults[2][1][1][2]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "3 - A2 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "3 - A2 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt = :png)
+end
+
+# ╔═╡ b87bb41e-6bcb-11eb-2a50-81d8ce260449
+let
+	# Exp 3 (p53-MEG3)
+	# B2
+	insetx, insety = [19800, 21200], [20900, 22300]
+	r = experimentresults[2][1][2][2]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "3 - B2 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "3 - B2 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt = :png)
+end
+
+# ╔═╡ 516bf770-6bcd-11eb-37ab-f9ebc03c3cc4
+let
+	# Exp 3 (p53-MEG3)
+	# C10
+	insetx, insety = [8700, 10100], [20900, 22300]
+	r = experimentresults[2][1][3][10]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "3 - C10 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "3 - C10 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt = :png)
+end
+
+# ╔═╡ 3c58ffc0-6bcf-11eb-13be-ddb38df5499d
+let
+	# Exp 3 (p53-MEG3)
+	# D10
+	insetx, insety = [16650, 18050], [29600, 31000]
+	r = experimentresults[2][1][4][10]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "3 - D10 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "3 - D10 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt=:png)
+end
+
+# ╔═╡ c50f0010-6ce4-11eb-17df-39ae7df11a90
+let
+	# Plot all
+	r = localizationsplot.(experimentresults[2][j][i][k] for k ∈ 1:10 for i ∈ 1:4 for j ∈ 1:3)
+	p = plot(r..., size=(2048, 2048), layout=grid(10,12), fmt=:png)
+	savefig(joinpath(outputdir, "p53-meg3-all-localizations.png"))
+	p
 end
 
 # ╔═╡ 9c92b290-56ae-11eb-2595-85845fe95f0e
@@ -765,7 +826,7 @@ end
 zresid_zpred_plot(mediansflatw)
 
 # ╔═╡ 3a3fa580-56ae-11eb-1f19-f3c06ef2d9d7
-zresid_zpred_plot(montecarloflat)
+zresid_zpred_plot(montecarloflatw)
 
 # ╔═╡ 59522180-575a-11eb-39c4-f9eaa27f7901
 zresid_zpred_plot(normmontecarloflat)
@@ -781,7 +842,7 @@ end
 qqnormplot(mediansflat)
 
 # ╔═╡ 5ef3f050-56b0-11eb-31f9-419a4161b67e
-qqnormplot(montecarloflat)
+qqnormplot(montecarloflatw)
 
 # ╔═╡ 1823a8d0-575c-11eb-0fa1-893a914f69f7
 qqnormplot(normmontecarloflat)
@@ -818,7 +879,6 @@ qqnormplot(normmontecarloflat)
 # ╟─9bf9aaf0-55be-11eb-17a2-75b3eec550f8
 # ╟─265006c0-55c1-11eb-2ba8-3d628d096704
 # ╠═c101d900-57ab-11eb-04ab-77cd4e0ff4b3
-# ╠═d1259f32-6b0e-11eb-36a0-0308ec00088c
 # ╟─19934eb0-57ba-11eb-3f45-11c68057c1f7
 # ╟─25bb5660-57ba-11eb-3999-4bbf47d29d8a
 # ╟─342cfff0-57ba-11eb-07d6-2b90717f7c7b
@@ -838,6 +898,7 @@ qqnormplot(normmontecarloflat)
 # ╟─87ec3520-56ac-11eb-2a1a-2981155d4168
 # ╟─9ce1f5f0-56ac-11eb-22a5-d9b5d6a18978
 # ╟─ba7d2760-56ac-11eb-11ca-d543a628c68b
+# ╠═03d7ceae-6d78-11eb-3f4b-13cf782576c0
 # ╟─c18cc050-56ad-11eb-261c-4177aa31ca7c
 # ╟─2bba9b02-56ae-11eb-2e30-439dc20273f8
 # ╟─3a3fa580-56ae-11eb-1f19-f3c06ef2d9d7
@@ -887,7 +948,13 @@ qqnormplot(normmontecarloflat)
 # ╠═f325b3c0-57ba-11eb-1cae-17d58dd4ec29
 # ╠═0f2bc640-57bb-11eb-2632-e1058fbc9108
 # ╟─408e5d30-5764-11eb-124f-4f2630d1d908
-# ╟─bca6b8f0-6a46-11eb-09dc-1b398bf010e9
+# ╟─795d7b9e-6bbe-11eb-1871-777e334518d5
+# ╟─abdc8f60-6bc5-11eb-1203-c36ca41662e8
+# ╠═892650c0-6bbe-11eb-3154-eb5c97e8c955
+# ╠═b87bb41e-6bcb-11eb-2a50-81d8ce260449
+# ╠═516bf770-6bcd-11eb-37ab-f9ebc03c3cc4
+# ╠═3c58ffc0-6bcf-11eb-13be-ddb38df5499d
+# ╠═c50f0010-6ce4-11eb-17df-39ae7df11a90
 # ╟─9c92b290-56ae-11eb-2595-85845fe95f0e
 # ╟─2623d480-56af-11eb-2ab8-0d0afd8c45dc
 # ╟─a655a120-56ae-11eb-30be-459d7c3067dc

@@ -82,9 +82,7 @@ begin
 	end
 
 	normalizedmontecarlomeasurements = (montecarlomeasurements .- negativecontrolmontecarlomeasurements) ./ (positivecontrolmontecarlomeasurements .- negativecontrolmontecarlomeasurements)
-
-	nothing
-end
+end;
 
 # ╔═╡ 294e6a02-550e-11eb-3450-d9d5989ec08c
 md"""
@@ -306,8 +304,7 @@ Potential outliers in box plots:
 # ╔═╡ 012a7c50-56ab-11eb-3d50-c9820925f9ac
 [montecarlomeasurements[8,[3,4],1],
  montecarlomeasurements[[4,10],1,2],
- montecarlomeasurements[[4,9],2,2],
- montecarlomeasurements[8,5,2]]
+ montecarlomeasurements[[4,9],2,2]]
 
 # ╔═╡ 1637a040-56ac-11eb-2433-49c37383e005
 md"""Evaluating z-scores within each replicate:"""
@@ -329,14 +326,14 @@ md"""
 - In [2] Replicate 2: All within 1.96
 - In [1] Replicate 3: All within 1.96
 - In [2] Replicate 4: All within 1.96
-- In [2] Replicate 5: 1 value, Cell 8 (10%) just under 2.58. None outside 2.58.
+- In [2] Replicate 5: All within 1.96
 """
 
 # ╔═╡ c18cc050-56ad-11eb-261c-4177aa31ca7c
 md"""
 None of these potential outliers are due to data entry error or measurement error. Sampling a different population is possible but unknown. These potential outliers are relatively modest. In addition, since an ANOVA will be used, must be careful not to delete points from a balanced design. Therefore, no outliers will be removed.
 
-However, I will Windsorize the [1] Replicate 3 and 4, and [2] Replicate 5 outliers.
+However, I will Windsorize the [1] Replicate 3 and 4 outliers.
 """
 
 # ╔═╡ 0498eae0-59e7-11eb-028c-47a1e64c4e5e
@@ -345,11 +342,9 @@ begin
 	montecarloflatw = copy(montecarloflat)
 	montecarlomeasurementsw[8,3,1] = montecarlomeasurementsw[7,3,1]
 	montecarlomeasurementsw[8,4,1] = montecarlomeasurementsw[6,4,1]
-	montecarlomeasurementsw[8,5,2] = montecarlomeasurementsw[4,5,2]
 	montecarloflatw[8,3] = montecarloflatw[7,3]
 	montecarloflatw[8,4] = montecarloflatw[6,4]
-	montecarloflatw[8,10] = montecarloflatw[4,10]
-end
+end;
 
 # ╔═╡ 2bba9b02-56ae-11eb-2e30-439dc20273f8
 md"""
@@ -525,7 +520,7 @@ begin
 	normalizedmontecarlomeasurementsw[6,5,1] = normalizedmontecarlomeasurementsw[9,5,1]
 	normmontecarloflatw[8,4] = normmontecarloflatw[5,4]
 	normmontecarloflatw[6,5] = normmontecarloflatw[9,5]
-end
+end;
 
 # ╔═╡ df4eee90-5759-11eb-02ef-53a0c6f31f07
 md"""
@@ -609,6 +604,50 @@ let
 	fkbp12_mtor_montecarlo_means = dropdims(mean(normalizedmontecarlomeasurements, dims=1), dims=1)
 	dotplot!([1,1,1,1,1,2,2,2,2,2], fkbp12_mtor_montecarlo_means |> vec, mode = :none, label="", marker=(6, 0.75, :rect, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray]), stroke(0)))
 	dotplot!(groups, fkbp12_mtor_montecarlo, mode = :density, label="", marker=(4, 0.5, repeat([:orange, :darkblue, :darkred, :darkgreen, :darkgray], inner=10), stroke(0)))
+end
+
+# ╔═╡ f55ff670-6bbd-11eb-3650-8585a350ef2c
+md"""
+## Example localization maps
+"""
+
+# ╔═╡ 8e3320f0-6c24-11eb-1e67-ef196dc98679
+let
+	# Exp 1 (FKBP12-mTOR)
+	# A3
+	insetx, insety = [15200, 16600], [10900, 12300]
+	r = experimentresults[1][1][1][3]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "1 - A3 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "1 - A3 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt=:png)
+end
+
+# ╔═╡ b0ecbc82-6c8f-11eb-14ee-41bf2e845adc
+let
+	# Exp 1 (FKBP12-mTOR)
+	# B4
+	insetx, insety = [10000, 11400], [25800, 27200]
+	r = experimentresults[1][2][2][5]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "1 - B5 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "1 - B5 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt=:png)
+end
+
+# ╔═╡ eb152440-6caf-11eb-34bd-a9fc47f16a4d
+let
+	# Plot all
+	r = localizationsplot.(experimentresults[1][j][i][k] for k ∈ 1:10 for i ∈ 1:2 for j ∈ 1:5)
+	p = plot(r..., size=(2048, 2048), fmt=:png)
+	savefig(joinpath(outputdir, "fkbp12-mTOR-all-localizations.png"))
+	p
 end
 
 # ╔═╡ 9c92b290-56ae-11eb-2595-85845fe95f0e
@@ -751,6 +790,10 @@ qqnormplot(normmontecarloflat)
 # ╟─408e5d30-5764-11eb-124f-4f2630d1d908
 # ╟─8c39ec6e-5a72-11eb-3b9b-1d45fbdeaa8c
 # ╟─9cd79dc0-5a72-11eb-12a5-cd1e42c92297
+# ╟─f55ff670-6bbd-11eb-3650-8585a350ef2c
+# ╠═8e3320f0-6c24-11eb-1e67-ef196dc98679
+# ╠═b0ecbc82-6c8f-11eb-14ee-41bf2e845adc
+# ╠═eb152440-6caf-11eb-34bd-a9fc47f16a4d
 # ╟─9c92b290-56ae-11eb-2595-85845fe95f0e
 # ╟─2623d480-56af-11eb-2ab8-0d0afd8c45dc
 # ╟─a655a120-56ae-11eb-30be-459d7c3067dc

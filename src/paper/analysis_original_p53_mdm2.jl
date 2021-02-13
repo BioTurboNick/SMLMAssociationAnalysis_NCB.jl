@@ -162,7 +162,6 @@ Potential outliers in box plots:
  medianmeasurements[8,1,2,1,1],
  medianmeasurements[6,2,2,1,1],
  medianmeasurements[10,3,1,2,1],
- medianmeasurements[10,2,2,2,1],
  medianmeasurements[5,3,2,2,1]]
 
 # ╔═╡ f02df530-5515-11eb-0d9e-8dbb63ed2023
@@ -184,23 +183,28 @@ md"""
 - In [1,2] Replicate 3: All within 1.96
 - In [2,1] Replicate 1: All within 1.96
 - In [2,1] Replicate 2: All within 1.96
-- In [2,2] Replicate 1: 1 value, Cell 1 (10%) outside 1.96, but just barely. None outside 2.58.
-- In [2,2] Replicate 2: 1 value, Cell 10 (10%) outside 2.58 significantly. None outside 3.29.
+- In [2,1] Replicate 3: 1 value, Cell 10 (10%) outside 1.96 significantly. None outside 2.58.
+- In [2,2] Replicate 1: All within 1.96
+- In [2,2] Replicate 2: All within 1.96
 - In [2,2] Replicate 3: 1 value, Cell 5 (10%) outside 1.96 significantly. None outside 2.58.
 """
 
 # ╔═╡ 87eb8f70-5518-11eb-1639-f91b4bcb5c9b
 md"""
-None of these potential outliers are due to data entry error or measurement error. Sampling a different population is possible but unknown. These potential outliers are relatively modest except for [2,2] Replicate 2. In addition, since an ANOVA will be used, must be careful not to delete points from a balanced design. Therefore, no outliers will be removed. And I will Windsorize the [2,2] Replicate 2 Cell 10 for this purpose.
+None of these potential outliers are due to data entry error or measurement error. Sampling a different population is possible but unknown. These potential outliers are relatively modest. In addition, since an ANOVA will be used, must be careful not to delete points from a balanced design. Therefore, no outliers will be removed. However, I will Windsorize the more extreme ones for [1,2] Replicate 2, [2,1] Replicate 3, and [2,2] Replicate 3.
 """
 
 # ╔═╡ 9b7f65a2-5952-11eb-0c21-733df3703bf9
 begin
 	medianmeasurementsw = copy(medianmeasurements)
 	mediansflatw = copy(mediansflat)
-	medianmeasurementsw[10,2,1,1,1] = medianmeasurements[7,2,1,1,1]
-	mediansflatw[10,11] = mediansflat[7,11]
-end
+	medianmeasurementsw[6,2,2,1,1] = medianmeasurements[7,2,2,1,1]
+	medianmeasurementsw[10,3,1,2,1] = medianmeasurements[4,3,1,2,1]
+	medianmeasurementsw[5,3,2,2,1] = medianmeasurements[9,3,2,2,1]
+	mediansflatw[6,5] = mediansflat[7,5]
+	mediansflatw[10,9] = mediansflat[4,9]
+	mediansflatw[5,12] = mediansflat[9,12]
+end;
 
 # ╔═╡ a87aac80-5518-11eb-38d4-5fe90140b820
 md"""
@@ -359,7 +363,6 @@ Potential outliers in box plots:
 # ╔═╡ 012a7c50-56ab-11eb-3d50-c9820925f9ac
 [montecarlomeasurements[6,1,2,1,1],
  montecarlomeasurements[1,3,1,2,1],
- montecarlomeasurements[9,2,2,2,1],
  montecarlomeasurements[5,3,2,2,1]]
 
 # ╔═╡ 1637a040-56ac-11eb-2433-49c37383e005
@@ -383,14 +386,22 @@ md"""
 - In [2,1] Replicate 2: All within 1.96
 - In [2,1] Replicate 3: All within 1.96
 - In [2,2] Replicate 1: 1 value, Cell 7 (10%) outside 1.96. None outside 2.58.
-- In [2,2] Replicate 2: 1 value, Cell 8 (10%) outside 1.96. None outside 2.58.
+- In [2,2] Replicate 2: 1 value, Cell 9 (10%) outside 1.96. None outside 2.58.
 - In [2,2] Replicate 3: All within 1.96
 """
 
 # ╔═╡ c18cc050-56ad-11eb-261c-4177aa31ca7c
 md"""
-None of these potential outliers are due to data entry error or measurement error. Sampling a different population is possible but unknown. These potential outliers are relatively modest. In addition, since an ANOVA will be used, must be careful not to delete points from a balanced design. Therefore, no outliers will be removed.
+None of these potential outliers are due to data entry error or measurement error. Sampling a different population is possible but unknown. These potential outliers are relatively modest. In addition, since an ANOVA will be used, must be careful not to delete points from a balanced design. Therefore, no outliers will be removed. However, I shall Windsorize the significant one in [1,2] Replicate 1.
 """
+
+# ╔═╡ 935aa530-6d73-11eb-2012-4d5e8b594f42
+begin
+	montecarlomeasurementsw = copy(montecarlomeasurements)
+	montecarloflatw = copy(montecarloflat)
+	montecarlomeasurementsw[6,1,2,1,1] = montecarlomeasurementsw[2,1,2,1,1]
+	montecarloflatw[6,4] = montecarloflat[2,4]
+end;
 
 # ╔═╡ 2bba9b02-56ae-11eb-2e30-439dc20273f8
 md"""
@@ -405,11 +416,11 @@ Conducted Levene's test, a 1-way ANOVA of the absolute deviation between each va
 """
 
 # ╔═╡ b1ae0750-56af-11eb-0714-35b78e197b5e
-levene(montecarloflat)
+levene(montecarloflatw)
 
 # ╔═╡ f9676320-56af-11eb-1481-ef9502edded8
 md"""
-By Levene's test, the data may or may not be heteroscedastic.
+By Levene's test, the data is likely heteroscedastic.
 
 Group sizes are equal, but samples are on the smaller side. CIs and significance tests may be affected.
 """
@@ -425,10 +436,10 @@ There are a couple notable deviations but for the *most* part they appear close 
 """
 
 # ╔═╡ db6922c0-56b2-11eb-2601-5525d3f6bf70
-montecarloskewness = [skewness(montecarloflat[:,i]) for i ∈ axes(montecarloflat, 2)]
+montecarloskewness = [skewness(montecarloflatw[:,i]) for i ∈ axes(montecarloflatw, 2)]
 
 # ╔═╡ 047df370-56b3-11eb-3036-2393031bd967
-montecarlokurtosis = [kurtosis(montecarloflat[:,i]) for i ∈ axes(montecarloflat, 2)]
+montecarlokurtosis = [kurtosis(montecarloflatw[:,i]) for i ∈ axes(montecarloflatw, 2)]
 
 # ╔═╡ 3316f790-56b3-11eb-3d9c-e9ebf797c923
 md"""
@@ -442,13 +453,10 @@ md"""
 
 # ╔═╡ 755d8510-56b3-11eb-3a0c-53b643ba2053
 montecarloresult = anova(
-    permutedims(montecarlomeasurements[:, :, :, :, 1], (1,3,4,2)),
+    permutedims(montecarlomeasurementsw[:, :, :, :, 1], (1,3,4,2)),
     [fixed, fixed, subject],
     factornames = ["Doxycycline", "Nutlin-3a", "Replicate"],
 )
-
-# ╔═╡ c59d8c90-6b04-11eb-0f0c-2b9961963427
-mean(montecarloresult.crossedcellmeans, dims= (1,3))
 
 # ╔═╡ bf915350-574e-11eb-2f66-236c4ec9e600
 md"""
@@ -482,7 +490,7 @@ md"""
 # ╔═╡ 5ab31670-6af5-11eb-2e08-83b5228005d1
 let
 	import StatsPlots.mm
-	p53_mdm2_montecarlo = [montecarlomeasurements[:,:,1,1,1] |> vec; montecarlomeasurements[:,:,2,1,1] |> vec; montecarlomeasurements[:,:,1,2,1] |> vec; montecarlomeasurements[:,:,2,2,1] |> vec]
+	p53_mdm2_montecarlo = [montecarlomeasurementsw[:,:,1,1,1] |> vec; montecarlomeasurementsw[:,:,2,1,1] |> vec; montecarlomeasurementsw[:,:,1,2,1] |> vec; montecarlomeasurementsw[:,:,2,2,1] |> vec]
 	groups = repeat([2, 1, 4, 3], inner = 30)
 	boxplot(groups, p53_mdm2_montecarlo, outliers=false,
 		    label=["- Dox", "+ Dox"],
@@ -493,7 +501,7 @@ let
 			line=(2, 0.75),
 			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
 			yaxis=("Median distance (nm)", [0, 0.25]))
-	p53_mdm2_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,1], dims = 1), dims = 1) |> vec
+	p53_mdm2_montecarlo_means = dropdims(mean(montecarlomeasurementsw[:,:,:,:,1], dims = 1), dims = 1) |> vec
 	dotplot!(repeat([2, 1, 4, 3], inner=3), p53_mdm2_montecarlo_means |> vec, mode = :none, label="", marker=(4, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
 	dotplot!(groups, p53_mdm2_montecarlo, mode = :density, label="", marker=(2, 0.5, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
 end
@@ -504,7 +512,7 @@ md"""Create paper-quality version and save it:"""
 # ╔═╡ af04a0e0-6af5-11eb-05ed-99c27fd1a0ef
 let
 	import StatsPlots.mm
-	p53_mdm2_montecarlo = [montecarlomeasurements[:,:,1,1,1] |> vec; montecarlomeasurements[:,:,2,1,1] |> vec; montecarlomeasurements[:,:,1,2,1] |> vec; montecarlomeasurements[:,:,2,2,1] |> vec]
+	p53_mdm2_montecarlo = [montecarlomeasurementsw[:,:,1,1,1] |> vec; montecarlomeasurementsw[:,:,2,1,1] |> vec; montecarlomeasurementsw[:,:,1,2,1] |> vec; montecarlomeasurementsw[:,:,2,2,1] |> vec]
 	groups = repeat([2, 1, 4, 3], inner = 30)
 	boxplot(groups, p53_mdm2_montecarlo, outliers=false,
 		    label=["- Dox", "+ Dox"],
@@ -517,7 +525,7 @@ let
 			line=(8, 0.75),
 			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
 			yaxis=("Fraction associated", [0, 0.25]))
-	p53_mdm2_montecarlo_means = dropdims(mean(montecarlomeasurements[:,:,:,:,1], dims=1), dims=1) |> vec
+	p53_mdm2_montecarlo_means = dropdims(mean(montecarlomeasurementsw[:,:,:,:,1], dims=1), dims=1) |> vec
 	dotplot!(repeat([2, 1, 4, 3], inner=3), p53_mdm2_montecarlo_means |> vec, mode = :none, label="", marker=(12, 0.75, :rect, repeat([:orange, :darkblue, :darkred]), stroke(0)))
 	dotplot!(groups, p53_mdm2_montecarlo, mode = :density, label="", marker=(8, 0.5, repeat([:orange, :darkblue, :darkred], inner=10), stroke(0)))
 	savefig(joinpath(outputdir, "p53-mdm2-montecarlo.png"))
@@ -577,8 +585,16 @@ md"""
 
 # ╔═╡ 7323e450-5759-11eb-1c62-7ba711bf418b
 md"""
-None of these potential outliers are due to data entry error or measurement error. Sampling a different population is possible but unknown. These potential outliers are relatively modest. In addition, since an ANOVA will be used, must be careful not to delete points from a balanced design. Therefore, no outliers will be removed.
+None of these potential outliers are due to data entry error or measurement error. Sampling a different population is possible but unknown. These potential outliers are relatively modest. In addition, since an ANOVA will be used, must be careful not to delete points from a balanced design. Therefore, no outliers will be removed. However, I will Windsorize the extreme outlier in [1,2] Replicate 1.
 """
+
+# ╔═╡ 9ecc38b0-6d74-11eb-2d1a-ebfa12f11a64
+begin
+	normalizedmontecarlomeasurementsw = copy(normalizedmontecarlomeasurements)
+	normmontecarloflatw = copy(normmontecarloflat)
+	normalizedmontecarlomeasurementsw[6,1,2,1,1] = normalizedmontecarlomeasurementsw[4,1,2,1,1]
+	normmontecarloflatw[6,4] = normmontecarloflat[4,4]
+end;
 
 # ╔═╡ df4eee90-5759-11eb-02ef-53a0c6f31f07
 md"""
@@ -593,7 +609,7 @@ Conducted Levene's test, a 1-way ANOVA of the absolute deviation between each va
 """
 
 # ╔═╡ 9aade460-575b-11eb-29da-4ff6881ceb60
-levene(normmontecarloflat)
+levene(normmontecarloflatw)
 
 # ╔═╡ b8f00430-575b-11eb-0ada-7f0001326feb
 md"""
@@ -630,7 +646,7 @@ md"""
 
 # ╔═╡ b7624d5e-575d-11eb-1221-974537c3b48e
 normmontecarloresult = anova(
-    permutedims(normalizedmontecarlomeasurements[:, :, :, :, 1], (1,3,4,2)),
+    permutedims(normalizedmontecarlomeasurementsw[:, :, :, :, 1], (1,3,4,2)),
     [fixed, fixed, subject],
     factornames = ["Doxycycline", "Nutlin-3a", "Replicate"],
 )
@@ -655,6 +671,80 @@ Nutlin-3a did not have a significant effect on fraction bound (from 1.7% to 1.7%
 
 Doxycycline did not have a significant effect, though with a small effect size, though may be due to lack of power in the experiment. There was still a consistent increase with doxycycline exposure (from 1.4% to 1.9%). Thus, MEG3 overexpression does not cause significantly less binding between p53 and Mdm2.
 """
+
+# ╔═╡ d83ab120-6be5-11eb-0b44-176f26137172
+md"""
+## Localization/molecule maps
+"""
+
+# ╔═╡ e5020610-6be5-11eb-25ab-adb9479d6b16
+let
+	# Exp 2 (p53-Mdm2)
+	# A8
+	insetx, insety = [15100, 16500], [30000, 31400]
+	r = experimentresults[1][3][1][8]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "2 - A8 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "2 - A8 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024, 512), fmt = :png)
+end
+
+# ╔═╡ 840e9e20-6be7-11eb-2b80-37ffe2f4495d
+let
+	# Exp 2 (p53-Mdm2)
+	# B5
+	insetx, insety = [16050, 17450], [21100, 22500]
+	r = experimentresults[1][3][2][5]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "2 - B5 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "2 - B5 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024, 512), fmt = :png)
+end
+
+# ╔═╡ 7affa0d0-6be8-11eb-3395-555814cab9be
+let
+	# Exp 2 (p53-Mdm2)
+	# C9
+	insetx, insety = [16400, 17800], [22697, 24096]
+	r = experimentresults[1][2][3][9]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "2 - C9 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "2 - C9 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024, 512), fmt = :png)
+end
+
+# ╔═╡ 13ecfdf0-6bea-11eb-3af4-8d627cccdd2b
+let
+	# Exp 2 (p53-Mdm2)
+	# D4
+	insetx, insety = [24100, 25500], [14000, 15400]
+	r = experimentresults[1][2][4][4]
+	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "2 - D4 dSTORM.png"))
+	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
+	savefig(joinpath(outputdir, "2 - D4 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p2 = insetplot(r, insetx, insety, include_scalebar = true)
+	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt = :png)
+end
+
+# ╔═╡ 5db1f140-6ce7-11eb-29f1-ffb93c61c906
+let
+	# Plot all
+	r = localizationsplot.(experimentresults[1][j][i][k] for k ∈ 1:10 for i ∈ 1:4 for j ∈ 1:3)
+	p = plot(r..., size=(2048, 2048), layout=grid(10,12), fmt=:png)
+	savefig(joinpath(outputdir, "p53-mdm2-all-localizations.png"))
+	p
+end
 
 # ╔═╡ 9c92b290-56ae-11eb-2595-85845fe95f0e
 md"""
@@ -685,10 +775,10 @@ end
 zresid_zpred_plot(mediansflatw)
 
 # ╔═╡ 3a3fa580-56ae-11eb-1f19-f3c06ef2d9d7
-zresid_zpred_plot(montecarloflat)
+zresid_zpred_plot(montecarloflatw)
 
 # ╔═╡ 59522180-575a-11eb-39c4-f9eaa27f7901
-zresid_zpred_plot(normmontecarloflat)
+zresid_zpred_plot(normmontecarloflatw)
 
 # ╔═╡ 7922d1d0-56b0-11eb-261c-5f87ca587394
 function qqnormplot(data)
@@ -756,6 +846,7 @@ qqnormplot(normmontecarloflat)
 # ╟─9ce1f5f0-56ac-11eb-22a5-d9b5d6a18978
 # ╟─ba7d2760-56ac-11eb-11ca-d543a628c68b
 # ╟─c18cc050-56ad-11eb-261c-4177aa31ca7c
+# ╠═935aa530-6d73-11eb-2012-4d5e8b594f42
 # ╟─2bba9b02-56ae-11eb-2e30-439dc20273f8
 # ╟─3a3fa580-56ae-11eb-1f19-f3c06ef2d9d7
 # ╟─0f8a00a0-56af-11eb-2dc6-abd2a45298a4
@@ -769,7 +860,6 @@ qqnormplot(normmontecarloflat)
 # ╟─3316f790-56b3-11eb-3d9c-e9ebf797c923
 # ╟─6f1da2c0-56b3-11eb-2506-5f9a944735b6
 # ╠═755d8510-56b3-11eb-3a0c-53b643ba2053
-# ╠═c59d8c90-6b04-11eb-0f0c-2b9961963427
 # ╟─bf915350-574e-11eb-2f66-236c4ec9e600
 # ╟─d79abcc0-574e-11eb-3777-4f8b85036436
 # ╟─f5f23950-574e-11eb-02b5-2fb9b6272ce6
@@ -788,6 +878,7 @@ qqnormplot(normmontecarloflat)
 # ╟─edee22b2-5757-11eb-317a-d3e4d31486cd
 # ╟─a05efb90-5758-11eb-10ca-fb9fb8e05821
 # ╟─7323e450-5759-11eb-1c62-7ba711bf418b
+# ╠═9ecc38b0-6d74-11eb-2d1a-ebfa12f11a64
 # ╟─df4eee90-5759-11eb-02ef-53a0c6f31f07
 # ╟─59522180-575a-11eb-39c4-f9eaa27f7901
 # ╟─8c2a8790-575b-11eb-34be-99f584826d43
@@ -800,11 +891,17 @@ qqnormplot(normmontecarloflat)
 # ╟─682c7090-575d-11eb-3b12-d50d450d3fce
 # ╟─80f22522-575d-11eb-211b-59fe55838280
 # ╟─91c676d0-575d-11eb-2fd5-97ca14bfdec0
-# ╠═b7624d5e-575d-11eb-1221-974537c3b48e
+# ╟─b7624d5e-575d-11eb-1221-974537c3b48e
 # ╟─8f0dad80-575f-11eb-2312-adae92d50e83
 # ╟─a5489880-575f-11eb-1afa-c3bfaf5dccc8
 # ╟─4b211122-575f-11eb-0aa9-59fc4e9a2df7
 # ╟─408e5d30-5764-11eb-124f-4f2630d1d908
+# ╟─d83ab120-6be5-11eb-0b44-176f26137172
+# ╠═e5020610-6be5-11eb-25ab-adb9479d6b16
+# ╠═840e9e20-6be7-11eb-2b80-37ffe2f4495d
+# ╠═7affa0d0-6be8-11eb-3395-555814cab9be
+# ╠═13ecfdf0-6bea-11eb-3af4-8d627cccdd2b
+# ╠═5db1f140-6ce7-11eb-29f1-ffb93c61c906
 # ╟─9c92b290-56ae-11eb-2595-85845fe95f0e
 # ╟─2623d480-56af-11eb-2ab8-0d0afd8c45dc
 # ╟─a655a120-56ae-11eb-30be-459d7c3067dc

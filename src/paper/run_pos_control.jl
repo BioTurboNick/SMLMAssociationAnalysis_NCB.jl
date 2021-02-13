@@ -78,6 +78,10 @@ for experimentdirname ∈ experimentdirnames
                     200,
                 )
 
+                if i == 2
+                    ch1_task, ch2_task = ch2_task, ch1_task
+                end
+
                 ch1_molecules, ch1_localizations = fetch(ch1_task)
                 ch2_molecules, ch2_localizations = fetch(ch2_task)
 
