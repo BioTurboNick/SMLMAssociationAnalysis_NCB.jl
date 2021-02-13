@@ -173,7 +173,7 @@ function localizationsplot(result::Result; color1 = :magenta, color2 = :green, i
 
     if insetbox != [[0,0], [0,0]]
         xlims, ylims = first(insetbox), last(insetbox)
-        plot!([xlims[1]; xlims[2], xlims[2], xlims[1]], [ylims[1], ylims[1], ylims[2], ylims[2]], line = (boxlinewidth, :black))
+        plot!([xlims[1], xlims[2], xlims[2], xlims[1]], [ylims[1], ylims[1], ylims[2], ylims[2]], line = (boxlinewidth, :black))
     end
 
     include_scalebar && plot!([100; 5100], [100; 100], line=(scalewidth, :black),
