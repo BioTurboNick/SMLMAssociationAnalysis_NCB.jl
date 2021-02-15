@@ -38,7 +38,7 @@ julia> using SMLMAssociationAnalysis_NCB # load the module
 Recrate the paper's analysis
 ----------------------------
 The underlying data files have some quirks that need to be adjusted, so a special run file is provided.
-Follow the instructions above but use the scripts in `src/paper/`. You may obtain the data from [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3892995.svg)](https://doi.org/10.5281/zenodo.3892995) and extract it to `dataset/` in the project folder.
+Follow the instructions above but use the scripts in `src/paper/`. You may obtain the data from [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4542454.svg)](https://doi.org/10.5281/zenodo.4542454) and extract it to `dataset/` in the project folder.
 The output files will be deposited into `output/`.
  - `run_original.jl`: read the data files, compute associations, and save result
  - `run_pos_control.jl`: read the positive control data files, compute associations, and save result
