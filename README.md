@@ -16,8 +16,7 @@ between the two molecules.
 
 Recommendations
 ---------------
-Use an editor like Juno (https://junolab.org/; or Atom with `uber-juno` plugin) for best results. Visual Studio Code has
-a Julia plugin but is missing some features.
+Use an editor like Visual Studio Code (https://code.visualstudio.com/) for best results.
 
 
 Use for your own data
@@ -42,19 +41,8 @@ The underlying data files have some quirks that need to be adjusted, so a specia
 Follow the instructions above but use the scripts in `src/paper/`. You may obtain the data from [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3892995.svg)](https://doi.org/10.5281/zenodo.3892995) and extract it to `dataset/` in the project folder.
 The output files will be deposited into `output/`.
  - `run_original.jl`: read the data files, compute associations, and save result
- - `run_original_analysis.jl`: load result and calculate statistics and plots
+ - `run_pos_control.jl`: read the positive control data files, compute associations, and save result
+ - Analysis may be found in Pluto.jl notebooks starting with `analysis_original_`. To install Pluto, type `]add Pluto` and then `using Pluto; Pluto.run()`.
  - `run_optimize.jl`: run the calculations with various parameter choices for optimization
  - `run_optimize_analysis.jl`: generate graphs of the parameters for optimization.
  - `simulate.jl`: Simulate cells to test the algorithm.
-
-```
-Key to dataset:
-     Mdm2-p53: A = + Dox / - Nut
-               B = - Dox / - Nut
-               C = + Dox / + Nut
-               D = - Dox / + Nut
-     MEG3-p53: A = + Dox / MEG3
-               B = - Dox / MEG3
-               C = + Dox / GAPDH
-               D = - Dox / GAPDH
-```
