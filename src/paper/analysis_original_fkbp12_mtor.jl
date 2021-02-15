@@ -229,10 +229,13 @@ medianresult = anova(
     factornames = ["Rapamycin", "Replicate"],
 )
 
+# ╔═╡ 56cb4410-6f0a-11eb-2680-b598165ea2f1
+std(medianresult.crossedcellmeans, dims = 2)
+
 # ╔═╡ fd2d4a40-57ab-11eb-2688-53b009a37680
 md"""
 #### Interpret main effects
-Rapamycin caused a detectable but small decrease in median distance from 356.0 nm ± 128.59 nm to 317.5 nm ± 102.44 nm (Mean ± SD).
+Rapamycin caused a detectable but small decrease in median distance.
 """
 
 # ╔═╡ 895181b0-59f2-11eb-3d4e-1d92833b0e72
@@ -251,6 +254,7 @@ let
 		    left_margin=2mm,
 			size=(256, 512),
 			line=(2, 0.75),
+		    xgrid=:none,
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
 			yaxis=("Median distance (nm)", [0, 600]))
 	fkbp12_mtor_median_means = dropdims(mean(medianmeasurementsw, dims=1), dims=1)
@@ -274,6 +278,7 @@ let
             tickfontsize=48,
 			size=(1024, 2048),
 			line=(8, 0.75),
+		    xgrid=:none,
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
 			yaxis=("Median distance (nm)", [0, 600]))
 	fkbp12_mtor_median_means = dropdims(mean(medianmeasurementsw, dims=1), dims=1)
@@ -423,6 +428,7 @@ let
 		    left_margin=3mm,
 			line=(2, 0.75),
 		    size=(256, 512),
+		    xgrid=:none,
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
 			yaxis=("Fraction associated", [0, 0.25]))
 	fkbp12_mtor_montecarlo_means = dropdims(mean(montecarlomeasurementsw, dims=1), dims=1)
@@ -446,6 +452,7 @@ let
             tickfontsize=48,
 			size=(1024, 2048),
 			line=(8, 0.75),
+		    xgrid=:none,
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
 			yaxis=("Fraction associated", [0, 0.25]))
 	fkbp12_mtor_montecarlo_means = dropdims(mean(montecarlomeasurementsw, dims=1), dims=1)
@@ -580,7 +587,7 @@ normmontecarloresult = anova(
 # ╔═╡ 408e5d30-5764-11eb-124f-4f2630d1d908
 md"""
 #### Interpret main effects
-Rapamycin had a moderate effect but was not significant (2.48% to 5.85%).
+Rapamycin had a moderate effect but was not significant (2.13% to 5.11%).
 """
 
 # ╔═╡ 8c39ec6e-5a72-11eb-3b9b-1d45fbdeaa8c
@@ -599,6 +606,7 @@ let
 		    left_margin=3mm,
 			line=(3, 0.75),
 		    size=(256, 512),
+		    xgrid=:none,
 			xaxis=("Rapamycin", (1:2, ["-Rap", "+Rap"])),
 			yaxis=("Median distance (nm)", [-0.1,0.2]))
 	fkbp12_mtor_montecarlo_means = dropdims(mean(normalizedmontecarlomeasurements, dims=1), dims=1)
@@ -615,13 +623,13 @@ md"""
 let
 	# Exp 1 (FKBP12-mTOR)
 	# A3
-	insetx, insety = [15200, 16600], [10900, 12300]
-	r = experimentresults[1][1][1][3]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
-	savefig(joinpath(outputdir, "1 - A3 dSTORM.png"))
+	insetx, insety = [14600, 16000], [16300, 17700]
+	r = experimentresults[1][5][1][9]
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
+	savefig(joinpath(outputdir, "1 - A9 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
-	savefig(joinpath(outputdir, "1 - A3 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "1 - A9 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt=:png)
 end
@@ -630,13 +638,13 @@ end
 let
 	# Exp 1 (FKBP12-mTOR)
 	# B4
-	insetx, insety = [10000, 11400], [25800, 27200]
-	r = experimentresults[1][2][2][5]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
-	savefig(joinpath(outputdir, "1 - B5 dSTORM.png"))
+	insetx, insety = [19000, 20400], [14300, 15700]
+	r = experimentresults[1][5][2][8]
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
+	savefig(joinpath(outputdir, "1 - B8 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
-	savefig(joinpath(outputdir, "1 - B5 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	savefig(joinpath(outputdir, "1 - B8 dSTORM 1400nm.png"))
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt=:png)
 end
@@ -731,6 +739,7 @@ qqnormplot(normmontecarloflat)
 # ╟─6778a880-55be-11eb-1016-c59335beef0a
 # ╟─265006c0-55c1-11eb-2ba8-3d628d096704
 # ╠═c101d900-57ab-11eb-04ab-77cd4e0ff4b3
+# ╠═56cb4410-6f0a-11eb-2680-b598165ea2f1
 # ╟─fd2d4a40-57ab-11eb-2688-53b009a37680
 # ╟─895181b0-59f2-11eb-3d4e-1d92833b0e72
 # ╟─95fd3850-59f2-11eb-0914-a999ed3b9e5f
@@ -789,7 +798,7 @@ qqnormplot(normmontecarloflat)
 # ╠═b7624d5e-575d-11eb-1221-974537c3b48e
 # ╟─408e5d30-5764-11eb-124f-4f2630d1d908
 # ╟─8c39ec6e-5a72-11eb-3b9b-1d45fbdeaa8c
-# ╟─9cd79dc0-5a72-11eb-12a5-cd1e42c92297
+# ╠═9cd79dc0-5a72-11eb-12a5-cd1e42c92297
 # ╟─f55ff670-6bbd-11eb-3650-8585a350ef2c
 # ╠═8e3320f0-6c24-11eb-1e67-ef196dc98679
 # ╠═b0ecbc82-6c8f-11eb-14ee-41bf2e845adc

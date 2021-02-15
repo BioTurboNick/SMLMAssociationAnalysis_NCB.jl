@@ -308,6 +308,7 @@ let
 			seriescolor=:white,
 			size=(256, 512),
 			line=(2, 0.75),
+		    xgrid=:none,
 			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
 			yaxis=("Median distance (nm)", [0, 600]))
 	p53_mdm2_median_means = dropdims(mean(medianmeasurementsw[:,:,:,:,1], dims = 1), dims = 1) |> vec
@@ -331,6 +332,7 @@ let
             tickfontsize=48,
 			size=(1024, 2048),
 			line=(8, 0.75),
+		    xgrid=:none,
 			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
 			yaxis=("Median distance (nm)", [0, 600]))
 	p53_mdm2_median_means = dropdims(mean(medianmeasurementsw[:,:,:,:,1], dims=1), dims=1) |> vec
@@ -479,7 +481,7 @@ Lines are nearly parallel and the interaction F statistic was solidly non-signif
 # ╔═╡ 248d1560-5753-11eb-2156-89cfb6742205
 md"""
 #### Interpret main effects
-Nutlin-3a is below the significance threshold with a large effect size while Doxycyline produced a small effect with low probability. Nutlin-3a was thus associated with a decrease in fraction associated (7.34% to 5.13%), while MEG3 expression likely was not associated with a change (6.80% to 5.67%).
+Nutlin-3a is below the significance threshold with a large effect size while Doxycyline produced a small effect with low probability. Nutlin-3a was thus associated with a decrease in fraction associated, while MEG3 expression likely was not associated with a change.
 """
 
 # ╔═╡ 552d3550-6af5-11eb-2fcb-fb755145a298
@@ -499,6 +501,7 @@ let
 		    left_margin=2mm,
 			size=(256, 512),
 			line=(2, 0.75),
+		    xgrid=:none,
 			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
 			yaxis=("Median distance (nm)", [0, 0.25]))
 	p53_mdm2_montecarlo_means = dropdims(mean(montecarlomeasurementsw[:,:,:,:,1], dims = 1), dims = 1) |> vec
@@ -523,6 +526,7 @@ let
             tickfontsize=48,
 			size=(1024, 2048),
 			line=(8, 0.75),
+		    xgrid=:none,
 			xaxis=("Treatment", (1:4, ["-Dox\n-Nut", "+Dox\n-Nut", "-Dox\n+Nut", "+Dox\n+Nut"])),
 			yaxis=("Fraction associated", [0, 0.25]))
 	p53_mdm2_montecarlo_means = dropdims(mean(montecarlomeasurementsw[:,:,:,:,1], dims=1), dims=1) |> vec
@@ -683,11 +687,11 @@ let
 	# A8
 	insetx, insety = [15100, 16500], [30000, 31400]
 	r = experimentresults[1][3][1][8]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
 	savefig(joinpath(outputdir, "2 - A8 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
 	savefig(joinpath(outputdir, "2 - A8 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024, 512), fmt = :png)
 end
@@ -698,11 +702,11 @@ let
 	# B5
 	insetx, insety = [16050, 17450], [21100, 22500]
 	r = experimentresults[1][3][2][5]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
 	savefig(joinpath(outputdir, "2 - B5 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
 	savefig(joinpath(outputdir, "2 - B5 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024, 512), fmt = :png)
 end
@@ -713,11 +717,11 @@ let
 	# C9
 	insetx, insety = [16400, 17800], [22697, 24096]
 	r = experimentresults[1][2][3][9]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
 	savefig(joinpath(outputdir, "2 - C9 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
 	savefig(joinpath(outputdir, "2 - C9 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024, 512), fmt = :png)
 end
@@ -728,11 +732,11 @@ let
 	# D4
 	insetx, insety = [24100, 25500], [14000, 15400]
 	r = experimentresults[1][2][4][4]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
 	savefig(joinpath(outputdir, "2 - D4 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
 	savefig(joinpath(outputdir, "2 - D4 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt = :png)
 end

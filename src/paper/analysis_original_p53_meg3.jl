@@ -509,9 +509,9 @@ montecarloresultGAPDH = anova(
 # ╔═╡ 248d1560-5753-11eb-2156-89cfb6742205
 md"""
 #### Interpret main effects of within-RNA ANOVAs
-Doxycycline had a medium effect on MEG3 and p53, although not significant. Doxycyline increased fraction bound (7.18% to 10.3%).
+Doxycycline had a medium effect on MEG3 and p53, although not significant. Doxycyline increased fraction bound.
 
-Doxycyline had no effect on GAPDH and p53 and was highly nonsignificant (4.30% to 4.22%).
+Doxycyline had no effect on GAPDH and p53 and was highly nonsignificant
 """
 
 # ╔═╡ 174f2590-6a46-11eb-0621-73610de2d1c0
@@ -734,11 +734,11 @@ let
 	# A2
 	insetx, insety = [13800, 15200], [20300, 21700]
 	r = experimentresults[2][1][1][2]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
 	savefig(joinpath(outputdir, "3 - A2 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
 	savefig(joinpath(outputdir, "3 - A2 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt = :png)
 end
@@ -749,11 +749,11 @@ let
 	# B2
 	insetx, insety = [19800, 21200], [20900, 22300]
 	r = experimentresults[2][1][2][2]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
 	savefig(joinpath(outputdir, "3 - B2 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
 	savefig(joinpath(outputdir, "3 - B2 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt = :png)
 end
@@ -764,11 +764,11 @@ let
 	# C10
 	insetx, insety = [8700, 10100], [20900, 22300]
 	r = experimentresults[2][1][3][10]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
 	savefig(joinpath(outputdir, "3 - C10 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
 	savefig(joinpath(outputdir, "3 - C10 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt = :png)
 end
@@ -779,11 +779,11 @@ let
 	# D10
 	insetx, insety = [16650, 18050], [29600, 31000]
 	r = experimentresults[2][1][4][10]
-	localizationsplot_forprint(r, insetbox = [insetx, insety])
+	localizationsplot(r, insetbox = [insetx, insety], forprint = true)
 	savefig(joinpath(outputdir, "3 - D10 dSTORM.png"))
 	insetplot(r, insetx, insety, include_scalebar = false, forprint = true)
 	savefig(joinpath(outputdir, "3 - D10 dSTORM 1400nm.png"))
-	p1 = localizationsplot(r, insetbox = [insetx, insety])
+	p1 = localizationsplot(r, insetbox = [insetx, insety], include_scalebar = true)
 	p2 = insetplot(r, insetx, insety, include_scalebar = true)
 	plot(p1, p2, layout = grid(1,2), size=(1024,512), fmt=:png)
 end
