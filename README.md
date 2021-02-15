@@ -1,11 +1,11 @@
 SMLMAssociationAnalysis_NCB.jl
 ==============================
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3893264.svg)](https://doi.org/10.5281/zenodo.3893264)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4542449.svg)](https://doi.org/10.5281/zenodo.4542449)
 
 Paper: TBD
 
-Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3892995.svg)](https://doi.org/10.5281/zenodo.3892995)
+Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4542454.svg)](https://doi.org/10.5281/zenodo.4542454)
 
 
 Purpose:
