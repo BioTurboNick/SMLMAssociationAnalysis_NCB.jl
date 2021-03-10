@@ -3,7 +3,7 @@ SMLMAssociationAnalysis_NCB.jl
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4542449.svg)](https://doi.org/10.5281/zenodo.4542449)
 
-Paper: TBD
+Paper: [Preprint doi:10.1101/857912](https://doi.org/10.1101/857912)
 
 Dataset: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4542454.svg)](https://doi.org/10.5281/zenodo.4542454)
 
